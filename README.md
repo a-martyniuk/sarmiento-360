@@ -1,6 +1,6 @@
 # 📊 Sarmiento 360 — Dashboard de Expensas y Auditoría Independiente
 
-Este es un panel de control y auditoría de expensas, gastos e infraestructura para el consorcio **Sarmiento 356-360** (Adrogué / Lomas de Zamora, Provincia de Buenos Aires). Se trata de una solución estática e independiente desarrollada por un copropietario para transparentar la información financiera y monitorear los servicios esenciales del edificio (70 Unidades Funcionales).
+Este es un panel de control y auditoría de expensas, gastos e infraestructura para el consorcio **Sarmiento 356-360** (Lomas de Zamora, Provincia de Buenos Aires). Se trata de una solución estática e independiente desarrollada por un copropietario para transparentar la información financiera y monitorear los servicios esenciales del edificio (70 Unidades Funcionales).
 
 Acceso al sitio en producción: **[alexismartyniuk.com.ar/sarmiento-360](https://alexismartyniuk.com.ar/sarmiento-360)**
 
