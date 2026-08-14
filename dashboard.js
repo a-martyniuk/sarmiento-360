@@ -1758,7 +1758,10 @@ const renderMorosidad = () => {
     if (moroMaxDeudaEl) moroMaxDeudaEl.textContent = fmtFull(maxMoro.deuda);
 
     const moroMaxOwnerEl = document.getElementById("moroMaxOwner");
-    if (moroMaxOwnerEl) moroMaxOwnerEl.textContent = `UF ${maxMoro.uf} (${maxMoro.depto} ${maxMoro.consorcista})`;
+    if (moroMaxOwnerEl) {
+        const cleanDept = maxMoro.depto ? maxMoro.depto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').replace(/\s+[A-ZÁÉÍÓÚñÑ]{2,}.*$/g, '').trim() : `UF ${maxMoro.uf}`;
+        moroMaxOwnerEl.textContent = `UF ${maxMoro.uf} (${cleanDept})`;
+    }
 
     const moroAvgDeudaEl = document.getElementById("moroAvgDeuda");
     if (moroAvgDeudaEl) moroAvgDeudaEl.textContent = fmtFull(avgDeuda);
@@ -1769,11 +1772,14 @@ const renderMorosidad = () => {
             ? '<span class="badge badge-danger">🚨 Moroso Crítico</span>' 
             : (item.deuda > 100000 ? '<span class="badge badge-warning">⚠️ Con Deuda</span>' : '<span class="badge badge-warning" style="opacity:0.8">⚠️ Saldo Menor</span>');
 
+        const cleanDept = item.depto ? item.depto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').replace(/\s+[A-ZÁÉÍÓÚñÑ]{2,}.*$/g, '').trim() : `UF ${item.uf}`;
+        const propStr = `Propietario U.F. ${item.uf}`;
+
         html += `
             <tr>
                 <td style="text-align:center;"><strong style="color:var(--accent); font-size:0.95rem;">UF ${item.uf}</strong></td>
-                <td><strong>${item.depto}</strong></td>
-                <td>${item.consorcista}</td>
+                <td><strong>${cleanDept}</strong></td>
+                <td>${propStr}</td>
                 <td style="text-align:right;"><strong style="color:#f43f5e; font-size:0.95rem;">${fmtFull(item.deuda)}</strong></td>
                 <td style="text-align:center;">${badgeStr}</td>
                 <td style="text-align:center;">

@@ -366,8 +366,9 @@ const renderTable = () => {
         const tPagar = (item.total_a_pagar !== undefined && !isNaN(Number(item.total_a_pagar))) ? Number(item.total_a_pagar) : ((item.total !== undefined && !isNaN(Number(item.total))) ? Number(item.total) : tMes);
         const isDeudor = tPagar > tMes;
 
-        const dptoStr = item.dpto || item.ubicacion || item.depto || `U.F. ${item.uf}`;
-        const propStr = item.propietario && item.propietario !== '—' ? item.propietario : '—';
+        const rawDpto = item.dpto || item.ubicacion || item.depto || `U.F. ${item.uf}`;
+        const dptoStr = rawDpto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').replace(/\s+[A-ZÁÉÍÓÚñÑ]{2,}.*$/g, '').trim();
+        const propStr = `Propietario U.F. ${item.uf}`;
         const pctVal = Number(item.porcentual || item.ga_pct || 0);
 
         return `
