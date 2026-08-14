@@ -1,6 +1,7 @@
 # Gemini / Agent data
 .gemini/
-.agents/
+.agents/*
+!.agents/rules/
 .system_generated/
 *.log
 
