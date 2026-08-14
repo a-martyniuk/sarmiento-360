@@ -11,6 +11,7 @@ const getRelativeDataUrl = (file) => {
 };
 
 let rawProrrateo = [];
+let rawGastos = [];
 let filteredProrrateo = [];
 
 // Chart instances
@@ -37,10 +38,12 @@ const fmtFull = (n) => {
 
 // ── BOOTSTRAP ──────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(getRelativeDataUrl("prorrateo.json"))
-        .then(r => r.json())
-        .then(data => {
-            const allProrrateo = data.prorrateo || [];
+    Promise.all([
+        fetch(getRelativeDataUrl("prorrateo.json")).then(r => r.json()).catch(() => ({ prorrateo: [] })),
+        fetch(getRelativeDataUrl("gastos.json")).then(r => r.json()).catch(() => ({ gastos: [] }))
+    ]).then(([prorrateoData, gastosData]) => {
+        rawGastos = gastosData.gastos || [];
+        const allProrrateo = prorrateoData.prorrateo || [];
             if (allProrrateo.length > 0) {
                 rawProrrateo = allProrrateo.map(item => {
                     const saldoAnt = Number(item.saldo_anterior || 0);
@@ -230,10 +233,34 @@ const auditCoeficients = (period) => {
 const renderKPIs = (period) => {
     const periodData = rawProrrateo.filter(item => item.periodo === period);
 
-    const totalFacturado = periodData.reduce((sum, item) => sum + (item.total_mes || item.total_a_pagar || item.total || 0), 0);
-    const totalRecaudado = periodData.reduce((sum, item) => sum + (item.pagos || 0), 0);
-    const totalDeuda = periodData.reduce((sum, item) => sum + (item.saldo_mes > 0 ? item.saldo_mes : (item.deuda || 0)), 0);
-    const totalInteres = periodData.reduce((sum, item) => sum + (item.interes_mora || item.interes || 0), 0);
+    // 1. Facturado Período: total devengado en gastos.json para este período (o suma de componentes positivos)
+    let totalFacturado = 0;
+    if (typeof rawGastos !== 'undefined' && rawGastos.length > 0) {
+        totalFacturado = rawGastos.filter(g => g.periodo === period).reduce((sum, g) => sum + Number(g.monto || 0), 0);
+    }
+    
+    if (totalFacturado === 0) {
+        totalFacturado = periodData.reduce((sum, item) => {
+            const ga = Math.abs(Number(item.ga_monto || item.gastos_comunes || 0));
+            const gb = Math.abs(Number(item.gb_monto || item.servicio_seguridad || 0));
+            const fo = Math.abs(Number(item.fondo_operativo_monto || item.fondo_reserva || 0));
+            const ge = Math.abs(Number(item.gastos_extra || item.gastos_extraordinarios || 0));
+            const ev = Math.abs(Number(item.red_ajustes || item.eventual || 0));
+            return sum + (ga + gb + fo + ge + ev);
+        }, 0);
+    }
+
+    // 2. Recaudado: suma de cobros recibidos
+    const totalRecaudado = periodData.reduce((sum, item) => sum + (item.pagos && Number(item.pagos) > 0 ? Number(item.pagos) : 0), 0);
+
+    // 3. Deuda Acumulada: suma de saldos deudores acumulados
+    const totalDeuda = periodData.reduce((sum, item) => {
+        const val = Number(item.saldo !== undefined ? item.saldo : (item.deuda || 0));
+        return sum + (val > 0 ? val : 0);
+    }, 0);
+
+    // 4. Intereses por Mora
+    const totalInteres = periodData.reduce((sum, item) => sum + Number(item.interes_mora || item.interes || 0), 0);
 
     const recPct = totalFacturado > 0 ? (totalRecaudado / totalFacturado) * 100 : 0;
 
