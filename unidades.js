@@ -19,13 +19,21 @@ let chartCaja = null;
 let chartUfHistory = null;
 
 // Formatters
-const fmt = (n) => new Intl.NumberFormat('es-AR', {
-    style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0
-}).format(n);
+const fmt = (n) => {
+    const val = Number(n);
+    if (isNaN(val)) return '$ 0';
+    return new Intl.NumberFormat('es-AR', {
+        style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0
+    }).format(val);
+};
 
-const fmtFull = (n) => new Intl.NumberFormat('es-AR', {
-    style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2
-}).format(n);
+const fmtFull = (n) => {
+    const val = Number(n);
+    if (isNaN(val)) return '$ 0,00';
+    return new Intl.NumberFormat('es-AR', {
+        style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2
+    }).format(val);
+};
 
 // ── BOOTSTRAP ──────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -227,6 +235,7 @@ const renderKPIs = (period) => {
 
 // ── BAR CHART: TOP MOROSITY ──────────────────────────────────────
 const renderMorosityChart = (period) => {
+    if (typeof ApexCharts === 'undefined') return;
     const periodData = rawProrrateo.filter(item => item.periodo === period);
     
     // Filtrar los que tienen deuda acumulada > 0 y ordenar de mayor a menor
@@ -267,6 +276,7 @@ const renderMorosityChart = (period) => {
 
 // ── DONUT CHART: CAJA STATUS ──────────────────────────────────────
 const renderCajaChart = (period) => {
+    if (typeof ApexCharts === 'undefined') return;
     const periodData = rawProrrateo.filter(item => item.periodo === period);
     
     const pagos = periodData.reduce((sum, item) => sum + item.pagos, 0);
@@ -312,26 +322,33 @@ const renderTable = () => {
     }
 
     tbody.innerHTML = sorted.map(item => {
-        const tPagar = item.total_a_pagar || item.total;
-        const tMes = item.total_mes || (item.gastos_comunes + item.servicio_seguridad + item.fondo_reserva);
+        const ga = Number(item.gastos_comunes || item.ga_monto || 0);
+        const gb = Number(item.servicio_seguridad || item.gb_monto || 0);
+        const fo = Number(item.fondo_reserva || item.fondo_operativo_monto || 0);
+        const ge = Number(item.gastos_extraordinarios || item.gastos_extra || 0);
+        const ev = Number(item.eventual || item.red_ajustes || 0);
+
+        const tMes = (item.total_mes !== undefined && !isNaN(Number(item.total_mes))) ? Number(item.total_mes) : (ga + gb + fo + ge + ev);
+        const tPagar = (item.total_a_pagar !== undefined && !isNaN(Number(item.total_a_pagar))) ? Number(item.total_a_pagar) : ((item.total !== undefined && !isNaN(Number(item.total))) ? Number(item.total) : tMes);
         const isDeudor = tPagar > tMes;
 
         const dptoStr = item.dpto || item.ubicacion || item.depto || `U.F. ${item.uf}`;
         const propStr = item.propietario && item.propietario !== '—' ? item.propietario : '—';
+        const pctVal = Number(item.porcentual || item.ga_pct || 0);
 
         return `
         <tr class="uf-row" onclick="openModal(${item.uf})">
             <td style="font-weight:600; text-align:center;">${String(item.uf).padStart(3, '0')}</td>
             <td style="white-space:nowrap; font-weight:500;">${dptoStr}</td>
-            <td style="text-align:center; color:var(--text-3);">${(item.porcentual || item.ga_pct || 0).toFixed(3)}%</td>
-            <td style="text-align:right; color:var(--text-3);">${fmt(item.saldo_anterior)}</td>
-            <td style="text-align:right; color:var(--green); font-weight:500;">${item.pagos > 0 ? fmt(item.pagos) : '—'}</td>
-            <td style="text-align:right; color:${item.saldo_mes > 0 ? 'var(--red)' : (item.saldo_mes < 0 ? 'var(--green)' : 'var(--text-3)')};">${item.saldo_mes !== 0 ? fmt(item.saldo_mes) : '—'}</td>
-            <td style="text-align:right;">${fmt(item.gastos_comunes || item.ga_monto)}</td>
-            <td style="text-align:right;">${fmt(item.servicio_seguridad || item.gb_monto)}</td>
-            <td style="text-align:right;">${fmt(item.fondo_reserva || item.fondo_operativo_monto)}</td>
-            <td style="text-align:right;">${(item.gastos_extraordinarios || 0) > 0 ? fmt(item.gastos_extraordinarios) : '—'}</td>
-            <td style="text-align:right;">${(item.eventual || 0) > 0 ? fmt(item.eventual) : '—'}</td>
+            <td style="text-align:center; color:var(--text-3);">${pctVal.toFixed(3)}%</td>
+            <td style="text-align:right; color:var(--text-3);">${fmt(item.saldo_anterior || 0)}</td>
+            <td style="text-align:right; color:var(--green); font-weight:500;">${(item.pagos || 0) > 0 ? fmt(item.pagos) : '—'}</td>
+            <td style="text-align:right; color:${(item.saldo_mes || 0) > 0 ? 'var(--red)' : ((item.saldo_mes || 0) < 0 ? 'var(--green)' : 'var(--text-3)')};">${(item.saldo_mes || 0) !== 0 ? fmt(item.saldo_mes) : '—'}</td>
+            <td style="text-align:right;">${fmt(ga)}</td>
+            <td style="text-align:right;">${fmt(gb)}</td>
+            <td style="text-align:right;">${fmt(fo)}</td>
+            <td style="text-align:right;">${ge > 0 ? fmt(ge) : '—'}</td>
+            <td style="text-align:right;">${ev > 0 ? fmt(ev) : '—'}</td>
             <td style="text-align:right; font-weight:600; color:var(--text-1);">${fmt(tMes)}</td>
             <td style="text-align:right; color:var(--purple); font-weight:500;">${(item.interes_mora || item.interes || 0) > 0 ? fmt(item.interes_mora || item.interes) : '—'}</td>
             <td style="text-align:right; font-weight:800; color:var(--accent);">${fmt(tPagar)}</td>
@@ -492,13 +509,15 @@ const openModal = (ufNum) => {
         tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
     };
 
-    if (chartUfHistory) chartUfHistory.destroy();
-    chartUfHistory = new ApexCharts(document.querySelector("#ufHistoryChart"), opts);
-    chartUfHistory.render().then(() => {
-        setTimeout(() => {
-            if (chartUfHistory) chartUfHistory.zoomX(minIndex, maxIndex);
-        }, 100);
-    });
+    if (typeof ApexCharts !== 'undefined') {
+        if (chartUfHistory) chartUfHistory.destroy();
+        chartUfHistory = new ApexCharts(document.querySelector("#ufHistoryChart"), opts);
+        chartUfHistory.render().then(() => {
+            setTimeout(() => {
+                if (chartUfHistory) chartUfHistory.zoomX(minIndex, maxIndex);
+            }, 100);
+        });
+    }
 
     document.getElementById("ufModal").classList.add("open");
 };
