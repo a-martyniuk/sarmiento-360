@@ -25,13 +25,21 @@ EXCEL_MAP = {
 def clean_amount(val_str):
     if not val_str or str(val_str).strip() in ["-", "$ -", "$", "-%", "%", "None"]:
         return 0.0
-    v = str(val_str).replace("$", "").replace(" ", "").replace(".", "").replace(",", ".")
-    v = v.replace("%", "")
-    is_neg = False
-    if "-" in v:
-        is_neg = True
-        v = v.replace("-", "")
-    v = re.sub(r"[^\d.]", "", v)
+    v = str(val_str).replace("$", "").replace(" ", "").replace("%", "").strip()
+    is_neg = "-" in v
+    v = v.replace("-", "")
+    
+    if "," in v:
+        v = v.replace(".", "").replace(",", ".")
+    else:
+        parts = v.split(".")
+        if len(parts) > 2:
+            v = "".join(parts)
+        elif len(parts) == 2:
+            if len(parts[1]) == 3:
+                v = parts[0] + parts[1]
+            else:
+                v = parts[0] + "." + parts[1]
     try:
         res = float(v)
         return -res if is_neg else res
@@ -197,7 +205,7 @@ def main():
         return
 
     files = [os.path.join(LIQUIDACIONES_DIR, f) for f in os.listdir(LIQUIDACIONES_DIR) 
-             if f.endswith("_liquidacion.pdf")]
+             if f.endswith("_liquidacion.pdf") and not f.startswith("326_151_")]
     
     print(f"Encontradas {len(files)} liquidaciones para procesar.")
     
