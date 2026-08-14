@@ -1,6 +1,15 @@
 // Dashboard de Unidades Funcionales (U.F.) — Sarmiento 360
 // ─────────────────────────────────────────────────────────────
 
+// Helper para resolver archivos JSON relativos sin importar si la URL tiene slash final o no
+const getRelativeDataUrl = (file) => {
+    let path = window.location.pathname;
+    if (!path.endsWith("/") && !path.endsWith(".html")) {
+        path += "/";
+    }
+    return new URL(file, window.location.origin + path).href;
+};
+
 let rawProrrateo = [];
 let filteredProrrateo = [];
 
@@ -20,7 +29,7 @@ const fmtFull = (n) => new Intl.NumberFormat('es-AR', {
 
 // ── BOOTSTRAP ──────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(new URL("prorrateo.json", document.baseURI).href)
+    fetch(getRelativeDataUrl("prorrateo.json"))
         .then(r => r.json())
         .then(data => {
             const allProrrateo = data.prorrateo || [];
@@ -599,7 +608,7 @@ const loadServicesStatus = () => {
     const container = document.getElementById("servicesStatusWidget");
     if (!container) return;
 
-    fetch(new URL("servicios_status.json", document.baseURI).href)
+    fetch(getRelativeDataUrl("servicios_status.json"))
         .then(r => r.json())
         .then(data => {
             const edesur = data.edesur || { status: "Normal", message: "Sin alertas" };

@@ -1,4 +1,12 @@
-// AUDITORÍA DOCUMENTAL Y CONTRATOS - SARMIENTO 360
+// Helper para resolver archivos JSON relativos sin importar si la URL tiene slash final o no
+const getRelativeDataUrl = (file) => {
+    let path = window.location.pathname;
+    if (!path.endsWith("/") && !path.endsWith(".html")) {
+        path += "/";
+    }
+    return new URL(file, window.location.origin + path).href;
+};
+
 let allGastos = [];
 let filteredGastos = [];
 
@@ -8,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadGastosData() {
     try {
-        const response = await fetch("gastos.json");
+        const response = await fetch(getRelativeDataUrl("gastos.json"));
         const data = await response.json();
         allGastos = (data.gastos || []).filter(g => g.monto && g.monto > 0);
         

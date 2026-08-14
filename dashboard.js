@@ -1,5 +1,11 @@
-// Dashboard Sarmiento 360 — Lógica completa
-// ─────────────────────────────────────────────────────────────
+// Helper para resolver archivos JSON relativos sin importar si la URL tiene slash final o no
+const getRelativeDataUrl = (file) => {
+    let path = window.location.pathname;
+    if (!path.endsWith("/") && !path.endsWith(".html")) {
+        path += "/";
+    }
+    return new URL(file, window.location.origin + path).href;
+};
 
 let rawExpenses  = [];
 let rawBalances  = [];
@@ -139,7 +145,7 @@ const matchConcept = (c1, c2) => {
 document.addEventListener("DOMContentLoaded", async () => {
     await fetchIPC();
 
-    fetch(new URL("gastos.json", document.baseURI).href)
+    fetch(getRelativeDataUrl("gastos.json"))
         .then(r => r.json())
         .then(data => {
             const allExpenses = data.gastos.filter(e => e.monto > 0);
@@ -1687,7 +1693,7 @@ const loadServicesStatus = () => {
     const container = document.getElementById("servicesStatusWidget");
     if (!container) return;
 
-    fetch(new URL("servicios_status.json", document.baseURI).href)
+    fetch(getRelativeDataUrl("servicios_status.json"))
         .then(r => r.json())
         .then(data => {
             const edesur = data.edesur || { status: "Normal", message: "Sin alertas" };
@@ -1836,7 +1842,7 @@ const init = async () => {
     await fetchIPC();
 
     try {
-        const response = await fetch("gastos.json");
+        const response = await fetch(getRelativeDataUrl("gastos.json"));
         const data = await response.json();
         rawExpenses = data.gastos || [];
         rawExtraordinarios = data.gastos_extraordinarios || [];
