@@ -17,3 +17,8 @@ env/
 # OS-specific
 .DS_Store
 Thumbs.db
+
+# Scratch and nested test dirs
+scratch/
+sarmiento-360/
+

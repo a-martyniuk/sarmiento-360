@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alexismartyniuk.com.ar/sarmiento-151/sitemap.xml
+Sitemap: https://alexismartyniuk.com.ar/sarmiento-360/sitemap.xml

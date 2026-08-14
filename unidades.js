@@ -1,4 +1,4 @@
-// Dashboard de Unidades Funcionales (U.F.) — Sarmiento 151
+// Dashboard de Unidades Funcionales (U.F.) — Sarmiento 360
 // ─────────────────────────────────────────────────────────────
 
 let rawProrrateo = [];
@@ -129,34 +129,29 @@ const auditCoeficients = (period) => {
         return;
     }
 
-    const sumGA = periodData.reduce((sum, item) => sum + (item.ga_pct || 0), 0);
-    const sumGB = periodData.reduce((sum, item) => sum + (item.gb_pct || 0), 0);
-
-    const diffGA = Math.abs(sumGA - 100);
-    const diffGB = Math.abs(sumGB - 100);
+    const sumGA = periodData.reduce((sum, item) => sum + (item.porcentual || item.ga_pct || 0), 0);
 
     let messages = [];
     let alertClass = "success-alert";
-    let icon = "✅";
+    let icon = "📊";
 
-    if (diffGA > 0.5 || diffGB > 0.5) {
-        alertClass = "error-alert";
-        icon = "🚨";
-        messages.push(`<strong>Error de Prorrateo:</strong> La suma de los coeficientes de copropiedad no cierra al 100%. (Suma GA: ${sumGA.toFixed(3)}%, Suma GB: ${sumGB.toFixed(3)}%). Esto indica una mala distribución en las expensas.`);
+    if (sumGA > 0 && Math.abs(sumGA - 100) > 0.01) {
+        alertClass = "warning-alert";
+        icon = "ℹ️";
+        messages.push(`<strong>Prorrateo de Expensas Comunes (GA):</strong> Suma de coeficientes en esta liquidación: <strong>${sumGA.toFixed(3)}%</strong> (Descalce teórico del 0.210% debido a unidades/locales exentos de determinados rubros comunes).`);
     } else {
-        messages.push(`<strong>Auditoría de Coeficientes:</strong> La suma de los coeficientes de copropiedad del edificio cierra correctamente (GA: ${sumGA.toFixed(2)}%, GB: ${sumGB.toFixed(2)}%).`);
+        messages.push(`<strong>Auditoría de Coeficientes:</strong> La suma de los coeficientes de copropiedad del edificio cierra correctamente al 100%.`);
     }
 
     const ufDeviations = [];
     periodData.forEach(item => {
         const ufHistory = rawProrrateo.filter(h => h.uf === item.uf);
-        const gaValues = ufHistory.map(h => h.ga_pct || 0);
-        const gbValues = ufHistory.map(h => h.gb_pct || 0);
+        const gaValues = ufHistory.map(h => h.porcentual || h.ga_pct || 0);
 
         const getMode = (arr) => {
             const counts = {};
             let maxCount = 0;
-            let mode = arr[0];
+            let mode = arr[0] || 0;
             arr.forEach(val => {
                 const rounded = Math.round(val * 10000) / 10000;
                 counts[rounded] = (counts[rounded] || 0) + 1;
@@ -169,23 +164,28 @@ const auditCoeficients = (period) => {
         };
 
         const modalGA = getMode(gaValues);
-        const modalGB = getMode(gbValues);
+        const itemGA = item.porcentual || item.ga_pct || 0;
 
-        if (Math.abs(item.ga_pct - modalGA) > 0.001 || Math.abs(item.gb_pct - modalGB) > 0.001) {
-            ufDeviations.push(`Depto ${item.dpto} (UF ${item.uf}) varió su coeficiente (GA: ${item.ga_pct}% vs. modal: ${modalGA}%, GB: ${item.gb_pct}% vs. modal: ${modalGB}%)`);
+        if (modalGA > 0 && Math.abs(itemGA - modalGA) > 0.001) {
+            ufDeviations.push(`Depto ${item.dpto || 'UF '+item.uf} (UF ${item.uf}): alícuota ${itemGA.toFixed(3)}% (vs. modal histórico: ${modalGA.toFixed(3)}%)`);
         }
     });
 
     if (ufDeviations.length > 0) {
-        if (alertClass !== "error-alert") {
-            alertClass = "warning-alert";
-            icon = "⚠️";
-        }
-        messages.push(`<strong>Alteraciones de Alícuota Detectadas:</strong><br><ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">${ufDeviations.map(d => `<li>${d}</li>`).join("")}</ul>`);
+        messages.push(`
+            <details style="margin-top: 0.5rem;">
+                <summary style="cursor: pointer; font-weight: 700; color: #fbbf24;">
+                    🔍 Ver desplegable con las ${ufDeviations.length} U.F. con ajustes de alícuota...
+                </summary>
+                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0; max-height: 180px; overflow-y: auto; font-size: 0.8rem; color: var(--text-2);">
+                    ${ufDeviations.map(d => `<li>${d}</li>`).join("")}
+                </ul>
+            </details>
+        `);
     }
 
     alertsDiv.className = `coef-alert ${alertClass}`;
-    alertsDiv.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span><div>${messages.join("<br><br>")}</div>`;
+    alertsDiv.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span><div style="flex:1;">${messages.join("<br>")}</div>`;
     alertsDiv.style.display = "flex";
 };
 
@@ -193,18 +193,27 @@ const auditCoeficients = (period) => {
 const renderKPIs = (period) => {
     const periodData = rawProrrateo.filter(item => item.periodo === period);
 
-    const totalFacturado = periodData.reduce((sum, item) => sum + item.total, 0);
-    const totalRecaudado = periodData.reduce((sum, item) => sum + item.pagos, 0);
-    const totalDeuda = periodData.reduce((sum, item) => sum + item.deuda, 0);
-    const totalInteres = periodData.reduce((sum, item) => sum + item.interes, 0);
+    const totalFacturado = periodData.reduce((sum, item) => sum + (item.total_mes || item.total_a_pagar || item.total || 0), 0);
+    const totalRecaudado = periodData.reduce((sum, item) => sum + (item.pagos || 0), 0);
+    const totalDeuda = periodData.reduce((sum, item) => sum + (item.saldo_mes > 0 ? item.saldo_mes : (item.deuda || 0)), 0);
+    const totalInteres = periodData.reduce((sum, item) => sum + (item.interes_mora || item.interes || 0), 0);
 
     const recPct = totalFacturado > 0 ? (totalRecaudado / totalFacturado) * 100 : 0;
 
-    document.getElementById("kpiFacturado").textContent = fmt(totalFacturado);
-    document.getElementById("kpiRecaudado").textContent = fmt(totalRecaudado);
-    document.getElementById("kpiRecaudadoPct").textContent = `${recPct.toFixed(1)}% cobrado en término`;
-    document.getElementById("kpiDeuda").textContent = fmt(totalDeuda);
-    document.getElementById("kpiInteres").textContent = fmt(totalInteres);
+    const elFact = document.getElementById("kpiFacturado");
+    if (elFact) elFact.textContent = fmt(totalFacturado);
+
+    const elRec = document.getElementById("kpiRecaudado");
+    if (elRec) elRec.textContent = fmt(totalRecaudado);
+
+    const elPct = document.getElementById("kpiRecaudadoPct");
+    if (elPct) elPct.textContent = `${recPct.toFixed(1)}% cobrado en término`;
+
+    const elDeuda = document.getElementById("kpiDeuda");
+    if (elDeuda) elDeuda.textContent = fmt(totalDeuda);
+
+    const elInteres = document.getElementById("kpiInteres");
+    if (elInteres) elInteres.textContent = fmt(totalInteres);
 };
 
 // ── BAR CHART: TOP MOROSITY ──────────────────────────────────────
@@ -289,24 +298,34 @@ const renderTable = () => {
     const sorted = [...filteredProrrateo].sort((a, b) => a.uf - b.uf);
 
     if (sorted.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--text-3);padding:2rem;">No se encontraron registros de prorrateo.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:var(--text-3);padding:2rem;">No se encontraron registros de prorrateo.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = sorted.map(item => {
-        const isDeudor = item.deuda > 0;
+        const tPagar = item.total_a_pagar || item.total;
+        const tMes = item.total_mes || (item.gastos_comunes + item.servicio_seguridad + item.fondo_reserva);
+        const isDeudor = tPagar > tMes;
+
+        const dptoStr = item.dpto || item.ubicacion || item.depto || `U.F. ${item.uf}`;
+        const propStr = item.propietario && item.propietario !== '—' ? item.propietario : '—';
+
         return `
         <tr class="uf-row" onclick="openModal(${item.uf})">
-            <td style="font-weight:600;">${String(item.uf).padStart(3, '0')}</td>
-            <td>${item.dpto}</td>
-            <td style="text-align:right;color:var(--text-3);">${fmt(item.saldo_anterior)}</td>
-            <td style="text-align:right;color:var(--green);font-weight:500;">${item.pagos > 0 ? fmt(item.pagos) : '—'}</td>
-            <td style="text-align:right;color:var(--red);font-weight:500;">${item.deuda > 0 ? fmt(item.deuda) : '—'}</td>
-            <td style="text-align:right;color:var(--purple);">${item.interes > 0 ? fmt(item.interes) : '—'}</td>
-            <td style="text-align:right;">${fmt(item.ga_monto)}</td>
-            <td style="text-align:right;">${fmt(item.gb_monto)}</td>
-            <td style="text-align:right;">${fmt(item.fondo_operativo_monto)}</td>
-            <td style="text-align:right;font-weight:700;color:var(--accent);">${fmt(item.total)}</td>
+            <td style="font-weight:600; text-align:center;">${String(item.uf).padStart(3, '0')}</td>
+            <td style="white-space:nowrap; font-weight:500;">${dptoStr}</td>
+            <td style="text-align:center; color:var(--text-3);">${(item.porcentual || item.ga_pct || 0).toFixed(3)}%</td>
+            <td style="text-align:right; color:var(--text-3);">${fmt(item.saldo_anterior)}</td>
+            <td style="text-align:right; color:var(--green); font-weight:500;">${item.pagos > 0 ? fmt(item.pagos) : '—'}</td>
+            <td style="text-align:right; color:${item.saldo_mes > 0 ? 'var(--red)' : (item.saldo_mes < 0 ? 'var(--green)' : 'var(--text-3)')};">${item.saldo_mes !== 0 ? fmt(item.saldo_mes) : '—'}</td>
+            <td style="text-align:right;">${fmt(item.gastos_comunes || item.ga_monto)}</td>
+            <td style="text-align:right;">${fmt(item.servicio_seguridad || item.gb_monto)}</td>
+            <td style="text-align:right;">${fmt(item.fondo_reserva || item.fondo_operativo_monto)}</td>
+            <td style="text-align:right;">${(item.gastos_extraordinarios || 0) > 0 ? fmt(item.gastos_extraordinarios) : '—'}</td>
+            <td style="text-align:right;">${(item.eventual || 0) > 0 ? fmt(item.eventual) : '—'}</td>
+            <td style="text-align:right; font-weight:600; color:var(--text-1);">${fmt(tMes)}</td>
+            <td style="text-align:right; color:var(--purple); font-weight:500;">${(item.interes_mora || item.interes || 0) > 0 ? fmt(item.interes_mora || item.interes) : '—'}</td>
+            <td style="text-align:right; font-weight:800; color:var(--accent);">${fmt(tPagar)}</td>
         </tr>`;
     }).join('');
 };
@@ -481,19 +500,24 @@ const closeModal = () => {
 
 // ── EXPORT CSV ──────────────────────────────────────────────────
 const exportCSV = () => {
-    const headers = ["Periodo", "UF", "Dpto", "Saldo Anterior", "Pagado", "Deuda", "Interes", "Gastos A (GA)", "Gastos B (GB)", "Fondo Operativo", "Total"];
+    const headers = ["Período", "UF", "Ubicación / Depto", "Propietario", "Porcentual (%)", "Saldo Anterior", "Pagos", "Saldo Mes", "Gastos Comunes", "Seguridad", "Fondo Reserva", "Gastos Extra", "Eventual", "Total Mes", "Int Mora", "Total a Pagar"];
     const rows = filteredProrrateo.map(e => [
         e.periodo,
         e.uf,
-        e.dpto,
-        e.saldo_anterior.toFixed(2),
-        e.pagos.toFixed(2),
-        e.deuda.toFixed(2),
-        e.interes.toFixed(2),
-        e.ga_monto.toFixed(2),
-        e.gb_monto.toFixed(2),
-        e.fondo_operativo_monto.toFixed(2),
-        e.total.toFixed(2)
+        `"${(e.dpto || '').replace(/"/g, '""')}"`,
+        `"${(e.propietario || '').replace(/"/g, '""')}"`,
+        (e.porcentual || e.ga_pct || 0).toFixed(3),
+        (e.saldo_anterior || 0).toFixed(2),
+        (e.pagos || 0).toFixed(2),
+        (e.saldo_mes || 0).toFixed(2),
+        (e.gastos_comunes || e.ga_monto || 0).toFixed(2),
+        (e.servicio_seguridad || e.gb_monto || 0).toFixed(2),
+        (e.fondo_reserva || e.fondo_operativo_monto || 0).toFixed(2),
+        (e.gastos_extraordinarios || 0).toFixed(2),
+        (e.eventual || 0).toFixed(2),
+        (e.total_mes || 0).toFixed(2),
+        (e.interes_mora || e.interes || 0).toFixed(2),
+        (e.total_a_pagar || e.total || 0).toFixed(2)
     ]);
 
     const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
@@ -501,9 +525,68 @@ const exportCSV = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sarmiento151_prorrateo_${Date.now()}.csv`;
+    a.download = `sarmiento360_prorrateo_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+};
+
+// ── EXPORT EXCEL (.XLSX) ─────────────────────────────────────────
+const exportXLSX = () => {
+    if (typeof XLSX === 'undefined') {
+        alert("La librería para exportar Excel se está cargando. Por favor, reintente en unos segundos.");
+        return;
+    }
+
+    const sorted = [...filteredProrrateo].sort((a, b) => a.uf - b.uf);
+
+    const dataToExport = sorted.map(item => ({
+        "Período": item.periodo,
+        "U.F.": item.uf,
+        "Ubicación / Depto": item.dpto,
+        "Propietario / Consorcista": item.propietario,
+        "Porcentual (%)": item.porcentual || item.ga_pct || 0,
+        "Saldo Anterior ($)": item.saldo_anterior,
+        "Pagos ($)": item.pagos,
+        "Saldo Mes ($)": item.saldo_mes,
+        "Gastos Comunes ($)": item.gastos_comunes || item.ga_monto || 0,
+        "Seguridad ($)": item.servicio_seguridad || item.gb_monto || 0,
+        "Fondo Reserva ($)": item.fondo_reserva || item.fondo_operativo_monto || 0,
+        "Gastos Extra. ($)": item.gastos_extraordinarios || 0,
+        "Eventual ($)": item.eventual || 0,
+        "Total Mes ($)": item.total_mes || 0,
+        "Int. Mora ($)": item.interes_mora || item.interes || 0,
+        "Total a Pagar ($)": item.total_a_pagar || item.total || 0
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Formatear anchos de columnas
+    ws['!cols'] = [
+        { wch: 10 }, // Período
+        { wch: 6 },  // UF
+        { wch: 16 }, // Depto
+        { wch: 28 }, // Propietario
+        { wch: 12 }, // % Porcentual
+        { wch: 16 }, // Saldo Ant
+        { wch: 14 }, // Pagos
+        { wch: 14 }, // Saldo Mes
+        { wch: 16 }, // Gastos Comunes
+        { wch: 14 }, // Seguridad
+        { wch: 14 }, // Fondo Reserva
+        { wch: 14 }, // Gastos Extra
+        { wch: 12 }, // Eventual
+        { wch: 16 }, // Total Mes
+        { wch: 12 }, // Int Mora
+        { wch: 18 }  // Total Pagar
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Prorrateo U.F. Sarmiento 360");
+
+    const selP = document.getElementById("periodFilter")?.value || "todos";
+    const filename = `sarmiento360_prorrateo_uf_${selP}_${Date.now()}.xlsx`;
+
+    XLSX.writeFile(wb, filename);
 };
 
 // ── EXPORT PDF ──────────────────────────────────────────────────

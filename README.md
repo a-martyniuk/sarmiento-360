@@ -1,8 +1,8 @@
-# 📊 Sarmiento 151 — Dashboard de Expensas y Auditoría Independiente
+# 📊 Sarmiento 360 — Dashboard de Expensas y Auditoría Independiente
 
-Este es un panel de control y auditoría de expensas, gastos e infraestructura para el consorcio **Sarmiento 151** (Lomas de Zamora, Provincia de Buenos Aires). Se trata de una solución estática e independiente desarrollada por un copropietario para transparentar la información financiera y monitorear los servicios esenciales del edificio.
+Este es un panel de control y auditoría de expensas, gastos e infraestructura para el consorcio **Sarmiento 356-360** (Adrogué / Lomas de Zamora, Provincia de Buenos Aires). Se trata de una solución estática e independiente desarrollada por un copropietario para transparentar la información financiera y monitorear los servicios esenciales del edificio (70 Unidades Funcionales).
 
-Acceso al sitio en producción: **[alexismartyniuk.com.ar/sarmiento-151](https://alexismartyniuk.com.ar/sarmiento-151)**
+Acceso al sitio en producción: **[alexismartyniuk.com.ar/sarmiento-360](https://alexismartyniuk.com.ar/sarmiento-360)**
 
 ---
 
@@ -15,28 +15,29 @@ La plataforma está diseñada con una arquitectura liviana, de alto rendimiento 
   * **Vanilla JavaScript (ES6+):** Lógica pura para filtrado dinámico, procesamiento de datos, cálculos en vivo y control de estados de la UI.
   * **ApexCharts (CDN):** Visualizaciones interactivas de series temporales y distribución patrimonial.
 * **Backend de Ingesta (Local):**
-  * Scripts en **Python** para procesar, limpiar y parsear los datos brutos extraídos de los PDFs de expensas de la administración oficiales hacia archivos relacionales `gastos.json` y `prorrateo.json`.
+  * Scripts en **Python** (`extract_data.py` y `extract_prorrateo.py`) para procesar, limpiar y parsear los datos brutos extraídos de los PDFs y planillas auxiliares de la administración D&F hacia archivos relacionales `gastos.json` y `prorrateo.json`.
 * **Monitoreo en Tiempo Real (Serverless API):**
-  * **check_servicios.py:** Script de Python encargado de auditar la red de servicios locales (Luz con Edesur, Agua con AySA y Gas con Metrogas) para alertar interrupciones activas en la zona de Lomas de Zamora.
+  * **check_servicios.py:** Script de Python encargado de auditar la red de servicios locales (Luz con Edesur, Agua con AySA y Gas con Metrogas) para alertar interrupciones activas en la zona.
 
 ---
 
 ## 📁 Estructura del Proyecto
 ```
-Sarmiento151/
+Administracion_Sarmiento360/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml          # Pipeline de CI/CD para GitHub Pages
-├── scratch/                    # Scripts temporales de diagnóstico
+├── Landing/                    # Documentación original, liquidaciones y recibos
+├── liquidaciones/              # Archivos PDF estandarizados de liquidación
 ├── check_servicios.py          # Script de monitoreo de Luz, Agua y Gas
-├── extract_data.py             # Parser principal de datos de expensas
-├── extract_prorrateo.py        # Parser de expensas por U.F.
+├── extract_data.py             # Parser principal de datos de expensas y balances
+├── extract_prorrateo.py        # Parser de expensas por U.F. (70 U.F.s)
 ├── gastos.json                 # Base de datos consolidada de gastos
 ├── prorrateo.json              # Base de datos consolidada de U.F. e intereses
 ├── index.html                  # Panel de Control General de Gastos
 ├── dashboard.js                # Lógica del dashboard de gastos
 ├── unidades.html               # Panel de control de Unidades Funcionales
-├── unidades.js                 # Lógica e interés punitorio por U.F.
+├── unidades.js                 # Lógica de deudas e intereses por U.F.
 ├── robots.txt                  # Directivas de buscadores para SEO
 ├── sitemap.xml                 # Mapa del sitio para buscadores
 ├── LICENSE                     # Licencia del proyecto (MIT)

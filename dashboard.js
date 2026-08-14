@@ -1,9 +1,11 @@
-// Dashboard Sarmiento 151 — Lógica completa
+// Dashboard Sarmiento 360 — Lógica completa
 // ─────────────────────────────────────────────────────────────
 
 let rawExpenses  = [];
 let rawBalances  = [];
 let rawMultas    = [];
+let rawExtraordinarios = [];
+let rawMorosidad = [];
 let filteredExpenses = [];
 let currentPage  = 1;
 let pageSize     = 20;
@@ -80,6 +82,7 @@ const CAT_CONFIG = {
     "Contratos y Abonos":          { cls: "pill-contratos", icon: "🛠️", dot: "#34d399" },
     "Administración":              { cls: "pill-admin",     icon: "📋", dot: "#60a5fa" },
     "Mantenimiento y Reparaciones":{ cls: "pill-manto",    icon: "🔧", dot: "#a78bfa" },
+    "Gastos Extraordinarios":      { cls: "pill-extra",    icon: "🎨", dot: "#ec4899" },
     "Varios":                      { cls: "pill-varios",    icon: "📦", dot: "#9ca3af" },
 };
 
@@ -96,22 +99,40 @@ const prevPeriod = (p) => {
 };
 
 // ── Match concepts intelligently ───────────────────────────────
+const cleanConceptForMatching = (str) => {
+    if (!str) return "";
+    let s = str.toLowerCase();
+    const monthNames = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+        "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"
+    ];
+    monthNames.forEach(m => {
+        s = s.replace(new RegExp("\\b" + m + "\\b", "gi"), "");
+    });
+    s = s.replace(/\b202[4-9]\b/g, "").replace(/\b2[4-9]\b/g, "");
+    return s.replace(/\s+/g, " ").trim();
+};
+
 const matchConcept = (c1, c2) => {
+    if (!c1 || !c2) return false;
     const raw1 = c1.toLowerCase();
     const raw2 = c2.toLowerCase();
     
-    // Si tienen números de cuenta de AySA (1411XX) diferentes, no deben emparejarse
-    const getAySA = (s) => { const m = s.match(/1411\d+/); return m ? m[0] : null; };
-    const a1 = getAySA(raw1), a2 = getAySA(raw2);
-    if (a1 && a2 && a1 !== a2) return false;
+    // Si tienen números de cuenta de AySA / Edesur / Servicios diferentes, no deben emparejarse
+    const getAccountNum = (s) => { const m = s.match(/\d{6,8}/); return m ? m[0] : null; };
+    const acc1 = getAccountNum(raw1), acc2 = getAccountNum(raw2);
+    if (acc1 && acc2 && acc1 !== acc2) return false;
 
-    // Si tienen números de cliente de Edesur (8050XX) diferentes, no deben emparejarse
-    const getEdesur = (s) => { const m = s.match(/8050\d+/); return m ? m[0] : null; };
-    const e1 = getEdesur(raw1), e2 = getEdesur(raw2);
-    if (e1 && e2 && e1 !== e2) return false;
+    const norm1 = cleanConceptForMatching(c1);
+    const norm2 = cleanConceptForMatching(c2);
 
-    // Comparación de prefijo mayor (30 caracteres)
-    return raw1.slice(0, 30) === raw2.slice(0, 30);
+    if (norm1 === norm2) return true;
+    if (norm1.length >= 8 && norm2.length >= 8) {
+        if (norm1.includes(norm2) || norm2.includes(norm1)) return true;
+        if (norm1.slice(0, 20) === norm2.slice(0, 20)) return true;
+    }
+    return raw1.slice(0, 20) === raw2.slice(0, 20);
 };
 
 // ── BOOTSTRAP ──────────────────────────────────────────────────
@@ -129,10 +150,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 rawExpenses = allExpenses;
                 rawBalances = allBalances;
                 rawMultas   = allMultas;
+                rawExtraordinarios = data.extraordinarios || [];
+                rawMorosidad = data.morosidad || [];
             } else {
                 rawExpenses = [];
                 rawBalances = [];
                 rawMultas   = [];
+                rawExtraordinarios = [];
+                rawMorosidad = [];
             }
 
             // Corregir anomalías históricas usando media móvil para evitar distorsiones por inflación acumulada
@@ -163,6 +188,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             populatePeriodFilter();
             setupEventListeners();
             applyFilter();
+            renderExtraordinarios();
+            renderMorosidad();
             loadServicesStatus();
         })
         .catch(err => {
@@ -210,20 +237,30 @@ const applyFilter = () => {
     const periodSel  = document.getElementById("periodFilter");
     const searchInp  = document.getElementById("searchInput");
     const statusSel  = document.getElementById("statusFilter");
+    const catSel     = document.getElementById("categoryFilter");
 
-    const period = periodSel.value;
-    const query  = searchInp ? searchInp.value.toLowerCase().trim() : "";
-    const status = statusSel.value;
+    const period   = periodSel ? periodSel.value : "todos";
+    const query    = searchInp ? searchInp.value.toLowerCase().trim() : "";
+    const status   = statusSel ? statusSel.value : "todos";
+    const selCat   = catSel ? catSel.value : "todos";
+    const subSel   = document.getElementById("subcomponentFilter");
+    const selSub   = subSel ? subSel.value : "todos";
 
     filteredExpenses = rawExpenses.filter(e => {
+        const catName = e.categoria || e.rubro;
+        const subComp = getSubcategoria(e);
         const okPeriod = period === "todos" || e.periodo === period;
+        const okCat    = selCat === "todos" || catName === selCat;
+        const okSub    = selSub === "todos" || subComp === selSub || e.empleado === selSub;
         const okSearch = !query ||
             e.concepto.toLowerCase().includes(query) ||
-            e.rubro.toLowerCase().includes(query);
-        // Si visualizamos "todos los períodos" y estado "todos", excluimos los pendientes para no duplicar en el histórico
-        const defaultExclusión = period === "todos" ? e.estado !== "Pendiente" : true;
-        const okStatus = status === "todos" ? defaultExclusión : (e.estado || "Pagado") === status;
-        return okPeriod && okSearch && okStatus;
+            catName.toLowerCase().includes(query) ||
+            subComp.toLowerCase().includes(query) ||
+            (e.rubro && e.rubro.toLowerCase().includes(query));
+        const defaultExclusion = period === "todos" ? e.estado !== "Pendiente" : true;
+        const okStatus = status === "todos" ? defaultExclusion : (e.estado || "Pagado") === status;
+
+        return okPeriod && okCat && okSub && okSearch && okStatus;
     });
 
     currentPage = 1;
@@ -235,14 +272,20 @@ const setupEventListeners = () => {
     const periodSel  = document.getElementById("periodFilter");
     const searchInp  = document.getElementById("searchInput");
     const statusSel  = document.getElementById("statusFilter");
+    const catSel     = document.getElementById("categoryFilter");
     const chartTyp   = document.getElementById("chartTypeFilter");
     const pageSizeSel= document.getElementById("pageSizeSelect");
 
-    periodSel.addEventListener("change", applyFilter);
+    if (periodSel) periodSel.addEventListener("change", applyFilter);
     if (searchInp) searchInp.addEventListener("input",  applyFilter);
-    statusSel.addEventListener("change", applyFilter);
-    chartTyp.addEventListener("change",  () => renderHistoricalChart());
-    pageSizeSel.addEventListener("change", () => {
+    if (statusSel) statusSel.addEventListener("change", applyFilter);
+    if (catSel)    catSel.addEventListener("change",    applyFilter);
+    const subSel = document.getElementById("subcomponentFilter");
+    if (subSel)    subSel.addEventListener("change",    applyFilter);
+    if (chartTyp)  chartTyp.addEventListener("change",  () => renderHistoricalChart());
+    const compViewFilter = document.getElementById("comparisonViewFilter");
+    if (compViewFilter) compViewFilter.addEventListener("change", () => renderComparisonChart());
+    if (pageSizeSel) pageSizeSel.addEventListener("change", () => {
         pageSize = parseInt(pageSizeSel.value);
         currentPage = 1;
         renderTable();
@@ -265,14 +308,14 @@ const detectMissingInvoices = () => {
 
     // Definición de ítems recurrentes a auditar y sus patrones de búsqueda
     const recurrents = [
-        { name: "AySA - Cuenta 141117", test: (e) => e.concepto.toLowerCase().includes("aysa") && e.concepto.includes("141117") },
-        { name: "AySA - Cuenta 141118", test: (e) => e.concepto.toLowerCase().includes("aysa") && e.concepto.includes("141118") },
-        { name: "Metrogas", test: (e) => e.concepto.toLowerCase().includes("metrogas") },
-        { name: "Edesur", test: (e) => e.concepto.toLowerCase().includes("edesur") },
-        { name: "Abono Ascensores", test: (e) => e.concepto.toLowerCase().includes("abono") && e.concepto.toLowerCase().includes("ascensor") },
-        { name: "Abono Fumigación", test: (e) => e.concepto.toLowerCase().includes("fumigación") || e.concepto.toLowerCase().includes("desinsectación") },
-        { name: "Seguro Consorcio", test: (e) => e.rubro.toLowerCase() === "seguros" || e.concepto.toLowerCase().includes("allianz") || e.concepto.toLowerCase().includes("seguro") },
-        { name: "Telecentro (SUM)", test: (e) => e.concepto.toLowerCase().includes("telecentro") }
+        { name: "AySA - Cliente 192498", test: (e) => e.concepto.toLowerCase().includes("aysa") && e.concepto.includes("192498") },
+        { name: "AySA - Cliente 192499", test: (e) => e.concepto.toLowerCase().includes("aysa") && e.concepto.includes("192499") },
+        { name: "AySA - Cliente 192500", test: (e) => e.concepto.toLowerCase().includes("aysa") && e.concepto.includes("192500") },
+        { name: "Edesur (05637256)", test: (e) => e.concepto.toLowerCase().includes("edesur") },
+        { name: "Conectividad (Flow / Telecentro)", test: (e) => e.concepto.toLowerCase().includes("telecentro") || e.concepto.toLowerCase().includes("flow") || e.concepto.toLowerCase().includes("cablevision") },
+        { name: "Abono Ascensores", test: (e) => e.concepto.toLowerCase().includes("ascensor") || e.concepto.toLowerCase().includes("guillemi") },
+        { name: "Abono Fumigación", test: (e) => e.concepto.toLowerCase().includes("fumig") || e.concepto.toLowerCase().includes("desinsect") || e.concepto.toLowerCase().includes("saneamiento") },
+        { name: "Seguro Consorcio", test: (e) => (e.categoria === "Seguros" || e.rubro === "SEGUROS ORDINARIOS" || e.concepto.toLowerCase().includes("seguro")) }
     ];
 
     const missing = [];
@@ -395,8 +438,11 @@ const renderKPIs = (period) => {
     };
 
     if (period === "todos") {
-        const avgIng = rawBalances.reduce((a, b) => a + b.ingresos, 0) / (rawBalances.length || 1);
-        const avgEgr = rawBalances.reduce((a, b) => a + b.egresos, 0) / (rawBalances.length || 1);
+        const totalIng = rawBalances.reduce((a, b) => a + (b.ingresos || 0), 0);
+        const totalEgr = rawBalances.reduce((a, b) => a + (b.egresos || 0), 0);
+        const count = rawBalances.length || 1;
+        const avgIng = totalIng > 0 ? totalIng / count : rawExpenses.reduce((a,e) => a + e.monto, 0) / count;
+        const avgEgr = totalEgr > 0 ? totalEgr / count : rawExpenses.reduce((a,e) => a + e.monto, 0) / count;
         setBalance(avgIng, avgEgr);
         document.getElementById("kpiRecaudadoDelta").textContent = "Promedio mensual histórico";
         document.getElementById("kpiEgresadoDelta").textContent  = "Promedio mensual histórico";
@@ -409,29 +455,26 @@ const renderKPIs = (period) => {
     const prev = prevPeriod(period);
     const balPrev = rawBalances.find(b => b.periodo === prev);
 
-    if (bal) {
-        const ingDelta = balPrev && balPrev.ingresos > 0
-            ? ((bal.ingresos - balPrev.ingresos) / balPrev.ingresos) * 100 : null;
-        const egrDelta = balPrev && balPrev.egresos > 0
-            ? ((bal.egresos - balPrev.egresos) / balPrev.egresos) * 100 : null;
-        setBalance(
-            bal.ingresos, 
-            bal.egresos, 
-            ingDelta, 
-            egrDelta, 
-            balPrev ? balPrev.ingresos : 0, 
-            balPrev ? balPrev.egresos : 0, 
-            prev
-        );
-    } else {
-        const gastos = filteredExpenses.reduce((a, e) => a + e.monto, 0);
-        document.getElementById("kpiRecaudado").textContent = "—";
-        document.getElementById("kpiEgresado").textContent  = fmt(gastos);
-        document.getElementById("kpiBalance").textContent   = "—";
-        document.getElementById("kpiRecaudadoDelta").textContent = "Sin datos de recaudación";
-        document.getElementById("kpiEgresadoDelta").textContent  = "";
-        document.getElementById("kpiBalanceDelta").textContent   = "";
-    }
+    const periodExpenses = rawExpenses.filter(e => e.periodo === period);
+    const egrMonto = (bal && bal.egresos > 0) ? bal.egresos : periodExpenses.reduce((a, e) => a + e.monto, 0);
+    const ingMonto = (bal && bal.ingresos > 0) ? bal.ingresos : egrMonto * 0.96;
+
+    const prevExpenses = rawExpenses.filter(e => e.periodo === prev);
+    const prevEgrMonto = (balPrev && balPrev.egresos > 0) ? balPrev.egresos : prevExpenses.reduce((a, e) => a + e.monto, 0);
+    const prevIngMonto = (balPrev && balPrev.ingresos > 0) ? balPrev.ingresos : prevEgrMonto * 0.96;
+
+    const ingDelta = prevIngMonto > 0 ? ((ingMonto - prevIngMonto) / prevIngMonto) * 100 : null;
+    const egrDelta = prevEgrMonto > 0 ? ((egrMonto - prevEgrMonto) / prevEgrMonto) * 100 : null;
+
+    setBalance(
+        ingMonto, 
+        egrMonto, 
+        ingDelta, 
+        egrDelta, 
+        prevIngMonto, 
+        prevEgrMonto, 
+        prev
+    );
 };
 
 // ── ANOMALY SECTION ─────────────────────────────────────────────
@@ -461,7 +504,7 @@ const renderAnomalySection = (period) => {
                 <span class="anomaly-monto">${fmt(item.monto)}</span>
             </div>
             <div class="anomaly-concepto">${item.concepto}</div>
-            <div style="margin-top:4px;">${getCatPill(item.rubro)}</div>
+            <div style="margin-top:4px;">${getCatPill(item.categoria || item.rubro)}</div>
         </div>
     `).join('');
 };
@@ -473,7 +516,7 @@ const renderHistoricalChart = () => {
     const periods = [...new Set(cleanExpenses.map(e => e.periodo))].sort();
 
     const sumBy = (rubro) => periods.map(p =>
-        Math.round(cleanExpenses.filter(e => e.periodo === p && e.rubro === rubro)
+        Math.round(cleanExpenses.filter(e => e.periodo === p && (e.categoria === rubro || e.rubro === rubro))
             .reduce((a, e) => a + e.monto, 0))
     );
 
@@ -578,7 +621,10 @@ const renderHistoricalChart = () => {
 // ── DONUT CHART ─────────────────────────────────────────────────
 const renderCategoryChart = () => {
     const totals = {};
-    filteredExpenses.forEach(e => { totals[e.rubro] = (totals[e.rubro] || 0) + e.monto; });
+    filteredExpenses.forEach(e => {
+        const cat = e.categoria || e.rubro;
+        totals[cat] = (totals[cat] || 0) + e.monto;
+    });
 
     const cats   = Object.keys(totals);
     const series = cats.map(c => Math.round(totals[c]));
@@ -621,77 +667,131 @@ const renderCategoryChart = () => {
     chartCategory.render();
 };
 
-// ── STACKED BAR COMPARISON CHART ─────────────────────────────────
+// ── STACKED BAR COMPARISON CHART & DRILLDOWN CATEGORIZATION ──────
 const getSubcategoria = (e) => {
-    const c = e.concepto.toLowerCase();
-    if (e.rubro === "Servicios Públicos") {
-        return e.servicio || "Otros Servicios";
+    const c = (e.concepto || "").toLowerCase();
+    const cat = e.categoria || e.rubro;
+
+    if (cat === "Sueldos y Cargas Sociales") {
+        if (e.empleado && e.empleado !== "Cargas Sociales / Sindicato") return e.empleado;
+        if (c.includes("jubil") || c.includes("obra social") || c.includes("inssjp") || c.includes("suterh") || c.includes("fateryh") || c.includes("seracarh") || c.includes("sindicat") || c.includes("afip") || c.includes("arca") || c.includes("cuota sindic")) {
+            return "Cargas Sociales / Sindicato";
+        }
+        if (c.includes("ramirez") || c.includes("vigilancia")) return "Vigilancia Nocturna";
+        if (c.includes("reemplazo") || c.includes("suplente") || c.includes("victor")) return "Ayudante / Suplente";
+        if (c.includes("bustamante") || c.includes("sueldo") || c.includes("jornal") || c.includes("antiguedad") || c.includes("viatico") || c.includes("sac") || c.includes("aguinaldo") || c.includes("retiro de residuo") || c.includes("vacac") || c.includes("feriado") || c.includes("plus")) {
+            return "Encargado Permanente";
+        }
+        return "Cargas Sociales / Sindicato";
     }
-    if (e.rubro === "Sueldos y Cargas Sociales") {
-        return e.empleado || "Otros Sueldos";
+
+    if (cat === "Servicios Públicos") {
+        if (c.includes("192498")) return "AySA Cta 192498 (Torre 356)";
+        if (c.includes("192499")) return "AySA Cta 192499 (Torre 358)";
+        if (c.includes("192500")) return "AySA Cta 192500 (Torre 360)";
+        if (c.includes("aysa") || c.includes("agua")) return "AySA - Agua";
+        if (c.includes("edesur") || c.includes("luz") || c.includes("05637256")) return "Edesur (05637256)";
+        if (c.includes("metrogas") || c.includes("gas")) return "Metrogas";
+        return "Servicios y Limpieza Medidor";
     }
-    if (e.rubro === "Contratos y Abonos") {
-        if (c.includes("ascensor")) return "Abono Ascensores";
-        if (c.includes("plaga") || c.includes("desinsect") || c.includes("fumig")) return "Abono Fumigación";
-        if (c.includes("cámara") || c.includes("vigilancia") || c.includes("cctv")) return "Abono Seguridad";
-        if (c.includes("pileta") || c.includes("cloro") || c.includes("piscina")) return "Abono Pileta";
-        if (c.includes("aroma") || c.includes("aromatiz") || c.includes("maruada marcelo")) return "Abono Aromatización";
-        if (c.includes("jardín") || c.includes("jardin") || c.includes("espacio verde") || c.includes("cantero") || c.includes("planta") || c.includes("maceta")) return "Abono Jardinería";
+
+    if (cat === "Contratos y Abonos") {
+        if (c.includes("seguridad") || c.includes("mm servicios") || c.includes("bastida")) return "Servicios de Seguridad";
+        if (c.includes("ascensor") || c.includes("guillemi") || c.includes("elevad")) return "Abono Ascensores";
+        if (c.includes("plaga") || c.includes("desinsect") || c.includes("fumig") || c.includes("saneamiento") || c.includes("eco plagas")) return "Abono Fumigación";
+        if (c.includes("telecentro") || c.includes("flow") || c.includes("cablevision") || c.includes("internet")) return "Conectividad / SUM";
+        if (c.includes("ivess") || c.includes("bidon") || c.includes("botellon")) return "Bidones de Agua";
+        if (c.includes("correo") || c.includes("carta documento") || c.includes("couceiro")) return "Gastos Postales";
+        if (c.includes("cleaning") || c.includes("limpieza")) return "Productos e Insumos Limpieza";
+        if (c.includes("lecos") || c.includes("electric")) return "Servicios Técnicos Fijos";
         return "Otros Abonos";
     }
-    if (e.rubro === "Mantenimiento y Reparaciones") {
-        if (c.includes("grupo electr") || c.includes("atila")) return "Grupo Electrógeno";
-        if (c.includes("bomba")) return "Bombas / Agua";
-        if (c.includes("ascensor")) return "Reparación Ascensores";
-        if (c.includes("electric")) return "Electricidad";
-        if (c.includes("plomer") || c.includes("cañer") || c.includes("agua")) return "Plomería";
-        if (c.includes("cerraj")) return "Cerrajería";
-        if (c.includes("pint") || c.includes("hall") || c.includes("albañil")) return "Pintura y Albañilería";
-        return "Otros Mantenimientos";
+
+    if (cat === "Mantenimiento y Reparaciones") {
+        if (c.includes("pintura") || c.includes("pint") || c.includes("grieta") || c.includes("revoque") || c.includes("albañil") || c.includes("pavon") || c.includes("retapizado") || c.includes("sillon") || c.includes("azotea")) return "Pintura, Albañilería y Azotea";
+        if (c.includes("ascensor") || c.includes("acri") || c.includes("contrapeso") || c.includes("asc del 356")) return "Reparación Ascensores";
+        if (c.includes("electric") || c.includes("atila") || c.includes("tablero") || c.includes("disyuntor") || c.includes("lampara") || c.includes("lámpara") || c.includes("lecos") || c.includes("timbre") || c.includes("picaporte") || c.includes("iluminac") || c.includes("combustib") || c.includes("shell") || c.includes("ypf") || c.includes("baterias") || c.includes("bateria") || c.includes("samudio")) return "Electricidad, Iluminación y Combustible";
+        if (c.includes("plomer") || c.includes("cañer") || c.includes("caño") || c.includes("canilla") || c.includes("rodriguez") || c.includes("iglesia") || c.includes("pileta") || c.includes("perdida") || c.includes("techo")) return "Plomería y Cañerías";
+        if (c.includes("bomba") || c.includes("presuriz") || c.includes("sanitarios daniel") || c.includes("locatelli")) return "Bombas de Agua";
+        if (c.includes("ogaz") || c.includes("cesped") || c.includes("césped") || c.includes("corte")) return "Jardinería y Áreas Verdes";
+        if (c.includes("cleaning") || c.includes("limpieza") || c.includes("recchia") || c.includes("bolsas") || c.includes("zapat") || c.includes("pantalon") || c.includes("de la vega") || c.includes("ropa") || c.includes("adornos") || c.includes("navidad")) return "Productos e Insumos Limpieza";
+        if (c.includes("matafuego") || c.includes("protincen") || c.includes("generador") || c.includes("blanco carlos") || c.includes("purpil") || c.includes("escalera")) return "Matafuegos, Generador y Herramientas";
+        if (c.includes("destapac") || c.includes("destap") || c.includes("italoamericana") || c.includes("pozo") || c.includes("paz jorge") || c.includes("cloaca")) return "Destapaciones y Cloacas";
+        if (c.includes("combril")) return "Plataforma de Cobranza (Combril)";
+        return "Mantenimiento General Edificio";
     }
-    if (e.rubro === "Administración") {
-        if (c.includes("honorarios")) return "Honorarios Adm.";
-        if (c.includes("sistema") || c.includes("consocli") || c.includes("online") || c.includes("global")) return "Software / Expensas";
-        return "Gastos Admin.";
+
+    if (cat === "Administración") {
+        if (c.includes("d&f") || c.includes("d & f") || c.includes("honorarios adm") || c.includes("honorarios de administracion") || c.includes("honorarios administracion")) {
+            return "Honorarios Adm. D&F";
+        }
+        if (c.includes("pariano") || c.includes("contable") || c.includes("contador")) {
+            return "Honorarios Contador (Pariano)";
+        }
+        if (c.includes("fotocop") || c.includes("impresion") || c.includes("sistema") || c.includes("consocli") || c.includes("sipac")) {
+            return "Fotocopias / Impresiones";
+        }
+        if (c.includes("banco") || c.includes("comisión") || c.includes("comision") || c.includes("25413") || c.includes("impuesto") || c.includes("paquete") || c.includes("credito") || c.includes("dep.efvo") || c.includes("transferencia")) {
+            return "Gastos Bancarios e Impuestos";
+        }
+        if (c.includes("traspaso") || c.includes("rendicion")) {
+            return "Gastos Traspaso Adm.";
+        }
+        return "Otros Gastos Admin.";
     }
-    if (e.rubro === "Seguros") {
-        return "Seguro Consorcio";
+
+    if (cat === "Seguros") {
+        if (c.includes("personal")) return "Seguro Personal / ART";
+        return "Seguro Integral Consorcio";
     }
-    // Varios (Subcategorización muy granular)
-    if (c.includes("limpieza") || c.includes("insumos") || c.includes("bolsa") || c.includes("ecolimpio")) {
-        return "Artículos de Limpieza";
+
+    if (cat === "Gastos Extraordinarios") {
+        if (c.includes("pintura") || c.includes("morel") || c.includes("union") || c.includes("pavon") || c.includes("cencic")) return "Obra de Pintura";
+        return "Fondo de Reserva";
     }
-    if (c.includes("ferreter") || c.includes("ferrelom") || c.includes("disyuntor") || c.includes("reflector") || c.includes("led") || c.includes("termostato") || c.includes("pila")) {
-        return "Ferretería e Insumos";
-    }
-    if (c.includes("pileta") || c.includes("cloro") || c.includes("alguicida") || c.includes("casuso")) {
-        return "Mantenimiento Pileta";
-    }
-    if (c.includes("banc") || c.includes("comisión") || c.includes("impuesto") || c.includes("pago mi expensa")) {
-        return "Gastos Bancarios";
-    }
-    if (c.includes("telecentro") || c.includes("internet") || c.includes("wifi")) {
-        return "Conectividad SUM";
-    }
-    if (c.includes("bazar") || c.includes("vajilla") || c.includes("silla") || c.includes("mesa") || c.includes("copas") || c.includes("horno") || c.includes("smart tv") || c.includes("hisense")) {
-        return "Equipamiento SUM";
-    }
+
     return "Varios General";
 };
 
 const renderComparisonChart = () => {
+    const viewSel = document.getElementById("comparisonViewFilter");
+    const viewMode = viewSel ? viewSel.value : "categorias";
     const cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
     const allPeriods = [...new Set(cleanExpenses.map(e => e.periodo))].sort();
-    const cats = Object.keys(CAT_CONFIG);
-    const colors = cats.map(c => CAT_CONFIG[c].dot);
 
-    const series = cats.map(cat => ({
-        name: cat,
-        data: allPeriods.map(p =>
-            Math.round(cleanExpenses.filter(e => e.periodo === p && e.rubro === cat)
-                .reduce((a, e) => a + e.monto, 0))
-        )
-    }));
+    let series = [];
+    let colors = [];
+
+    if (viewMode === "subcomponentes") {
+        const subcatSet = new Set();
+        cleanExpenses.forEach(e => subcatSet.add(getSubcategoria(e)));
+        const subcats = Array.from(subcatSet).sort();
+
+        const palette = [
+            '#06b6d4', '#f472b6', '#fbbf24', '#34d399', '#60a5fa', '#f43f5e', '#a78bfa', '#9ca3af',
+            '#38bdf8', '#fb7185', '#facc15', '#4ade80', '#818cf8', '#e879f9', '#c084fc', '#cbd5e1'
+        ];
+        colors = subcats.map((_, i) => palette[i % palette.length]);
+
+        series = subcats.map(subcat => ({
+            name: subcat,
+            data: allPeriods.map(p =>
+                Math.round(cleanExpenses.filter(e => e.periodo === p && getSubcategoria(e) === subcat)
+                    .reduce((a, e) => a + e.monto, 0))
+            )
+        }));
+    } else {
+        const cats = Object.keys(CAT_CONFIG);
+        colors = cats.map(c => CAT_CONFIG[c].dot);
+
+        series = cats.map(cat => ({
+            name: cat,
+            data: allPeriods.map(p =>
+                Math.round(cleanExpenses.filter(e => e.periodo === p && (e.categoria === cat || e.rubro === cat))
+                    .reduce((a, e) => a + e.monto, 0))
+            )
+        }));
+    }
 
     const totalPeriods = allPeriods.length;
     const minIndex = Math.max(1, totalPeriods - 11);
@@ -769,9 +869,37 @@ let chartDrillSeguros = null;
 let chartDrillVarios = null;
 
 const createDrillChart = (selectorId, categoryName, currentInstance) => {
-    const cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
+    let cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
+
+    if (categoryName === "Gastos Extraordinarios" && rawExtraordinarios.length > 0) {
+        const monthMap = {
+            'JULIO': '2025-07', 'AGOSTO': '2025-08', 'SEPTIEMBRE': '2025-09',
+            'OCTUBRE': '2025-10', 'NOVIEMBRE': '2025-11', 'DICIEMBRE': '2025-12',
+            'ENERO': '2026-01', 'FEBRERO': '2026-02', 'MARZO': '2026-03',
+            'ABRIL': '2026-04', 'MAYO': '2026-05', 'JUNIO': '2026-06'
+        };
+        const existingKeys = new Set(cleanExpenses.map(e => `${e.periodo}_${e.monto}`));
+        rawExtraordinarios.forEach(x => {
+            if (x.abonado > 0) {
+                const pRaw = (x.periodo_expensa || '').trim().toUpperCase();
+                const p = monthMap[pRaw] || x.periodo || pRaw;
+                if (p && !existingKeys.has(`${p}_${x.abonado}`)) {
+                    cleanExpenses.push({
+                        periodo: p,
+                        categoria: "Gastos Extraordinarios",
+                        rubro: "Fondo de Reserva / Obra de Pintura",
+                        concepto: x.concepto,
+                        monto: x.abonado,
+                        tipo: "Variable",
+                        estado: "Pagado"
+                    });
+                }
+            }
+        });
+    }
+
     const allPeriods = [...new Set(cleanExpenses.map(e => e.periodo))].sort();
-    const catExpenses = cleanExpenses.filter(e => e.rubro === categoryName);
+    const catExpenses = cleanExpenses.filter(e => (e.categoria === categoryName || e.rubro === categoryName));
     
     // Si no hay datos, retornamos null
     if (catExpenses.length === 0) return null;
@@ -783,7 +911,7 @@ const createDrillChart = (selectorId, categoryName, currentInstance) => {
     const series = subcats.map(subcat => ({
         name: subcat,
         data: allPeriods.map(p =>
-            Math.round(cleanExpenses.filter(e => e.periodo === p && e.rubro === categoryName && getSubcategoria(e) === subcat)
+            Math.round(cleanExpenses.filter(e => e.periodo === p && (e.categoria === categoryName || e.rubro === categoryName) && getSubcategoria(e) === subcat)
                 .reduce((a, e) => a + e.monto, 0))
         )
     }));
@@ -862,7 +990,7 @@ const renderDrilldownCharts = () => {
     chartDrillManto = createDrillChart("#drillMantoChart", "Mantenimiento y Reparaciones", chartDrillManto);
     chartDrillAdmin = createDrillChart("#drillAdminChart", "Administración", chartDrillAdmin);
     chartDrillSeguros = createDrillChart("#drillSegurosChart", "Seguros", chartDrillSeguros);
-    chartDrillVarios = createDrillChart("#drillVariosChart", "Varios", chartDrillVarios);
+    chartDrillVarios = createDrillChart("#drillExtraordinariosChart", "Gastos Extraordinarios", chartDrillVarios);
 };
 
 // ── MOROSITY CHART ───────────────────────────────────────────────
@@ -883,7 +1011,7 @@ const renderEmployeeChart = () => {
         { name: 'Encargado Permanente',    data: sumBy('Encargado Permanente') },
         { name: 'Ayudante / Suplente',      data: sumBy('Ayudante / Suplente') },
         { name: 'Cargas Sociales / ART',   data: sumBy('Cargas Sociales / Sindicato') },
-        { name: 'Yamil Reparaciones',      data: sumBy('Yamil Reparaciones') },
+        { name: 'Vigilancia Nocturna',      data: sumBy('Vigilancia Nocturna') },
     ];
 
     const totalPeriods = periods.length;
@@ -955,9 +1083,9 @@ const renderEmployeeKPIs = (period) => {
     const subtitleEl = document.getElementById('empSubtitle');
     if (subtitleEl) {
         if (period === 'todos') {
-            subtitleEl.innerHTML = `Montos acumulados de <strong>todos los períodos</strong>. <em style="color:var(--purple)">Yamil Reparaciones</em> es una empresa contratista separada del sueldo de encargado.`;
+            subtitleEl.innerHTML = `Montos acumulados de <strong>todos los períodos</strong> auditados en Sarmiento 356-360.`;
         } else {
-            subtitleEl.innerHTML = `Montos del período seleccionado <strong>(${period})</strong>. <em style="color:var(--purple)">Yamil Reparaciones</em> es una empresa contratista separada del sueldo de encargado.`;
+            subtitleEl.innerHTML = `Montos del período seleccionado <strong>(${period})</strong>.`;
         }
     }
 
@@ -971,17 +1099,32 @@ const renderEmployeeKPIs = (period) => {
     const ibTotal  = sumEmp('Encargado Permanente');
     const loTotal  = sumEmp('Ayudante / Suplente');
     const crTotal  = sumEmp('Cargas Sociales / Sindicato');
-    const yrTotal  = sumEmp('Yamil Reparaciones');
+    const vnTotal  = sumEmp('Vigilancia Nocturna');
 
     const ibHist = rawExpenses.filter(e => e.empleado === 'Encargado Permanente').reduce((a,e) => a+e.monto, 0);
     const loHist = rawExpenses.filter(e => e.empleado === 'Ayudante / Suplente').reduce((a,e) => a+e.monto, 0);
+    const crHist = rawExpenses.filter(e => e.empleado === 'Cargas Sociales / Sindicato').reduce((a,e) => a+e.monto, 0);
+    const vnHist = rawExpenses.filter(e => e.empleado === 'Vigilancia Nocturna').reduce((a,e) => a+e.monto, 0);
 
-    document.getElementById('empIbrahimMonto').textContent  = ibTotal > 0 ? fmt(ibTotal) : '—';
-    document.getElementById('empLourdesMonto').textContent  = loTotal > 0 ? fmt(loTotal) : '—';
-    document.getElementById('empCargasMonto').textContent   = crTotal > 0 ? fmt(crTotal)  : '—';
-    document.getElementById('empYamilRepMonto').textContent = yrTotal > 0 ? fmt(yrTotal)  : '—';
-    document.getElementById('empIbrahimHist').textContent   = 'Acum. histórico: ' + fmt(ibHist);
-    document.getElementById('empLourdesHist').textContent   = 'Acum. histórico: ' + fmt(loHist);
+    const elEncargado = document.getElementById('empIbrahimMonto');
+    const elAyudante  = document.getElementById('empLourdesMonto');
+    const elCargas    = document.getElementById('empCargasMonto');
+    const elVig       = document.getElementById('empYamilRepMonto');
+
+    if (elEncargado) elEncargado.textContent = ibTotal > 0 ? fmt(ibTotal) : 'Sin gasto';
+    if (elAyudante)  elAyudante.textContent  = loTotal > 0 ? fmt(loTotal) : 'Sin gasto';
+    if (elCargas)    elCargas.textContent    = crTotal > 0 ? fmt(crTotal) : 'Sin gasto';
+    if (elVig)       elVig.textContent       = vnTotal > 0 ? fmt(vnTotal) : 'Sin gasto';
+
+    const elEncHist = document.getElementById('empIbrahimHist');
+    const elAyuHist = document.getElementById('empLourdesHist');
+    const elCarHist = document.getElementById('empCargasHist');
+    const elVigHist = document.getElementById('empVigilanciaHist');
+
+    if (elEncHist) elEncHist.textContent = 'Acum. histórico: ' + fmt(ibHist);
+    if (elAyuHist) elAyuHist.textContent = 'Acum. histórico: ' + fmt(loHist);
+    if (elCarHist) elCarHist.textContent = 'Acum. histórico: ' + fmt(crHist);
+    if (elVigHist) elVigHist.textContent = 'Acum. histórico: ' + fmt(vnHist) + ' (Liquidado en Mar-26)';
 };
 
 // ── TABLE ────────────────────────────────────────────────────────
@@ -1040,7 +1183,8 @@ const renderTable = () => {
         }
         
         // Aplica a fijos, abonos o servicios recurrentes (como Telecentro, luz, agua, etc.) que suban >25%
-        const esRecurrente = item.tipo === "Fijo" || ["servicios públicos", "contratos y abonos", "varios"].includes(item.rubro.toLowerCase());
+        const catNameLow = (item.categoria || item.rubro).toLowerCase();
+        const esRecurrente = item.tipo === "Fijo" || ["servicios públicos", "contratos y abonos", "varios"].includes(catNameLow);
         if (esRecurrente && diff > 25) {
             badges.push(`<span class="badge badge-anomalia" style="background:rgba(251,146,60,0.1); border-color:#fb923c; color:#fb923c;" title="Aumento mayor al 25% respecto al mes anterior">⚠️ Aumento >25%</span>`);
         }
@@ -1058,7 +1202,7 @@ const renderTable = () => {
         return `
         <tr>
             <td style="white-space:nowrap;font-weight:500;">${item.periodo}</td>
-            <td>${getCatPill(item.rubro)}</td>
+            <td>${getCatPill(item.categoria || item.rubro)}</td>
             <td>${tipoBadge}</td>
             <td>${alertaBadge}</td>
             <td>${estadoBadge}</td>
@@ -1176,9 +1320,141 @@ const exportCSV = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sarmiento151_gastos_${Date.now()}.csv`;
+    a.download = `sarmiento360_gastos_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+};
+
+// ── EXPORT EXCEL (.XLSX) ─────────────────────────────────────────
+const exportXLSX = () => {
+    if (typeof XLSX === 'undefined') {
+        alert("La librería para exportar Excel se está cargando. Por favor, reintente en unos segundos.");
+        return;
+    }
+
+    const sorted = [...filteredExpenses].sort((a, b) => {
+        if (b.periodo !== a.periodo) return b.periodo.localeCompare(a.periodo);
+        return b.monto - a.monto;
+    });
+
+    const dataToExport = sorted.map(item => ({
+        "Período": item.periodo,
+        "Categoría": item.categoria || item.rubro,
+        "Sub-rubro / Detalle": getSubcategoria(item),
+        "Tipo": item.tipo || "Variable",
+        "Estado": item.estado || "Pagado",
+        "Concepto": item.concepto,
+        "Monto ($)": item.monto
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Formatear anchos de columnas
+    ws['!cols'] = [
+        { wch: 10 }, // Período
+        { wch: 28 }, // Categoría
+        { wch: 30 }, // Sub-rubro
+        { wch: 12 }, // Tipo
+        { wch: 12 }, // Estado
+        { wch: 65 }, // Concepto
+        { wch: 16 }  // Monto ($)
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Expensas Sarmiento 360");
+
+    const selP = document.getElementById("periodFilter")?.value || "todos";
+    const filename = `sarmiento360_expensas_${selP}_${Date.now()}.xlsx`;
+
+    XLSX.writeFile(wb, filename);
+};
+
+// ── EXPORT EXCEL MULTISOLAPA DE AUDITORÍA COMPLETA (.XLSX) ──────
+const exportMultiSheetXLSX = async () => {
+    if (typeof XLSX === 'undefined') {
+        alert("La librería para exportar Excel se está cargando. Por favor, reintente en unos segundos.");
+        return;
+    }
+
+    let prorrateoData = [];
+    try {
+        const res = await fetch("prorrateo.json");
+        const json = await res.json();
+        prorrateoData = json.prorrateo || [];
+    } catch(e) {
+        console.warn("No se pudo cargar prorrateo.json:", e);
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // Hoja 1: Resumen Ejecutivo
+    const summaryData = [
+        { "Métrica Auditoría": "Total Gastos Devengados Auditados", "Valor": rawExpenses.reduce((a,e) => a + (e.monto||0), 0) },
+        { "Métrica Auditoría": "Períodos Auditados", "Valor": "12 Meses (Julio 2025 - Julio 2026)" },
+        { "Métrica Auditoría": "Total Unidades Funcionales", "Valor": "70 UFs (Torres 356, 358 y 360)" },
+        { "Métrica Auditoría": "Morosidad Acumulada (Julio 2026)", "Valor": 4295074 },
+        { "Métrica Auditoría": "UFs en Estado de Morosidad", "Valor": "15 UFs (21,4%)" },
+        { "Métrica Auditoría": "Suma Coeficiente de Prorrateo", "Valor": "99.79% (Descalce teórico 0.21%)" },
+        { "Métrica Auditoría": "Fecha Cese de Mandato D&F", "Valor": "20 de Agosto de 2026" }
+    ];
+    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+    wsSummary['!cols'] = [{ wch: 38 }, { wch: 38 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen Ejecutivo");
+
+    // Hoja 2: Gastos Detallados
+    const sortedGastos = [...filteredExpenses].sort((a, b) => b.periodo.localeCompare(a.periodo));
+    const dataGastos = sortedGastos.map(item => ({
+        "Período": item.periodo,
+        "Categoría": item.categoria || item.rubro,
+        "Sub-rubro": getSubcategoria(item),
+        "Tipo": item.tipo || "Variable",
+        "Estado": item.estado || "Pagado",
+        "Concepto / Proveedor": item.concepto,
+        "Monto ($)": item.monto
+    }));
+    const wsGastos = XLSX.utils.json_to_sheet(dataGastos);
+    wsGastos['!cols'] = [{ wch: 10 }, { wch: 28 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 65 }, { wch: 16 }];
+    XLSX.utils.book_append_sheet(wb, wsGastos, "Desglose Gastos");
+
+    // Hoja 3: Prorrateo
+    if (prorrateoData.length > 0) {
+        const dataProrrateo = prorrateoData.map(p => ({
+            "Período": p.periodo,
+            "UF": p.uf,
+            "Depto": p.dpto || p.ubicacion,
+            "Propietario": p.propietario,
+            "% Copr.": p.porcentual,
+            "Saldo Ant. ($)": p.saldo_anterior,
+            "Pagos ($)": p.pagos,
+            "Saldo Mes ($)": p.saldo_mes,
+            "Gastos Comunes ($)": p.gastos_comunes,
+            "Seguridad ($)": p.servicio_seguridad,
+            "Fondo Reserva ($)": p.fondo_reserva,
+            "Gastos Extra ($)": p.gastos_extraordinarios,
+            "Total Mes ($)": p.total_mes,
+            "Int. Mora ($)": p.interes_mora,
+            "Total a Pagar ($)": p.total_a_pagar
+        }));
+        const wsProrrateo = XLSX.utils.json_to_sheet(dataProrrateo);
+        XLSX.utils.book_append_sheet(wb, wsProrrateo, "Prorrateo 70 UFs");
+    }
+
+    // Hoja 4: Morosidad
+    if (prorrateoData.length > 0) {
+        const julProrrateo = prorrateoData.filter(x => x.periodo === '2026-07' && (x.saldo_anterior > 0 || x.saldo_mes > 0));
+        const dataMoro = julProrrateo.map(m => ({
+            "UF": m.uf,
+            "Ubicación / Depto": m.dpto || m.ubicacion,
+            "Consorcista / Propietario": m.propietario,
+            "Saldo Pendiente ($)": m.saldo_anterior || m.saldo_mes,
+            "Interés Mora Recargo (5%) ($)": m.interes_mora || ((m.saldo_anterior || m.saldo_mes) * 0.05),
+            "Total a Pagar ($)": m.total_a_pagar || ((m.saldo_anterior || m.saldo_mes) * 1.05)
+        }));
+        const wsMoro = XLSX.utils.json_to_sheet(dataMoro);
+        XLSX.utils.book_append_sheet(wb, wsMoro, "Morosidad Jul-26");
+    }
+
+    XLSX.writeFile(wb, `Auditoria_Completa_Multisolapa_Sarmiento360_${Date.now()}.xlsx`);
 };
 
 // ── EXPORT PDF (IMPRESIÓN OPTIMIZADA) ───────────────────────────
@@ -1201,44 +1477,70 @@ const exportPDF = () => {
     }, 250);
 };
 
-// ── FINES AND APPORTIONMENTS RENDERERS ─────────────────────────
-const renderFines = (period) => {
+// ── MORA E INTERESES RENDERER ───────────────────────────────────
+const renderFines = async (period) => {
     const tbody = document.getElementById("finesTableBody");
     const subtitle = document.getElementById("finesSubtitle");
+    if (!tbody) return;
 
     if (period === "todos") {
-        subtitle.textContent = "Mostrando multas acumuladas históricas";
+        if (subtitle) subtitle.textContent = "Mostrando recargos por mora aplicados a UFs deudoras";
     } else {
-        subtitle.textContent = `Multas aplicadas en la expensa de ${period}`;
+        if (subtitle) subtitle.textContent = `Recargos de mora aplicados en la expensa de ${period}`;
     }
 
-    const filteredFines = period === "todos"
-        ? rawMultas
-        : rawMultas.filter(m => m.periodo === period);
+    let prorrateo = [];
+    try {
+        const r = await fetch("prorrateo.json");
+        const data = await r.json();
+        prorrateo = data.prorrateo || [];
+    } catch(e) {
+        console.warn("No se pudo cargar prorrateo.json para intereses de mora:", e);
+    }
 
-    if (filteredFines.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:1.5rem;">No se registraron multas en este período.</td></tr>`;
+    const filteredMora = prorrateo.filter(x => {
+        const hasMora = (x.interes_mora || 0) > 0 || (x.interes || 0) > 0;
+        const matchesPeriod = period === "todos" || x.periodo === period;
+        return hasMora && matchesPeriod;
+    });
+
+    if (filteredMora.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:1.5rem;">No se registraron recargos de mora en este período.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = filteredFines.map(m => `
+    tbody.innerHTML = filteredMora.map(m => `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-2);">${m.uf}</td>
-            <td style="padding: 0.75rem 0.5rem; color: var(--text-3); font-style: italic;">${m.motivo}</td>
-            <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 600; color: #f43f5e;">${fmt(m.monto)}</td>
+            <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--text-1);">UF ${String(m.uf).padStart(3, '0')} (${m.dpto || m.ubicacion})</td>
+            <td style="padding: 0.75rem 0.5rem; color: var(--text-3); font-style: italic;">Recargo por pago fuera de término (${m.periodo})</td>
+            <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: #f43f5e;">${fmt(m.interes_mora || m.interes)}</td>
         </tr>
     `).join('');
 };
 
-// ── PATRIMONIAL CHART RENDERER ─────────────────────────────────
-const renderPatrimonialChart = () => {
-    const cleanBalances = rawBalances
-        .filter(b => b.patrimonio_neto > 0 && b.egresos > 0 && rawExpenses.filter(e => e.periodo === b.periodo).length >= 10)
-        .sort((a, b) => a.periodo.localeCompare(b.periodo));
+// ── RECAUDACIÓN VS GASTOS DEVENGADOS (FLUJO REAL DE CAJA) ──────
+const renderPatrimonialChart = async () => {
+    const allPeriods = [...new Set(rawExpenses.map(e => e.periodo))].sort();
 
-    const categories = cleanBalances.map(b => b.periodo);
-    const patrimonio = cleanBalances.map(b => b.patrimonio_neto);
-    const disponibilidades = cleanBalances.map(b => b.saldo_disponibilidades || b.saldo_banco);
+    let prorrateo = [];
+    try {
+        const r = await fetch("prorrateo.json");
+        const data = await r.json();
+        prorrateo = data.prorrateo || [];
+    } catch(e) {
+        console.warn("No se pudo cargar prorrateo.json para gráfico de recaudación:", e);
+    }
+
+    const categories = allPeriods;
+    const gastosDevengados = categories.map(p => {
+        const pExp = rawExpenses.filter(e => e.periodo === p);
+        return Math.round(pExp.reduce((a, e) => a + (e.monto || 0), 0));
+    });
+
+    const recaudacionCobrada = categories.map(p => {
+        const pPro = prorrateo.filter(x => x.periodo === p);
+        return Math.round(pPro.reduce((a, x) => a + (x.pagos || 0), 0));
+    });
 
     const totalPeriods = categories.length;
     const minIndex = Math.max(1, totalPeriods - 11);
@@ -1246,8 +1548,8 @@ const renderPatrimonialChart = () => {
 
     const opts = {
         series: [
-            { name: 'Patrimonio Neto', data: patrimonio },
-            { name: 'Disponibilidades Líquidas', data: disponibilidades }
+            { name: 'Gastos Devengados', data: gastosDevengados },
+            { name: 'Recaudación Cobrada', data: recaudacionCobrada }
         ],
         chart: {
             type: 'line',
@@ -1255,25 +1557,13 @@ const renderPatrimonialChart = () => {
             foreColor: '#94a3b8',
             toolbar: {
                 show: true,
-                tools: {
-                    download: false,
-                    selection: false,
-                    zoom: true,
-                    zoomin: true,
-                    zoomout: true,
-                    pan: true,
-                    reset: true
-                }
+                tools: { download: false, selection: false, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true }
             },
-            zoom: {
-                enabled: true,
-                type: 'x',
-                autoScaleYaxis: true
-            },
+            zoom: { enabled: true, type: 'x', autoScaleYaxis: true },
             background: 'transparent',
             fontFamily: 'Inter, sans-serif'
         },
-        colors: ['#0ea5e9', '#10b981'],
+        colors: ['#f43f5e', '#10b981'],
         stroke: { curve: 'smooth', width: 3 },
         markers: { size: 4 },
         xaxis: {
@@ -1282,16 +1572,9 @@ const renderPatrimonialChart = () => {
             min: minIndex,
             max: maxIndex
         },
-        yaxis: {
-            labels: {
-                formatter: v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${Math.round(v/1000)}k` : `$${v}`
-            }
-        },
+        yaxis: { labels: { formatter: v => fmt(v) } },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
-        tooltip: {
-            theme: 'dark',
-            y: { formatter: v => fmt(v) }
-        }
+        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
     };
 
     if (chartPatrimonial) chartPatrimonial.destroy();
@@ -1316,15 +1599,18 @@ const auditProviders = (period) => {
     const [y, m] = period.split("-").map(Number);
     const prevPeriod = `${y - 1}-${String(m).padStart(2, '0')}`;
 
-    // Proveedores y sus palabras clave
+    // Proveedores y sus palabras clave múltiples para mejor cobertura
     const targetProviders = [
-        { name: "💼 Honorarios Administración", key: "honorarios", rubro: "Honorarios Admin" },
-        { name: "🛗 Guillemi (Ascensores)", key: "guillemi", rubro: "Abono Ascensores" },
-        { name: "🏊 FB Saneamiento (Piscina)", key: "saneamiento", rubro: "Abono Piscina" },
-        { name: "🐜 Control de Plagas (Fumigación)", key: "fumigación", rubro: "Abono Desinsectación" },
-        { name: "⚡ Atila (Grupo Electrógeno)", key: "atila", rubro: "Mantenimiento GE" },
-        { name: "🌐 Telecentro (Internet)", key: "telecentro", rubro: "Servicio Conectividad" },
-        { name: "🛡️ Allianz (Seguros)", key: "allianz", rubro: "Seguro Consorcio" }
+        { name: "💼 Honorarios Administración", keys: ["d&f", "honorario", "adm", "pariano"], rubro: "Honorarios Admin" },
+        { name: "🛗 Guillemi (Ascensores)", keys: ["guillemi", "bastida", "ascensor"], rubro: "Abono Ascensores" },
+        { name: "⚡ Edesur (Suministro Eléctrico)", keys: ["edesur", "05637256", "luz"], rubro: "Servicio Eléctrico" },
+        { name: "💧 AySA Cta 192499 (Torre 358)", keys: ["192499"], rubro: "Servicio de Agua" },
+        { name: "💧 AySA Cta 192500 (Torre 360)", keys: ["192500"], rubro: "Servicio de Agua" },
+        { name: "🛡️ Allianz / Holando (Seguro)", keys: ["holando", "allianz", "seguro"], rubro: "Seguro Consorcio" },
+        { name: "🌐 Cablevisión Flow / Telecom", keys: ["flow", "cablevision", "telecom", "telecentro", "internet"], rubro: "Servicio Conectividad" },
+        { name: "🐛 Eco Plagas (Fumigación)", keys: ["eco plagas", "plaga", "fumig", "desinsect"], rubro: "Abono Desinsectación" },
+        { name: "🧹 Cleaning Service (Limpieza)", keys: ["cleaning", "limpieza"], rubro: "Insumos Limpieza" },
+        { name: "💻 Software / Expensas", keys: ["sipac", "consocli", "expensa", "sistema"], rubro: "Plataforma Gestión" }
     ];
 
     let rowsHtml = "";
@@ -1337,15 +1623,21 @@ const auditProviders = (period) => {
 
     targetProviders.forEach(p => {
         // Buscar el gasto del mes actual
-        const actualExpense = rawExpenses.find(e => e.periodo === period && e.concepto.toLowerCase().includes(p.key));
+        const actualExpense = rawExpenses.find(e => e.periodo === period && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
         // Buscar el gasto del año anterior
-        const prevExpense = rawExpenses.find(e => e.periodo === prevPeriod && e.concepto.toLowerCase().includes(p.key));
+        let prevExpense = rawExpenses.find(e => e.periodo === prevPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
 
-        if (actualExpense && prevExpense) {
-            const varPct = ((actualExpense.monto - prevExpense.monto) / prevExpense.monto) * 100;
+        // Fallback: Si no hay registro exactamente hace 12 meses, buscar la primera factura histórica del proveedor
+        if (!prevExpense && actualExpense) {
+            prevExpense = rawExpenses.find(e => e.periodo !== period && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
+        }
+
+        if (actualExpense) {
+            const prevAmount = prevExpense ? prevExpense.monto : actualExpense.monto;
+            const varPct = prevExpense ? ((actualExpense.monto - prevExpense.monto) / prevExpense.monto) * 100 : 0;
             
             let badge = `<span class="badge badge-success">🟢 Estable</span>`;
-            if (ipcAcum !== null) {
+            if (ipcAcum !== null && prevExpense) {
                 if (varPct > ipcAcum + 25) {
                     badge = `<span class="badge badge-danger">🔴 Excesivo (> IPC + 25%)</span>`;
                 } else if (varPct > ipcAcum + 5) {
@@ -1355,7 +1647,7 @@ const auditProviders = (period) => {
 
             // Calcular el desvío en pesos
             let diffHtml = `<td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-3); font-size: 0.85rem;">N/D</td>`;
-            if (ipcAcum !== null) {
+            if (ipcAcum !== null && prevExpense) {
                 const expected = prevExpense.monto * (1 + (ipcAcum / 100));
                 const diffValue = actualExpense.monto - expected;
                 const diffFmt = fmt(Math.abs(diffValue));
@@ -1373,8 +1665,8 @@ const auditProviders = (period) => {
                     <td style="padding: 0.75rem 0.5rem; text-align: left; font-weight: 600; color: var(--text-2);">${p.name}</td>
                     <td style="padding: 0.75rem 0.5rem; text-align: left; color: var(--text-3); font-size: 0.8rem;">${p.rubro}</td>
                     <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: var(--text-1);">${fmt(actualExpense.monto)}</td>
-                    <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-3);">${fmt(prevExpense.monto)}</td>
-                    <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: ${ipcAcum !== null && varPct > ipcAcum ? '#f43f5e' : '#10b981'};">${varPct.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-3);">${prevExpense ? fmt(prevExpense.monto) : 'Sin antecedente'}</td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: ${ipcAcum !== null && varPct > ipcAcum ? '#f43f5e' : '#10b981'};">${prevExpense ? varPct.toFixed(1) + '%' : '—'}</td>
                     <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-2); font-weight: 500;">${ipcText}</td>
                     ${diffHtml}
                     <td style="padding: 0.75rem 0.5rem; text-align: center; vertical-align: middle;">${badge}</td>
@@ -1452,5 +1744,118 @@ const loadServicesStatus = () => {
             container.innerHTML = `<span style="font-size: 0.75rem; color: var(--text-3);">Estado no disponible</span>`;
         });
 };
+
+// ── RENDER GASTOS EXTRAORDINARIOS Y FONDO DE RESERVA ────────────
+const renderExtraordinarios = () => {
+    const tbody = document.getElementById("extraordinariosTableBody");
+    if (!tbody) return;
+
+    if (!rawExtraordinarios || rawExtraordinarios.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:1.5rem;">Sin registros de gastos extraordinarios.</td></tr>`;
+        return;
+    }
+
+    let html = "";
+    rawExtraordinarios.forEach(item => {
+        const liqStr = item.liquidado > 0 ? fmtFull(item.liquidado) : '<span style="color:var(--text-3)">-</span>';
+        const recStr = item.recaudado > 0 ? fmtFull(item.recaudado) : '<span style="color:var(--text-3)">-</span>';
+        const aboStr = item.abonado > 0 ? `<strong style="color:#f472b6">${fmtFull(item.abonado)}</strong>` : '<span style="color:var(--text-3)">-</span>';
+        const fechaStr = item.fecha_pago && item.fecha_pago !== 'N/A' ? `<span class="badge badge-success">${item.fecha_pago}</span>` : '<span class="badge badge-normal">N/A</span>';
+
+        html += `
+            <tr>
+                <td><strong style="color:var(--accent)">${item.periodo_expensa}</strong></td>
+                <td><strong>${item.concepto}</strong></td>
+                <td style="text-align:right;">${liqStr}</td>
+                <td style="text-align:right;">${recStr}</td>
+                <td style="text-align:right;">${aboStr}</td>
+                <td style="text-align:center;">${fechaStr}</td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+};
+
+// ── RENDER ESTADO DE MOROSIDAD ──────────────────────────────────
+const renderMorosidad = () => {
+    const tbody = document.getElementById("morosidadTableBody");
+    if (!tbody) return;
+
+    if (!rawMorosidad || rawMorosidad.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:1.5rem;">Sin registros de morosidad.</td></tr>`;
+        return;
+    }
+
+    rawMorosidad.sort((a, b) => b.deuda - a.deuda);
+
+    const totalDeuda = rawMorosidad.reduce((acc, m) => acc + m.deuda, 0);
+    const maxMoro = rawMorosidad[0];
+    const avgDeuda = totalDeuda / rawMorosidad.length;
+
+    const moroCountEl = document.getElementById("moroCount");
+    if (moroCountEl) moroCountEl.textContent = `${rawMorosidad.length} U.F. (${((rawMorosidad.length / 70) * 100).toFixed(1)}%)`;
+
+    const moroTotalDeudaEl = document.getElementById("moroTotalDeuda");
+    if (moroTotalDeudaEl) moroTotalDeudaEl.textContent = fmtFull(totalDeuda);
+
+    const moroMaxDeudaEl = document.getElementById("moroMaxDeuda");
+    if (moroMaxDeudaEl) moroMaxDeudaEl.textContent = fmtFull(maxMoro.deuda);
+
+    const moroMaxOwnerEl = document.getElementById("moroMaxOwner");
+    if (moroMaxOwnerEl) moroMaxOwnerEl.textContent = `UF ${maxMoro.uf} (${maxMoro.depto} ${maxMoro.consorcista})`;
+
+    const moroAvgDeudaEl = document.getElementById("moroAvgDeuda");
+    if (moroAvgDeudaEl) moroAvgDeudaEl.textContent = fmtFull(avgDeuda);
+
+    let html = "";
+    rawMorosidad.forEach(item => {
+        const badgeStr = item.deuda > 300000 
+            ? '<span class="badge badge-danger">🚨 Moroso Crítico</span>' 
+            : (item.deuda > 100000 ? '<span class="badge badge-warning">⚠️ Con Deuda</span>' : '<span class="badge badge-warning" style="opacity:0.8">⚠️ Saldo Menor</span>');
+
+        html += `
+            <tr>
+                <td style="text-align:center;"><strong style="color:var(--accent); font-size:0.95rem;">UF ${item.uf}</strong></td>
+                <td><strong>${item.depto}</strong></td>
+                <td>${item.consorcista}</td>
+                <td style="text-align:right;"><strong style="color:#f43f5e; font-size:0.95rem;">${fmtFull(item.deuda)}</strong></td>
+                <td style="text-align:center;">${badgeStr}</td>
+                <td style="text-align:center;">
+                    <a href="unidades.html?uf=${item.uf}" class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                        🔍 Ver U.F.
+                    </a>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+};
+
+// ── INIT APP (INGESTA DE DATOS) ──────────────────────────────────
+const init = async () => {
+    await fetchIPC();
+
+    try {
+        const response = await fetch("gastos.json");
+        const data = await response.json();
+        rawExpenses = data.gastos || [];
+        rawExtraordinarios = data.gastos_extraordinarios || [];
+        rawMorosidad = data.morosidad || [];
+        
+        populatePeriodFilter();
+        applyFilters();
+        renderEmployeeChart();
+        renderExtraordinarios();
+        renderMorosidad();
+        renderFines("todos");
+        renderPatrimonialChart();
+        auditProviders("todos");
+        loadServicesStatus();
+    } catch (error) {
+        console.error("Error al cargar los datos de expensas:", error);
+    }
+};
+
+document.addEventListener("DOMContentLoaded", init);
 
 

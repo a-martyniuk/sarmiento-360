@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <base href="/sarmiento-151/">
+    <base href="./">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sarmiento 151 — Dashboard de Expensas</title>
-    <meta name="description" content="Panel de control de gastos y expensas del consorcio Sarmiento 151.">
-    <link rel="canonical" href="https://alexismartyniuk.com.ar/sarmiento-151/" />
+    <title>Sarmiento 360 — Dashboard de Expensas</title>
+    <meta name="description" content="Panel de control de gastos y expensas del consorcio Sarmiento 356-360.">
+    <link rel="canonical" href="https://alexismartyniuk.com.ar/sarmiento-360/" />
     
     <!-- Metadatos de Seguridad (CSP) -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data:; img-src 'self' https: data:; font-src 'self' https: fonts.gstatic.com; style-src 'self' https: 'unsafe-inline' fonts.googleapis.com;">
@@ -16,23 +16,24 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://alexismartyniuk.com.ar/sarmiento-151/">
-    <meta property="og:title" content="Sarmiento 151 — Dashboard de Expensas">
-    <meta property="og:description" content="Auditoría independiente y monitoreo de expensas, gastos, abonos y servicios del consorcio Sarmiento 151.">
-    <meta property="og:image" content="https://alexismartyniuk.com.ar/sarmiento-151/favicon.png">
+    <meta property="og:url" content="https://alexismartyniuk.com.ar/sarmiento-360/">
+    <meta property="og:title" content="Sarmiento 360 — Dashboard de Expensas">
+    <meta property="og:description" content="Auditoría independiente y monitoreo de expensas, gastos, abonos y servicios del consorcio Sarmiento 356-360.">
+    <meta property="og:image" content="https://alexismartyniuk.com.ar/sarmiento-360/favicon.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://alexismartyniuk.com.ar/sarmiento-151/">
-    <meta property="twitter:title" content="Sarmiento 151 — Dashboard de Expensas">
-    <meta property="twitter:description" content="Auditoría independiente y monitoreo de expensas, gastos, abonos y servicios del consorcio Sarmiento 151.">
-    <meta property="twitter:image" content="https://alexismartyniuk.com.ar/sarmiento-151/favicon.png">
+    <meta property="twitter:url" content="https://alexismartyniuk.com.ar/sarmiento-360/">
+    <meta property="twitter:title" content="Sarmiento 360 — Dashboard de Expensas">
+    <meta property="twitter:description" content="Auditoría independiente y monitoreo de expensas, gastos, abonos y servicios del consorcio Sarmiento 356-360.">
+    <meta property="twitter:image" content="https://alexismartyniuk.com.ar/sarmiento-360/favicon.png">
 
     <!-- Favicon de Respaldo (Emoji) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg-base: #050810;
@@ -593,6 +594,7 @@
         .pill-contratos { background: rgba(52,211,153,0.12);  color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
         .pill-admin     { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
         .pill-manto     { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+        .pill-extra     { background: rgba(236,72,153,0.12); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
         .pill-varios    { background: rgba(156,163,175,0.12); color: #9ca3af; border: 1px solid rgba(156,163,175,0.2); }
 
         .badge {
@@ -1154,7 +1156,7 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
     <div>
-        <div class="brand">Sarmiento 151</div>
+        <a href="index.html" style="text-decoration:none; color:inherit;"><div class="brand">Sarmiento 360</div></a>
         <div style="font-size:0.62rem; color:var(--text-3); display:flex; align-items:center; gap:4px; margin-top:4px; cursor:help; border-bottom: 1px dotted rgba(255,255,255,0.2); padding-bottom: 2px; width: max-content;" data-tooltip-down="Este panel es un desarrollo independiente de un copropietario. Los datos se extraen de las liquidaciones de expensas oficiales provistas por la administración.">
             ℹ️ Monitoreo de Copropietario
         </div>
@@ -1165,25 +1167,33 @@
             <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
             Resumen General
         </a>
+        <a class="nav-link active" href="#resumen">
+            <span style="font-size:0.65rem; font-weight:800; color:var(--accent); background:rgba(6,182,212,0.12); padding:2px 6px; border-radius:4px;">01</span>
+            📜 Gestión & Avisos
+        </a>
         <a class="nav-link" href="#graficos">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Tendencias
-        </a>
-        <a class="nav-link" href="#categorias">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Categorías
-        </a>
-        <a class="nav-link" href="#tabla">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            Desglose Detallado
+            <span style="font-size:0.65rem; font-weight:800; color:var(--purple); background:rgba(139,92,246,0.12); padding:2px 6px; border-radius:4px;">02</span>
+            📊 Evolución de Gastos
         </a>
         <a class="nav-link" href="#empleados">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Sueldos / Empleados
+            <span style="font-size:0.65rem; font-weight:800; color:var(--amber); background:rgba(251,191,36,0.12); padding:2px 6px; border-radius:4px;">03</span>
+            👤 Auditoría Costos
+        </a>
+        <a class="nav-link" href="#morosidad">
+            <span style="font-size:0.65rem; font-weight:800; color:#f43f5e; background:rgba(244,63,94,0.12); padding:2px 6px; border-radius:4px;">04</span>
+            🚨 Morosidad & Deuda
+        </a>
+        <a class="nav-link" href="#tabla">
+            <span style="font-size:0.65rem; font-weight:800; color:var(--green); background:rgba(52,211,153,0.12); padding:2px 6px; border-radius:4px;">05</span>
+            📋 Desglose Detallado
         </a>
         <a class="nav-link" href="unidades.html" style="border-top:1px dashed rgba(255,255,255,0.05); padding-top:0.75rem; margin-top:0.25rem;">
             <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Expensas por U.F.
+        </a>
+        <a class="nav-link" href="auditoria-documentos.html">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            📁 Auditoría Documental
         </a>
 
         <div style="margin: 1.5rem 1rem 0 1rem; border-top: 1px solid var(--border); padding-top: 1.25rem;" id="missingInvoicesSection">
@@ -1219,15 +1229,73 @@
 <main class="main">
 
     <!-- PAGE HEADER + TOOLBAR -->
-    <div id="overview" class="page-header">
+    <div id="resumen" class="page-header">
         <div>
-            <h1 class="page-title">Cuadro de Mando</h1>
-            <p class="page-subtitle">Análisis financiero del consorcio — Sarmiento 151</p>
+            <div style="font-size: 0.65rem; font-weight: 800; color: #06b6d4; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="background: rgba(6,182,212,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.3);">CAPÍTULO 01</span> ESTADO DE LA GESTIÓN & AVISOS OFICIALES</div>
+            <h1 class="page-title">Cuadro de Mando Ejecutivo</h1>
+            <p class="page-subtitle">Auditoría independiente y control financiero del consorcio — Sarmiento 356-360</p>
         </div>
         <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="🔍 Buscar concepto..." style="padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-1); font-size: 0.8rem; outline: none; width: 180px;">
             <label for="periodFilter" style="font-size:0.8rem;color:var(--text-3);">Período:</label>
             <select id="periodFilter">
                 <option value="todos">Todos los períodos</option>
+            </select>
+            <label for="categoryFilter" style="font-size:0.8rem;color:var(--text-3);margin-left:0.5rem;">Categoría:</label>
+            <select id="categoryFilter">
+                <option value="todos">Todas las Categorías</option>
+                <option value="Sueldos y Cargas Sociales">👤 Sueldos y Cargas Sociales</option>
+                <option value="Servicios Públicos">⚡ Servicios Públicos</option>
+                <option value="Administración">📋 Administración</option>
+                <option value="Mantenimiento y Reparaciones">🔧 Mantenimiento y Rep.</option>
+                <option value="Contratos y Abonos">🛠️ Contratos y Abonos</option>
+                <option value="Seguros">🛡️ Seguros</option>
+                <option value="Gastos Extraordinarios">🎨 Gastos Extraordinarios</option>
+            </select>
+            <label for="subcomponentFilter" style="font-size:0.8rem;color:var(--text-3);margin-left:0.5rem;">Sub-rubro:</label>
+            <select id="subcomponentFilter">
+                <option value="todos">Todos los Sub-rubros</option>
+                <!-- Sueldos y Cargas Sociales -->
+                <option value="Encargado Permanente">👤 Encargado Permanente</option>
+                <option value="Ayudante / Suplente">👤 Ayudante / Suplente</option>
+                <option value="Vigilancia Nocturna">👤 Vigilancia Nocturna</option>
+                <option value="Cargas Sociales / Sindicato">🟡 Cargas Sociales / SUTERH / AFIP</option>
+                <!-- Servicios Públicos -->
+                <option value="Edesur (05637256)">⚡ Edesur (05637256)</option>
+                <option value="AySA Cta 192498 (Torre 356)">💧 AySA (Torre 356 - Cta 192498)</option>
+                <option value="AySA Cta 192499 (Torre 358)">💧 AySA (Torre 358 - Cta 192499)</option>
+                <option value="AySA Cta 192500 (Torre 360)">💧 AySA (Torre 360 - Cta 192500)</option>
+                <option value="Metrogas">🔥 Metrogas</option>
+                <!-- Contratos y Abonos -->
+                <option value="Abono Ascensores">🛗 Abono Ascensores (Guillemi)</option>
+                <option value="Servicios de Seguridad">👮 Servicios de Seguridad (Bastida S.A.)</option>
+                <option value="Abono Fumigación">🐛 Abono Fumigación (FB Saneamiento)</option>
+                <option value="Conectividad / SUM">🌐 Conectividad / TV SUM (Cablevisión Flow / Telecom)</option>
+                <option value="Bidones de Agua">🥤 Bidones de Agua (Ivess Forgione)</option>
+                <option value="Gastos Postales">✉️ Gastos Postales y Cartas Documento</option>
+                <!-- Mantenimiento y Reparaciones -->
+                <option value="Pintura, Albañilería y Azotea">🎨 Pintura, Albañilería y Azotea</option>
+                <option value="Electricidad, Iluminación y Combustible">💡 Electricidad, Iluminación y Combustible</option>
+                <option value="Plomería y Cañerías">🚰 Plomería y Cañerías</option>
+                <option value="Reparación Ascensores">🛗 Reparación de Ascensores</option>
+                <option value="Bombas de Agua">🛢️ Bombas de Agua y Presurizadores</option>
+                <option value="Jardinería y Áreas Verdes">🌱 Jardinería y Áreas Verdes</option>
+                <option value="Productos e Insumos Limpieza">🧹 Productos e Insumos de Limpieza</option>
+                <option value="Matafuegos, Generador y Herramientas">🧯 Matafuegos, Generador y Herramientas</option>
+                <option value="Destapaciones y Cloacas">🚽 Destapaciones y Cloacas</option>
+                <option value="Plataforma de Cobranza (Combril)">💳 Plataforma de Cobranza (Combril)</option>
+                <!-- Administración -->
+                <option value="Honorarios Adm. D&F">📋 Honorarios Adm. D&F</option>
+                <option value="Honorarios Contador (Pariano)">📜 Honorarios Contador (Estudio Pariano)</option>
+                <option value="Gastos Bancarios e Impuestos">🏦 Gastos Bancarios e Imp. (Ley 25.413)</option>
+                <option value="Fotocopias / Impresiones">📄 Fotocopias / Impresiones de Expensas</option>
+                <option value="Gastos Traspaso Adm.">📦 Gastos Traspaso Adm.</option>
+                <!-- Seguros -->
+                <option value="Seguro Integral Consorcio">🛡️ Seguro Integral Consorcio (Holando / Allianz)</option>
+                <option value="Seguro Personal / ART">👷 Seguro Personal / ART</option>
+                <!-- Extraordinarios -->
+                <option value="Obra de Pintura">🎨 Obra de Pintura Fachada</option>
+                <option value="Fondo de Reserva">🏦 Fondo de Reserva</option>
             </select>
             <label for="statusFilter" style="font-size:0.8rem;color:var(--text-3);margin-left:0.5rem;">Estado:</label>
             <select id="statusFilter">
@@ -1274,6 +1342,10 @@
     </div>
 
     <!-- CHARTS ROW 1: Historical + Donut -->
+    <div style="margin-top: 2rem; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.65rem; font-weight: 800; color: #a78bfa; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="background: rgba(167,139,250,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(167,139,250,0.3);">CAPÍTULO 02</span> TENDENCIAS Y EVOLUCIÓN DE GASTOS</div>
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-1); margin: 0;">📊 Tendencias e Histórico por Categoría</h2>
+    </div>
     <div id="graficos" class="charts-row">
         <div class="card">
             <div class="card-header">
@@ -1310,11 +1382,15 @@
     <!-- CHARTS ROW 2: Stacked Bar -->
     <div id="categorias2" style="margin-bottom: 1.75rem;">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                 <div>
-                    <div class="card-title">📊 Comparación Mensual por Rubro</div>
-                    <div class="card-subtitle">Evolución de cada categoría mes a mes (últimos 12 meses)</div>
+                    <div class="card-title">📊 Comparación Mensual por Rubro y Componentes</div>
+                    <div class="card-subtitle">Evolución apilada de los componentes de gasto mes a mes (últimos 12 meses)</div>
                 </div>
+                <select id="comparisonViewFilter" style="font-size:0.75rem;">
+                    <option value="categorias">Ver por: Categorías Principales (7 Rubros)</option>
+                    <option value="subcomponentes">Ver por: Subcomponentes Detallados (Servicios e Ítems)</option>
+                </select>
             </div>
             <div id="comparisonChart"></div>
         </div>
@@ -1371,7 +1447,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">👤 Sueldos y Cargas Sociales</div>
-                    <div class="card-subtitle">Detalle por empleado y contribuciones</div>
+                    <div class="card-subtitle">Desglose discriminado: Bustamante Juan, Bustamante Víctor, Ramírez Guillermo y Cargas Sociales</div>
                 </div>
             </div>
             <div id="drillSueldosChart"></div>
@@ -1380,7 +1456,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">⚡ Servicios Públicos</div>
-                    <div class="card-subtitle">Evolución de AySA, Edesur y Metrogas</div>
+                    <div class="card-subtitle">Desglose discriminado: Edesur, Cuentas AySA (Torres 356/358/360) y Metrogas</div>
                 </div>
             </div>
             <div id="drillServiciosChart"></div>
@@ -1389,7 +1465,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">🛠️ Contratos y Abonos</div>
-                    <div class="card-subtitle">Seguimiento de abonos fijos de mantenimiento</div>
+                    <div class="card-subtitle">Desglose discriminado: Bastida S.A., Ascensores Guillemi, Eco Plagas, Conectividad y Bidones</div>
                 </div>
             </div>
             <div id="drillContratosChart"></div>
@@ -1398,7 +1474,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">🔧 Mantenimiento y Reparaciones</div>
-                    <div class="card-subtitle">Evolución de reparaciones e instalaciones variables</div>
+                    <div class="card-subtitle">Desglose discriminado: Pintura/Azotea, Electricidad, Plomería, Bombas, Jardinería, Limpieza y Cloacas</div>
                 </div>
             </div>
             <div id="drillMantoChart"></div>
@@ -1407,7 +1483,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">📋 Administración</div>
-                    <div class="card-subtitle">Honorarios de administración y plataforma de gestión</div>
+                    <div class="card-subtitle">Desglose discriminado: Honorarios D&F, Estudio Pariano, Ley 25.413, Fotocopias y Traspaso</div>
                 </div>
             </div>
             <div id="drillAdminChart"></div>
@@ -1416,7 +1492,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">🛡️ Seguros</div>
-                    <div class="card-subtitle">Seguro integral del edificio y áreas comunes</div>
+                    <div class="card-subtitle">Desglose discriminado: Seguro Integral Edificio (Holando/Allianz) y Seguro Personal / ART</div>
                 </div>
             </div>
             <div id="drillSegurosChart"></div>
@@ -1424,23 +1500,26 @@
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">📦 Gastos Varios</div>
-                    <div class="card-subtitle">Insumos de limpieza, pileta, ferretería y gastos bancarios</div>
+                    <div class="card-title">🎨 Gastos Extraordinarios</div>
+                    <div class="card-subtitle">Desglose discriminado: Obra de Pintura Fachada (Morel/Pavón/Cencic) y Fondo de Reserva</div>
                 </div>
             </div>
-            <div id="drillVariosChart"></div>
+            <div id="drillExtraordinariosChart"></div>
         </div>
     </div>
 
     <!-- EMPLOYEE SECTION -->
-    <section id="empleados" style="margin-bottom:1.75rem;">
+    <section id="empleados" style="margin-top:2.5rem; margin-bottom:1.75rem;">
+        <div style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="background: rgba(251,191,36,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(251,191,36,0.3);">CAPÍTULO 03</span> AUDITORÍA POR CENTROS DE COSTO</div>
+            <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-1); margin: 0;">👤 Personal, Sueldos y Control de Tarifas</h2>
+        </div>
         <div class="card" style="margin-bottom:1rem;">
             <div class="card-header">
                 <div>
                     <div class="card-title">👥 Sueldos y Portería — Desglose por Persona</div>
                     <div class="card-subtitle" id="empSubtitle">
-                        Montos del período seleccionado. 
-                        <em style="color:var(--purple)">Yamil Reparaciones</em> es una empresa contratista separada del sueldo de encargado.
+                        Montos devengados en el período por encargados titulares, reemplazos, cargas sociales y servicio de vigilancia.
                     </div>
                 </div>
             </div>
@@ -1454,16 +1533,16 @@
                     <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Encargado Permanente</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="empIbrahimMonto">—</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empIbrahimHist">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Encargado permanente s/viv.</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Encargado Permanente (s/viv.)</div>
                 </div>
 
                 <!-- Ayudante / Suplente -->
                 <div style="background:rgba(244,114,182,0.05);border:1px solid rgba(244,114,182,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f472b6;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🩷 Encargada Adicional</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🩷 Reemplazos y Suplentes</div>
                     <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Ayudante / Suplente</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f472b6;" id="empLourdesMonto">—</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empLourdesHist">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Encargada adicional s/viv.</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Ayudante / Suplencias</div>
                 </div>
 
                 <!-- Cargas Sociales -->
@@ -1471,16 +1550,17 @@
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🟡 Cargas Sociales</div>
                     <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Cargas Soc. / Sindicato</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#fbbf24;" id="empCargasMonto">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;">ART · SUTERH · FATERYH · SERACARH</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empCargasHist">—</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">ART · SUTERH · FATERYH · AFIP</div>
                 </div>
 
-                <!-- Yamil Reparaciones -->
+                <!-- Vigilancia Nocturna -->
                 <div style="background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:1rem;border-top:2px solid #a78bfa;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔧 Contratista Externo</div>
-                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Yamil Reparaciones</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🟣 Vigilancia Nocturna</div>
+                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Vigilancia Nocturna</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#a78bfa;" id="empYamilRepMonto">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;">Eléctrica · Portón · Varios</div>
-                    <div style="font-size:0.7rem;color:rgba(167,139,250,0.6);margin-top:2px;font-style:italic;">≠ sueldo de encargado</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empVigilanciaHist">—</div>
+                    <div style="font-size:0.7rem;color:rgba(167,139,250,0.8);margin-top:2px;">Vigilancia Nocturna Eventual</div>
                 </div>
             </div>
 
@@ -1495,11 +1575,132 @@
         </div>
     </section>
 
+    <!-- EXTRAORDINARY EXPENSES SECTION -->
+    <section id="extraordinarios" style="margin-bottom:1.75rem;">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">🎨 Gastos Extraordinarios y Fondo de Reserva — Obra de Pintura del Edificio</div>
+                    <div class="card-subtitle">
+                        Seguimiento detallado de provisiones liquidadas, recaudación de copropietarios y pagos abonados a contratistas (Rafael Morel, La Unión e Hijos, Luis Pavón).
+                    </div>
+                </div>
+                <span class="pill pill-extra">🎨 Fondo de Reserva</span>
+            </div>
+
+            <!-- KPI Cards de Fondo de Reserva -->
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.25rem;">
+                <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:12px;padding:1rem;border-top:2px solid #06b6d4;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📊 Provisiones Liquidadas</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="extraLiquidado">$ 35.500.000</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Liquidado en expensas</div>
+                </div>
+                <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:1rem;border-top:2px solid #10b981;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">💰 Recaudado de Copropietarios</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#10b981;" id="extraRecaudado">$ 33.205.555</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Recaudación acumulada</div>
+                </div>
+                <div style="background:rgba(236,72,153,0.05);border:1px solid rgba(236,72,153,0.2);border-radius:12px;padding:1rem;border-top:2px solid #ec4899;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📤 Abonado a Contratistas</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f472b6;" id="extraAbonado">$ 38.679.581</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Pagos de obra de pintura</div>
+                </div>
+                <div style="background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f43f5e;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚖️ Saldo Fondo de Reserva (30-06-2026)</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="extraSaldo">-$ 5.474.026</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Financiación / Déficit temporal</div>
+                </div>
+            </div>
+
+            <!-- Tabla de Detalle -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Período Expensa</th>
+                            <th>Concepto / Trabajo de Obra</th>
+                            <th style="text-align:right;">Liquidado</th>
+                            <th style="text-align:right;">Recaudado</th>
+                            <th style="text-align:right;">Abonado</th>
+                            <th style="text-align:center;">Fecha de Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extraordinariosTableBody">
+                        <!-- Se llena dinámicamente con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: ESTADO DE MOROSIDAD -->
+    <section id="morosidad" style="margin-top:2.5rem; margin-bottom:1.75rem;">
+        <div style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #f43f5e; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="background: rgba(244,63,94,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(244,63,94,0.3);">CAPÍTULO 04</span> SALUD FINANCIERA & ESTADO DE COBRANZAS</div>
+            <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-1); margin: 0;">🚨 Estado de Morosidad de Copropietarios</h2>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">🚨 Estado de Morosidad de Propietarios — Última Liquidación (Julio 2026)</div>
+                    <div class="card-subtitle">
+                        Listado de Unidades Funcionales con deuda acumulada al cierre del último período liquidado.
+                    </div>
+                </div>
+                <span class="badge badge-danger" id="moroBadgeHeader">🚨 15 U.F. en Morosidad</span>
+            </div>
+
+            <!-- KPI Cards de Morosidad -->
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.25rem;">
+                <div style="background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f43f5e;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🚨 Unidades Morosas</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="moroCount">15 U.F. (21,4%)</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">De 70 U.F. totales</div>
+                </div>
+                <div style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:1rem;border-top:2px solid #fbbf24;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">💰 Deuda Acumulada Total</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#fbbf24;" id="moroTotalDeuda">$ 4.295.074</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Pendiente de cobro</div>
+                </div>
+                <div style="background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:1rem;border-top:2px solid #a78bfa;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚠️ Mayor Deuda Individual</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#a78bfa;" id="moroMaxDeuda">$ 969.835</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;" id="moroMaxOwner">UF 7 (2º A - 356)</div>
+                </div>
+                <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:12px;padding:1rem;border-top:2px solid #06b6d4;">
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📊 Deuda Promedio por U.F.</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="moroAvgDeuda">$ 286.338</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Promedio entre morosos</div>
+                </div>
+            </div>
+
+            <!-- Tabla de Morosos -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">U.F. #</th>
+                            <th>Ubicación / Depto</th>
+                            <th>Consorcista / Propietario</th>
+                            <th style="text-align:right;">Deuda Acumulada ($)</th>
+                            <th style="text-align:center;">Estado de Deuda</th>
+                            <th style="text-align:center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="morosidadTableBody">
+                        <!-- Se llena dinámicamente con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <!-- TABLE SECTION -->
-    <section id="tabla" class="table-section">
+    <section id="tabla" class="table-section" style="margin-top:2.5rem;">
 
         <div class="table-toolbar">
             <div>
+                <div style="font-size: 0.65rem; font-weight: 800; color: #34d399; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="background: rgba(52,211,153,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(52,211,153,0.3);">CAPÍTULO 05</span> LIBRO REGISTRO DETALLADO DE COMPROBANTES</div>
                 <div class="card-title">📋 Desglose Detallado de Gastos</div>
                 <div class="table-info" id="tableInfo">Cargando...</div>
             </div>
@@ -1511,6 +1712,8 @@
                     <option value="9999">Todos</option>
                 </select>
                 <button class="btn" onclick="exportCSV()">⬇ Exportar CSV</button>
+                <button class="btn" onclick="exportXLSX()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: #fff; margin-left: 0.5rem; font-weight: 600;">📊 Exportar Excel (.xlsx)</button>
+                <button class="btn" onclick="exportMultiSheetXLSX()" style="background: linear-gradient(135deg, #06b6d4, #0284c7); border-color: #06b6d4; color: #fff; margin-left: 0.5rem; font-weight: 600;" title="Exportar reporte completo multisolapa (Resumen, Gastos, Prorrateo, Morosidad)">📑 Auditoría Multisolapa (.xlsx)</button>
                 <button class="btn" onclick="exportPDF()" style="background:var(--purple); border-color:var(--purple); color:#fff; margin-left:0.5rem;">⬇ Exportar PDF</button>
             </div>
         </div>
@@ -1548,26 +1751,115 @@
         <div class="card">
             <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
                 <div>
-                    <h3 class="card-title">🚨 Multas del Período</h3>
-                    <p class="card-subtitle" id="finesSubtitle" style="font-size:0.8rem; color:var(--text-3);">Multas aplicadas en el período seleccionado</p>
+                    <h3 class="card-title">🚨 Control de Recargos por Mora Aplicados</h3>
+                    <p class="card-subtitle" id="finesSubtitle" style="font-size:0.8rem; color:var(--text-3);">Mostrando recargos por mora aplicados a UFs deudoras</p>
                 </div>
             </div>
             <div class="table-wrapper" style="max-height: 280px; overflow-y: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--border); text-align: left; color: var(--text-3);">
-                            <th style="padding: 0.75rem 0.5rem; width: 80px;">UF</th>
-                            <th style="padding: 0.75rem 0.5rem;">Motivo</th>
-                            <th style="padding: 0.75rem 0.5rem; text-align: right; width: 140px;">Monto</th>
+                            <th style="padding: 0.75rem 0.5rem; width: 220px;">U.F. / Ubicación</th>
+                            <th style="padding: 0.75rem 0.5rem;">Concepto de Recargo</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: right; width: 160px;">Monto Recargo ($)</th>
                         </tr>
                     </thead>
                     <tbody id="finesTableBody">
-                        <tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:2rem;">Seleccioná un período para ver las multas.</td></tr>
+                        <tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:2rem;">Cargando recargos por mora...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <!-- SECCIÓN NOVEDADES Y AVISOS DE LA ÚLTIMA EXPENSA -->
+    <section id="novedades" style="margin-top: 2rem; margin-bottom: 2.5rem;">
+        <div style="margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-1); display: flex; align-items: center; gap: 8px;">
+                📢 Novedades y Comunicados de la Última Expensa (Julio 2026)
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-3); margin-top: 4px;">
+                Avisos oficiales de la administración, recomendaciones permanentes, datos de pago y contactos de urgencia extraídos del último documento impreso.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+            
+            <!-- TARJETA 1: NOVEDADES DEL MES -->
+            <div class="card" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.25); border-top: 3px solid #ef4444; border-radius: 12px; padding: 1.25rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></span>
+                    Aviso Oficial del Mes
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                    📣 Novedades de la Administración
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 0.9rem; color: var(--text-2); font-size: 0.82rem; line-height: 1.55;">
+                    <strong style="color: #f87171;">CESE DE MANDATO:</strong> SE INFORMA QUE NUESTRO CESE DE MANDATO ES A PARTIR DEL DÍA <strong>20 DE AGOSTO</strong>, POR LO TANTO DURANTE ESE PERÍODO SEGUIMOS SIENDO MANDATARIOS LEGALES DEL CONSORCIO Y DE LA GUARDA DE LA DOCUMENTACIÓN. LA MISMA SERÁ ENTREGADA A LA NUEVA ADMINISTRACIÓN SIGUIENDO LOS PLAZOS LEGALES.
+                </div>
+            </div>
+
+            <!-- TARJETA 2: RECOMENDACIONES Y DATOS DE PAGO -->
+            <div class="card" style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.2); border-top: 3px solid #06b6d4; border-radius: 12px; padding: 1.25rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #06b6d4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
+                    💳 Datos de Pago & Normas
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                    📌 Recomendaciones Permanentes
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.78rem; color: var(--text-2); line-height: 1.45;">
+                    <div style="background: rgba(6, 182, 212, 0.08); border-radius: 8px; padding: 0.75rem; border: 1px dashed rgba(6, 182, 212, 0.3);">
+                        <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px;">🏦 Banco Galicia (Cuenta Consorcio)</div>
+                        <div><strong>CBU:</strong> <code style="color: #67e8f9; font-family: monospace;">0070044320000009108891</code></div>
+                        <div><strong>ALIAS:</strong> <code style="color: #67e8f9; font-weight: 700;">LOGRO.CENTRO.ACEITE</code></div>
+                        <div style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">* Indicar UF y centavos asignados al enviar el comprobante.</div>
+                    </div>
+                    <div><strong>2) Seguros:</strong> Se abonan en el mes en curso.</div>
+                    <div><strong>3) Abono en fecha:</strong> Evite recargos legales del 20% en honorarios (Arts. 2046/2048 CCyCN).</div>
+                    <div><strong>4) Convivencia:</strong> No estacionar en rampa de ingreso ni subir bicicletas por ascensores.</div>
+                    <div><strong>✉️ Mail Comprobantes:</strong> <a href="mailto:dyfadmconsorcios@gmail.com" style="color: #38bdf8; text-decoration: underline;">dyfadmconsorcios@gmail.com</a></div>
+                </div>
+            </div>
+
+            <!-- TARJETA 3: URGENCIAS Y SERVICIOS -->
+            <div class="card" style="background: rgba(251, 191, 36, 0.04); border: 1px solid rgba(251, 191, 36, 0.2); border-top: 3px solid #fbbf24; border-radius: 12px; padding: 1.25rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
+                    ☎️ Contactos de Emergencia
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                    🚨 Urgencias del Consorcio
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.78rem; color: var(--text-2);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span>🔧 <strong>Plomería / Gasista:</strong> Sr. Marcelo Rodríguez</span>
+                        <a href="tel:1151258152" style="color: #fbbf24; font-weight: 700; text-decoration: none;">11-5125-8152</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span>⚡ <strong>Electricidad / Bombas:</strong> Esteban Linaje</span>
+                        <a href="tel:1158181507" style="color: #fbbf24; font-weight: 700; text-decoration: none;">11-5818-1507</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span>🚿 <strong>Destapacaciones:</strong> Sr. Patricio</span>
+                        <a href="tel:1144365063" style="color: #fbbf24; font-weight: 700; text-decoration: none;">11-4436-5063 / 11-5982-3575</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span>🔑 <strong>Cerrajería:</strong> Ayran Urgencia 24hs</span>
+                        <a href="tel:1144150874" style="color: #fbbf24; font-weight: 700; text-decoration: none;">11-4415-0874</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span>🚗 <strong>Portón Eléctrico:</strong> Gustavo Pipa</span>
+                        <a href="tel:1140649418" style="color: #fbbf24; font-weight: 700; text-decoration: none;">11-4064-9418</a>
+                    </div>
+                    <div style="margin-top: 4px; font-size: 0.73rem; color: var(--text-3); display: flex; flex-direction: column; gap: 3px; background: rgba(0,0,0,0.2); padding: 6px 8px; border-radius: 6px;">
+                        <div>🔥 <strong>Metrogas:</strong> 0800-999-1050</div>
+                        <div>💧 <strong>AySA 24hs:</strong> 0800-321-2482</div>
+                        <div>⚡ <strong>Edesur 24hs:</strong> 0800-333-03787 / 4245-1833 <span style="color:var(--text-2);">(Cliente 3974678 // Medidor 2111329)</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
 
 </main>
 
@@ -1606,7 +1898,7 @@
 <div class="modal-overlay" id="contactModal">
     <div class="modal" style="position:relative; max-width: 480px; width: 92%;">
         <div class="modal-title">✉️ Contactar al Desarrollador</div>
-        <div class="modal-subtitle">Proyecto Sarmiento 151 — Alexis Martyniuk</div>
+        <div class="modal-subtitle">Proyecto Sarmiento 360 — Alexis Martyniuk</div>
         <button class="btn" style="position:absolute;top:1.25rem;right:1.25rem;padding:4px 10px;" onclick="closeContactModal()">✕ Cerrar</button>
 
         <div style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1614,7 +1906,7 @@
                 Selecciona la opción de tu preferencia para enviar tu duda o consulta:
             </p>
 
-            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=alexis.martyniuk@gmail.com&su=%5BSarmiento%20151%5D%20Consulta%20sobre%20el%20proyecto" 
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=alexis.martyniuk@gmail.com&su=%5BSarmiento%20360%5D%20Consulta%20sobre%20el%20proyecto" 
                target="_blank" 
                rel="noopener noreferrer"
                class="btn" 
@@ -1622,7 +1914,7 @@
                 🌐 Abrir en Gmail (Navegador Web)
             </a>
 
-            <a href="mailto:alexis.martyniuk@gmail.com?subject=%5BSarmiento%20151%5D%20Consulta%20sobre%20el%20proyecto" 
+            <a href="mailto:alexis.martyniuk@gmail.com?subject=%5BSarmiento%20360%5D%20Consulta%20sobre%20el%20proyecto" 
                class="btn" 
                style="display:flex; align-items:center; justify-content:center; gap:8px; padding:0.75rem; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-1); text-decoration:none;">
                 💻 Abrir App de Correo (Mailto)

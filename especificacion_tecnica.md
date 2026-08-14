@@ -1,4 +1,4 @@
-# Especificación Técnica Completa — Sarmiento 151
+# Especificación Técnica Completa — Sarmiento 360
 ### Reconstrucción de la especificación original del proyecto
 
 > Generado mediante ingeniería inversa del código fuente. Cada sección indica si la información es **✅ Confirmada** (código explícito), **🔍 Inferida** (deducida del comportamiento del código) o **❓ Indeterminada** (no puede determinarse).
@@ -7,11 +7,11 @@
 
 ## 1. Objetivo del Sistema
 
-**✅ Confirmado** — El sistema es un **panel de control y auditoría de expensas** para el consorcio propietario del edificio ubicado en **Av. Sarmiento 151, Lomas de Zamora, Provincia de Buenos Aires, Argentina**.
+**✅ Confirmado** — El sistema es un **panel de control y auditoría de expensas** para el consorcio propietario del edificio ubicado en **Av. Sarmiento 360, Lomas de Zamora, Provincia de Buenos Aires, Argentina**.
 
 Desarrollado por un **copropietario de manera independiente** con el propósito de transparentar la información financiera del consorcio y monitorear los servicios esenciales del edificio en tiempo real.
 
-Acceso en producción: **https://alexismartyniuk.com.ar/sarmiento-151**
+Acceso en producción: **https://alexismartyniuk.com.ar/sarmiento-360**
 
 ---
 
@@ -257,7 +257,7 @@ Antes de hacer cualquier request HTTP, el script verifica si el archivo ya exist
 │            ▼                                                      │
 │  ┌─────────────────────┐   ┌──────────────────────────────────┐  │
 │  │ Vercel CDN (estático│   │ GitHub Actions Workers            │  │
-│  │ /sarmiento-151)     │   │ ubuntu-latest                     │  │
+│  │ /sarmiento-360)     │   │ ubuntu-latest                     │  │
 │  └─────────────────────┘   │ - Python 3.10                     │  │
 │            │               │ - pdfplumber                      │  │
 │            ▼               │ - requests                        │  │
@@ -324,7 +324,7 @@ Antes de hacer cualquier request HTTP, el script verifica si el archivo ya exist
 **✅ Confirmado**
 
 ```
-Administracion_Sarmiento151/
+Administracion_Sarmiento360/
 │
 ├── .github/
 │   └── workflows/
@@ -905,7 +905,7 @@ Prueba todas las combinaciones de años × meses × tipos de documento en parale
 
 ## Resumen Ejecutivo
 
-El proyecto **Sarmiento 151** es un **sistema de auditoría financiera ciudadana** desarrollado por un copropietario para transparentar la gestión del consorcio de un edificio residencial en Argentina.
+El proyecto **Sarmiento 360** es un **sistema de auditoría financiera ciudadana** desarrollado por un copropietario para transparentar la gestión del consorcio de un edificio residencial en Argentina.
 
 Implementa un pipeline completamente automatizado y de **costo cero** que:
 1. **Descarga** automáticamente las liquidaciones PDF de expensas del portal de la administración
