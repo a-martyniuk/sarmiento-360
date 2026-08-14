@@ -1460,7 +1460,10 @@ const renderFines = async (period) => {
     });
 
     if (filteredMora.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:1.5rem;">No se registraron recargos de mora en este período.</td></tr>`;
+        const msg = period === "todos"
+            ? "ℹ️ No se registraron recargos por mora en la base de datos histórica."
+            : `ℹ️ En el período ${period} el consorcio no liquidó intereses por mora a ninguna unidad.`;
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:1.5rem;">${msg}</td></tr>`;
         return;
     }
 
@@ -1547,12 +1550,13 @@ const auditProviders = (period) => {
     const tbody = document.getElementById("providerAuditBody");
     if (!tbody) return;
 
+    let targetPeriod = period;
     if (period === "todos") {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-3);padding:1.5rem;">Seleccione un mes específico para auditar tarifas contra el año anterior.</td></tr>`;
-        return;
+        const allPeriods = [...new Set(rawExpenses.map(e => e.periodo))].sort().reverse();
+        targetPeriod = allPeriods[0] || "2026-07";
     }
 
-    const [y, m] = period.split("-").map(Number);
+    const [y, m] = targetPeriod.split("-").map(Number);
     const prevPeriod = `${y - 1}-${String(m).padStart(2, '0')}`;
 
     // Proveedores y sus palabras clave múltiples para mejor cobertura
