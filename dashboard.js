@@ -1583,13 +1583,13 @@ const auditProviders = (period) => {
 
     targetProviders.forEach(p => {
         // Buscar el gasto del mes actual
-        const actualExpense = rawExpenses.find(e => e.periodo === period && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
+        const actualExpense = rawExpenses.find(e => e.periodo === targetPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
         // Buscar el gasto del año anterior
         let prevExpense = rawExpenses.find(e => e.periodo === prevPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
 
         // Fallback: Si no hay registro exactamente hace 12 meses, buscar la primera factura histórica del proveedor
         if (!prevExpense && actualExpense) {
-            prevExpense = rawExpenses.find(e => e.periodo !== period && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
+            prevExpense = rawExpenses.find(e => e.periodo !== targetPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
         }
 
         if (actualExpense) {
