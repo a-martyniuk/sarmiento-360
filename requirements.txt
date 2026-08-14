@@ -1,0 +1,5 @@
+requests
+pdfplumber
+urllib3
+pypdf
+openpyxl
