@@ -629,10 +629,10 @@ const getSubcategoria = (e) => {
         if (c.includes("jubil") || c.includes("obra social") || c.includes("inssjp") || c.includes("suterh") || c.includes("fateryh") || c.includes("seracarh") || c.includes("sindicat") || c.includes("afip") || c.includes("arca") || c.includes("cuota sindic")) {
             return "Cargas Sociales / Sindicato";
         }
-        if (c.includes("ramirez") || c.includes("vigilancia")) return "Vigilancia Nocturna";
-        if (c.includes("reemplazo") || c.includes("suplente") || c.includes("victor")) return "Ayudante / Suplente";
-        if (c.includes("bustamante") || c.includes("sueldo") || c.includes("jornal") || c.includes("antiguedad") || c.includes("viatico") || c.includes("sac") || c.includes("aguinaldo") || c.includes("retiro de residuo") || c.includes("vacac") || c.includes("feriado") || c.includes("plus")) {
-            return "Encargado Permanente";
+        if (c.includes("ayudante") || c.includes("ramirez") || c.includes("vigilancia")) return "Ayudante / Suplente";
+        if (c.includes("encargado auxiliar") || c.includes("victor")) return "Encargado Auxiliar";
+        if (c.includes("encargado principal") || c.includes("bustamante") || c.includes("sueldo") || c.includes("jornal") || c.includes("antiguedad") || c.includes("viatico") || c.includes("sac") || c.includes("aguinaldo") || c.includes("retiro de residuo") || c.includes("vacac") || c.includes("feriado") || c.includes("plus")) {
+            return "Encargado Principal";
         }
         return "Cargas Sociales / Sindicato";
     }
