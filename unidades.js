@@ -42,7 +42,27 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             const allProrrateo = data.prorrateo || [];
             if (allProrrateo.length > 0) {
-                rawProrrateo = allProrrateo;
+                rawProrrateo = allProrrateo.map(item => {
+                    const saldoAnt = Number(item.saldo_anterior || 0);
+                    const pagosVal = Number(item.pagos || 0);
+                    const saldoVal = item.saldo !== undefined && !isNaN(Number(item.saldo)) ? Number(item.saldo) : (item.saldo_mes !== undefined && !isNaN(Number(item.saldo_mes)) ? Number(item.saldo_mes) : (saldoAnt - pagosVal));
+                    const deudaVal = item.deuda !== undefined && !isNaN(Number(item.deuda)) ? Number(item.deuda) : (saldoVal > 0 ? saldoVal : 0);
+
+                    return {
+                        ...item,
+                        saldo_anterior: isNaN(saldoAnt) ? 0 : saldoAnt,
+                        pagos: isNaN(pagosVal) ? 0 : pagosVal,
+                        saldo_mes: isNaN(saldoVal) ? 0 : saldoVal,
+                        deuda: isNaN(deudaVal) ? 0 : deudaVal,
+                        ga_monto: Number(item.ga_monto || item.gastos_comunes || 0),
+                        gb_monto: Number(item.gb_monto || item.servicio_seguridad || 0),
+                        fondo_operativo_monto: Number(item.fondo_operativo_monto || item.fondo_reserva || 0),
+                        gastos_extra: Number(item.gastos_extra || item.gastos_extraordinarios || 0),
+                        red_ajustes: Number(item.red_ajustes || item.eventual || 0),
+                        interes: Number(item.interes || item.interes_mora || 0),
+                        total: Number(item.total || item.total_a_pagar || item.total_mes || 0)
+                    };
+                });
                 rawProrrateo.sort((a, b) => a.periodo.localeCompare(b.periodo));
             } else {
                 rawProrrateo = [];
