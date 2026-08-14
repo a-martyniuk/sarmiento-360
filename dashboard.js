@@ -1163,6 +1163,7 @@ const renderTable = () => {
             <td>${estadoBadge}</td>
             <td class="concepto-cell">
                 <span class="concepto-text" onclick="openModal('${conceptSafe}')">${item.concepto}</span>
+                <a href="auditoria-documentos.html?periodo=${item.periodo}" title="Ver comprobante respaldatorio de ${item.periodo}" style="margin-left:6px; font-size:0.72rem; text-decoration:none; color:var(--accent); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); display:inline-flex; align-items:center; gap:3px;">📄 Factura</a>
             </td>
             <td class="amount-col amount-prev">${prevMonto > 0 ? fmt(prevMonto) : '—'}</td>
             <td style="text-align:right;white-space:nowrap;">${varHtml}</td>
@@ -1846,10 +1847,148 @@ const init = async () => {
         try { renderFines("todos"); } catch(e) { console.warn("Error en renderFines:", e); }
         try { renderPatrimonialChart(); } catch(e) { console.warn("Error en renderPatrimonialChart:", e); }
         try { auditProviders("todos"); } catch(e) { console.warn("Error en auditProviders:", e); }
+        try { renderContractsBoard(); } catch(e) { console.warn("Error en renderContractsBoard:", e); }
         try { loadServicesStatus(); } catch(e) { console.warn("Error en loadServicesStatus:", e); }
     } catch (error) {
         console.error("Error al cargar los datos de expensas:", error);
     }
+};
+
+// ── TABLERO DE CONTRATOS E INSPECCIONES ────────────────────────────
+const renderContractsBoard = () => {
+    const container = document.getElementById("contractsBoardContainer");
+    if (!container) return;
+
+    const contracts = [
+        {
+            title: "🛡️ Seguro Integral de Consorcio",
+            provider: "Holando / Allianz",
+            type: "Póliza Incendio y RC",
+            dueDate: "2026-10-15",
+            cost: "$ 199.165 /mes",
+            status: "Vigente"
+        },
+        {
+            title: "🛗 Abono de Ascensores",
+            provider: "Guillemi S.A.",
+            type: "Mantenimiento Preventivo (3 Torres)",
+            dueDate: "2026-12-01",
+            cost: "$ 146.400 /mes",
+            status: "Vigente"
+        },
+        {
+            title: "🐛 Fumigación y Desinsectación",
+            provider: "Eco Plagas Saneamiento",
+            type: "Control Mensual de Plagas",
+            dueDate: "2026-08-25",
+            cost: "$ 29.832 /mes",
+            status: "Próximo"
+        },
+        {
+            title: "🧯 Carga de Matafuegos",
+            provider: "Ordenanza Municipal Lomas",
+            type: "Re-inspección Anual de Extintores",
+            dueDate: "2026-11-10",
+            cost: "Verificar Presupuesto",
+            status: "Vigente"
+        },
+        {
+            title: "🎨 Inspección Fachada y Pintura",
+            provider: "Rafael Morel / Luis Pavón",
+            type: "Auditoría de Avance de Obra",
+            dueDate: "2026-09-30",
+            cost: "$ 1.500.000 /cuota",
+            status: "En Obra"
+        }
+    ];
+
+    const today = new Date();
+
+    const html = contracts.map(c => {
+        const parts = c.dueDate.split("-");
+        const due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        const diffTime = due - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        let badgeClass = "badge-success";
+        let badgeText = `🟢 ${diffDays} días restantes`;
+        if (diffDays <= 15) {
+            badgeClass = "badge-danger";
+            badgeText = `🔴 Vence en ${diffDays} días`;
+        } else if (diffDays <= 45) {
+            badgeClass = "badge-warning";
+            badgeText = `🟡 Vence en ${diffDays} días`;
+        }
+
+        return `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1rem; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.95rem; color:var(--text-1);">${c.title}</div>
+                        <div style="font-size:0.8rem; color:var(--accent); font-weight:600;">${c.provider}</div>
+                    </div>
+                    <span class="badge ${badgeClass}" style="font-size:0.7rem;">${badgeText}</span>
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-3); display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.05); padding-top:8px;">
+                    <span>${c.type}</span>
+                    <strong style="color:var(--text-1);">${c.cost}</strong>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    container.innerHTML = html;
+};
+
+// ── EXPORTADORES A EXCEL (XLSX) ──────────────────────────────────
+const exportExpensesToExcel = () => {
+    if (typeof XLSX === 'undefined') {
+        alert("La librería XLSX no está disponible.");
+        return;
+    }
+    if (!rawExpenses || rawExpenses.length === 0) {
+        alert("No hay datos de gastos para exportar.");
+        return;
+    }
+
+    const exportData = rawExpenses.map(e => ({
+        "Período": e.periodo,
+        "Categoría": e.categoria || e.rubro || 'General',
+        "Concepto": e.concepto,
+        "Monto ($ ARS)": e.monto,
+        "Tipo": e.tipo || 'Fijo',
+        "Estado": e.estado || 'Pagado',
+        "Anomalía": e.anomalia ? 'Sí' : 'No'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Gastos Historicos");
+    XLSX.writeFile(wb, "Sarmiento360_Gastos_Historicos.xlsx");
+};
+
+const exportMorosidadToExcel = () => {
+    if (typeof XLSX === 'undefined') {
+        alert("La librería XLSX no está disponible.");
+        return;
+    }
+    if (!rawMorosidad || rawMorosidad.length === 0) {
+        alert("No hay datos de morosidad para exportar.");
+        return;
+    }
+
+    const exportData = rawMorosidad.map(m => ({
+        "U.F. #": m.uf,
+        "Ubicación": m.depto ? m.depto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').trim() : `UF ${m.uf}`,
+        "Propietario": `Propietario U.F. ${m.uf}`,
+        "Deuda Acumulada ($ ARS)": m.deuda,
+        "Período": m.periodo || '2026-07'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Estado Morosidad");
+    XLSX.writeFile(wb, "Sarmiento360_Estado_Morosidad.xlsx");
 };
 
 document.addEventListener("DOMContentLoaded", init);

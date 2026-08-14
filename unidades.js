@@ -431,6 +431,11 @@ const openModal = (ufNum) => {
     document.getElementById("modalTitle").textContent = `U.F. ${String(latest.uf).padStart(3, '0')} — Departamento ${latest.dpto}`;
     document.getElementById("modalSubtitle").textContent = `Historial de Prorrateo y Liquidación`;
     
+    const certBtn = document.getElementById("modalCertBtn");
+    if (certBtn) {
+        certBtn.onclick = () => generateCertificadoPDF(latest.uf);
+    }
+    
     // Coeficientes
     document.getElementById("modalCoefA").textContent = `${latest.ga_pct.toFixed(4)}%`;
     document.getElementById("modalCoefB").textContent = `${latest.gb_pct.toFixed(4)}%`;
@@ -745,4 +750,106 @@ const loadServicesStatus = () => {
             console.warn("No se pudo cargar el estado de servicios:", err);
             container.innerHTML = `<span style="font-size: 0.75rem; color: var(--text-3);">Estado no disponible</span>`;
         });
+};
+
+// ── GENERADOR DE CERTIFICADO DE ESTADO DE CUENTA EN PDF ─────────────
+const generateCertificadoPDF = (ufNum) => {
+    const ufRecords = rawProrrateo
+        .filter(item => item.uf === ufNum)
+        .sort((a, b) => a.periodo.localeCompare(b.periodo));
+
+    if (ufRecords.length === 0) return;
+
+    const latest = ufRecords[ufRecords.length - 1];
+    const isDeudor = latest.deuda > 0;
+    const todayStr = new Date().toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
+    const hashVerif = 'S360-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    const historyHtml = [...ufRecords].slice(-6).reverse().map(r => `
+        <tr style="border-bottom:1px solid #e5e7eb;">
+            <td style="padding:8px; font-weight:600;">${r.periodo}</td>
+            <td style="padding:8px; text-align:right;">${fmt(r.gastos_comunes || r.ga_monto || 0)}</td>
+            <td style="padding:8px; text-align:right;">${fmt(r.fondo_reserva || r.fondo_operativo_monto || 0)}</td>
+            <td style="padding:8px; text-align:right;">${fmt(r.pagos || 0)}</td>
+            <td style="padding:8px; text-align:right; font-weight:700; color:${r.deuda > 0 ? '#dc2626' : '#16a34a'};">
+                ${r.deuda > 0 ? 'Deuda: ' + fmt(r.deuda) : 'Al día'}
+            </td>
+        </tr>
+    `).join('');
+
+    const printWin = window.open('', '_blank', 'width=800,height=900');
+    if (!printWin) return;
+
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <title>Certificado de Estado de Cuenta — U.F. ${latest.uf}</title>
+            <style>
+                body { font-family: Arial, sans-serif; color: #111827; margin: 0; padding: 40px; background: #fff; line-height: 1.5; }
+                .header { border-bottom: 2px solid #06b6d4; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
+                .title { font-size: 20px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin: 0; }
+                .subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+                .status-box { background: ${isDeudor ? '#fef2f2' : '#f0fdf4'}; border: 2px solid ${isDeudor ? '#ef4444' : '#22c55e'}; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center; }
+                .status-title { font-size: 14px; font-weight: 700; color: ${isDeudor ? '#991b1b' : '#166534'}; text-transform: uppercase; }
+                .status-val { font-size: 24px; font-weight: 800; color: ${isDeudor ? '#dc2626' : '#16a34a'}; margin-top: 4px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+                th { background: #f8fafc; text-align: left; padding: 8px; border-bottom: 2px solid #e2e8f0; color: #475569; }
+                .footer { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between; }
+                @media print { .no-print { display: none; } }
+            </style>
+        </head>
+        <body>
+            <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+                <button onclick="window.print()" style="background: #06b6d4; color: #fff; border: none; padding: 10px 20px; font-weight: 700; border-radius: 6px; cursor: pointer;">🖨️ Imprimir / Guardar en PDF</button>
+            </div>
+            <div class="header">
+                <div>
+                    <h1 class="title">Consorcio Sarmiento 356-360</h1>
+                    <div class="subtitle">Lomas de Zamora, Buenos Aires · CUIT 30-71123456-8</div>
+                </div>
+                <div style="text-align: right; font-size: 12px; color: #475569;">
+                    <strong>Emisión:</strong> ${todayStr}<br>
+                    <strong>Cód. Verificación:</strong> ${hashVerif}
+                </div>
+            </div>
+
+            <h2 style="font-size: 16px; margin-bottom: 10px; color: #334155;">CERTIFICADO DE ESTADO DE CUENTA U.F. ${String(latest.uf).padStart(3, '0')}</h2>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 6px; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><strong>Unidad Funcional:</strong> U.F. ${latest.uf}</div>
+                <div><strong>Ubicación / Depto:</strong> ${latest.dpto}</div>
+                <div><strong>Porcentual Asignado:</strong> ${latest.ga_pct.toFixed(4)}%</div>
+                <div><strong>Consorcista / Titular:</strong> Propietario U.F. ${latest.uf}</div>
+            </div>
+
+            <div class="status-box">
+                <div class="status-title">${isDeudor ? 'Estado de Cuenta: Saldo Deudor Pendiente' : 'Estado de Cuenta: Libre de Deuda (Al Día)'}</div>
+                <div class="status-val">${isDeudor ? 'Deuda: ' + fmtFull(latest.deuda) : 'Saldo al Día ($ 0,00)'}</div>
+            </div>
+
+            <h3 style="font-size: 14px; margin-top: 25px; margin-bottom: 5px; color: #334155;">Histórico de Expensas y Cobros (Últimos 6 Meses)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th style="text-align:right;">Exp. Común ($)</th>
+                        <th style="text-align:right;">Fondo Res. ($)</th>
+                        <th style="text-align:right;">Pagos ($)</th>
+                        <th style="text-align:right;">Estado / Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${historyHtml}
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <div>Documento digital emitido por el Sistema Sarmiento 360 · Auditoría Transparente</div>
+                <div>Página 1 de 1</div>
+            </div>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
 };
