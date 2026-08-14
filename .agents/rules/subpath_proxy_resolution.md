@@ -37,18 +37,27 @@ const getRelativeDataUrl = (file) => {
 };
 ```
 
-### 3. Trailing Slash HTTP Redirect Rules
-In Vercel / Next.js reverse proxy configuration (`vercel.json` and `next.config.ts`), ALWAYS add an explicit HTTP 301 permanent redirect rule from subpaths without trailing slash to subpaths with trailing slash:
+### 3. Trailing Slash Configuration in Next.js Reverse Proxies
+In Next.js reverse proxies (`next.config.ts`), ALWAYS set `skipTrailingSlashRedirect: true` in `nextConfig` so Next.js does NOT issue automatic trailing slash redirects that conflict with Vercel rewrites and trigger `ERR_TOO_MANY_REDIRECTS`:
 
-```json
-"redirects": [
-    {
-        "source": "/sarmiento-360",
-        "destination": "/sarmiento-360/",
-        "permanent": true
-    }
-]
+```typescript
+const nextConfig: NextConfig = {
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
+      {
+        source: "/sarmiento-360",
+        destination: "https://sarmiento-360.vercel.app/",
+      },
+      {
+        source: "/sarmiento-360/:path*",
+        destination: "https://sarmiento-360.vercel.app/:path*",
+      }
+    ];
+  }
+};
 ```
+NEVER configure HTTP `redirects` in `vercel.json` for proxied subpaths, as Vercel rewrites + redirects will loop infinitely (`ERR_TOO_MANY_REDIRECTS`).
 
 ### 4. Non-Blocking External API Fetching
 NEVER await external third-party APIs (such as INDEC, ENRE, external APIs) on the critical startup path of `DOMContentLoaded` or `init()`. Always fetch them asynchronously with baseline fallback data and an `AbortController` timeout (2.5s) to guarantee the local application renders 100% of the time.
