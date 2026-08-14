@@ -198,7 +198,7 @@ const populatePeriodFilter = () => {
 };
 
 // ── Apply filter ────────────────────────────────────────────────
-const applyFilter = () => {
+const applyFilters = () => {
     const periodSel  = document.getElementById("periodFilter");
     const searchInp  = document.getElementById("searchInput");
     const statusSel  = document.getElementById("statusFilter");
@@ -231,6 +231,7 @@ const applyFilter = () => {
     currentPage = 1;
     updateDashboard(period === "todos");
 };
+const applyFilter = applyFilters;
 
 // ── Event listeners ─────────────────────────────────────────────
 const setupEventListeners = () => {
@@ -374,32 +375,39 @@ const renderKPIs = (period) => {
         const ingDeltaEl = document.getElementById("kpiRecaudadoDelta");
         const egrDeltaEl = document.getElementById("kpiEgresadoDelta");
 
-        if (typeof ingDelta === "number") {
-            ingDeltaEl.textContent = `${pct(ingDelta)} vs mes anterior`;
-            ingDeltaEl.className = `kpi-delta ${ingDelta >= 0 ? "up" : "down"}`;
-            ingDeltaEl.setAttribute("data-tooltip", `Mes anterior (${prevPeriodName}): ${fmt(prevIng)}`);
-            ingDeltaEl.style.cursor = "help";
-            ingDeltaEl.style.borderBottom = "1px dotted rgba(255,255,255,0.3)";
-        } else {
-            ingDeltaEl.removeAttribute("data-tooltip");
-            ingDeltaEl.style.cursor = "default";
-            ingDeltaEl.style.borderBottom = "none";
+        if (ingDeltaEl) {
+            if (typeof ingDelta === "number") {
+                ingDeltaEl.textContent = `${pct(ingDelta)} vs mes anterior`;
+                ingDeltaEl.className = `kpi-delta ${ingDelta >= 0 ? "up" : "down"}`;
+                if (ingDeltaEl.setAttribute) ingDeltaEl.setAttribute("data-tooltip", `Mes anterior (${prevPeriodName}): ${fmt(prevIng)}`);
+                ingDeltaEl.style.cursor = "help";
+                ingDeltaEl.style.borderBottom = "1px dotted rgba(255,255,255,0.3)";
+            } else {
+                if (ingDeltaEl.removeAttribute) ingDeltaEl.removeAttribute("data-tooltip");
+                ingDeltaEl.style.cursor = "default";
+                ingDeltaEl.style.borderBottom = "none";
+            }
         }
-        if (typeof egrDelta === "number") {
-            egrDeltaEl.textContent = `${pct(egrDelta)} vs mes anterior`;
-            egrDeltaEl.className = `kpi-delta ${egrDelta <= 0 ? "up" : "down"}`;
-            egrDeltaEl.setAttribute("data-tooltip", `Mes anterior (${prevPeriodName}): ${fmt(prevEgr)}`);
-            egrDeltaEl.style.cursor = "help";
-            egrDeltaEl.style.borderBottom = "1px dotted rgba(255,255,255,0.3)";
-        } else {
-            egrDeltaEl.removeAttribute("data-tooltip");
-            egrDeltaEl.style.cursor = "default";
-            egrDeltaEl.style.borderBottom = "none";
+
+        if (egrDeltaEl) {
+            if (typeof egrDelta === "number") {
+                egrDeltaEl.textContent = `${pct(egrDelta)} vs mes anterior`;
+                egrDeltaEl.className = `kpi-delta ${egrDelta <= 0 ? "up" : "down"}`;
+                if (egrDeltaEl.setAttribute) egrDeltaEl.setAttribute("data-tooltip", `Mes anterior (${prevPeriodName}): ${fmt(prevEgr)}`);
+                egrDeltaEl.style.cursor = "help";
+                egrDeltaEl.style.borderBottom = "1px dotted rgba(255,255,255,0.3)";
+            } else {
+                if (egrDeltaEl.removeAttribute) egrDeltaEl.removeAttribute("data-tooltip");
+                egrDeltaEl.style.cursor = "default";
+                egrDeltaEl.style.borderBottom = "none";
+            }
         }
 
         const bDeltaEl = document.getElementById("kpiBalanceDelta");
-        bDeltaEl.textContent = delta >= 0 ? "✅ Recaudación cubre los gastos" : "⚠️ Los gastos superan la recaudación";
-        bDeltaEl.className = `kpi-delta ${delta >= 0 ? "up" : "down"}`;
+        if (bDeltaEl) {
+            bDeltaEl.textContent = delta >= 0 ? "✅ Recaudación cubre los gastos" : "⚠️ Los gastos superan la recaudación";
+            bDeltaEl.className = `kpi-delta ${delta >= 0 ? "up" : "down"}`;
+        }
     };
 
     if (period === "todos") {
@@ -476,6 +484,7 @@ const renderAnomalySection = (period) => {
 
 // ── HISTORICAL LINE CHART ───────────────────────────────────────
 const renderHistoricalChart = () => {
+    if (typeof ApexCharts === 'undefined') return;
     const chartType = document.getElementById("chartTypeFilter").value;
     const cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
     const periods = [...new Set(cleanExpenses.map(e => e.periodo))].sort();
@@ -500,64 +509,41 @@ const renderHistoricalChart = () => {
         colors = [(CAT_CONFIG[chartType] || { dot: '#06b6d4' }).dot];
     }
 
-    const totalPeriods = periods.length;
-    const minIndex = Math.max(1, totalPeriods - 11);
-    const maxIndex = totalPeriods;
+    const minIndex = Math.max(0, periods.length - 12);
+    const maxIndex = periods.length - 1;
 
     const opts = {
-        series,
         chart: {
             type: 'line',
-            height: 230,
-            foreColor: '#94a3b8',
-            toolbar: {
-                show: true,
-                tools: {
-                    download: false,
-                    selection: false,
-                    zoom: true,
-                    zoomin: true,
-                    zoomout: true,
-                    pan: true,
-                    reset: true
-                }
-            },
-            zoom: {
-                enabled: true,
-                type: 'x',
-                autoScaleYaxis: true
-            },
-            background: 'transparent',
-            fontFamily: 'Inter, sans-serif'
+            height: 320,
+            toolbar: { show: true },
+            zoom: { enabled: true },
+            animations: { enabled: true }
         },
-        stroke: { curve: 'smooth', width: chartType === "todos" ? 2 : 3 },
+        series,
         colors,
+        stroke: { curve: 'smooth', width: 2 },
         xaxis: {
-            type: 'category',
             categories: periods,
-            min: minIndex,
-            max: maxIndex,
-            axisBorder: { show: false },
-            axisTicks: { show: false },
-            labels: { rotate: -30, style: { fontSize: '10px' } }
+            labels: { style: { colors: 'var(--text-3)' } }
         },
         yaxis: {
             labels: {
-                formatter: v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${Math.round(v/1000)}k` : `$${v}`
+                style: { colors: 'var(--text-3)' },
+                formatter: (v) => fmt(v)
             }
         },
+        legend: { labels: { colors: 'var(--text-1)' } },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
-        dataLabels: { enabled: false },
-        legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '11px' },
         tooltip: {
             theme: 'dark',
             y: {
-                formatter: (val, { series, seriesIndex, dataPointIndex, w }) => {
-                    const baseStr = fmtFull(val);
-                    const period = periods[dataPointIndex];
+                formatter: (val, { seriesIndex, dataPointIndex, w }) => {
+                    const baseStr = fmt(val);
+                    const currentPeriod = periods[dataPointIndex];
                     let ipcStr = "";
-                    if (ipcData[period] && ipcData[period].inflacion !== null) {
-                        ipcStr = ` | Inflación IPC: +${ipcData[period].inflacion.toFixed(1)}%`;
+                    if (ipcData[currentPeriod] && ipcData[currentPeriod].inflacion !== null) {
+                        ipcStr = ` | IPC: +${ipcData[currentPeriod].inflacion.toFixed(1)}%`;
                     }
                     if (dataPointIndex > 0) {
                         const prevVal = w.globals.series[seriesIndex][dataPointIndex - 1];
@@ -585,6 +571,7 @@ const renderHistoricalChart = () => {
 
 // ── DONUT CHART ─────────────────────────────────────────────────
 const renderCategoryChart = () => {
+    if (typeof ApexCharts === 'undefined') return;
     const totals = {};
     filteredExpenses.forEach(e => {
         const cat = e.categoria || e.rubro;
@@ -719,6 +706,7 @@ const getSubcategoria = (e) => {
 };
 
 const renderComparisonChart = () => {
+    if (typeof ApexCharts === 'undefined') return;
     const viewSel = document.getElementById("comparisonViewFilter");
     const viewMode = viewSel ? viewSel.value : "categorias";
     const cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
@@ -834,6 +822,7 @@ let chartDrillSeguros = null;
 let chartDrillVarios = null;
 
 const createDrillChart = (selectorId, categoryName, currentInstance) => {
+    if (typeof ApexCharts === 'undefined') return null;
     let cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
 
     if (categoryName === "Gastos Extraordinarios" && rawExtraordinarios.length > 0) {
@@ -964,6 +953,7 @@ const renderDrilldownCharts = () => {
 // ── EMPLOYEE BREAKDOWN CHART ─────────────────────────────────────
 let chartEmployee = null;
 const renderEmployeeChart = () => {
+    if (typeof ApexCharts === 'undefined') return;
     const periods = [...new Set(rawExpenses.map(e => e.periodo))].sort();
 
     const sumBy = (nombre) => periods.map(p =>
@@ -1485,6 +1475,7 @@ const renderFines = async (period) => {
 
 // ── RECAUDACIÓN VS GASTOS DEVENGADOS (FLUJO REAL DE CAJA) ──────
 const renderPatrimonialChart = async () => {
+    if (typeof ApexCharts === 'undefined') return;
     const allPeriods = [...new Set(rawExpenses.map(e => e.periodo))].sort();
 
     let prorrateo = [];
@@ -1836,16 +1827,16 @@ const init = async () => {
             history[key].push(e.monto);
         });
 
-        populatePeriodFilter();
-        setupEventListeners();
-        applyFilters();
-        renderEmployeeChart();
-        renderExtraordinarios();
-        renderMorosidad();
-        renderFines("todos");
-        renderPatrimonialChart();
-        auditProviders("todos");
-        loadServicesStatus();
+        try { populatePeriodFilter(); } catch(e) { console.warn("Error en populatePeriodFilter:", e); }
+        try { setupEventListeners(); } catch(e) { console.warn("Error en setupEventListeners:", e); }
+        try { applyFilters(); } catch(e) { console.warn("Error en applyFilters:", e); }
+        try { renderEmployeeChart(); } catch(e) { console.warn("Error en renderEmployeeChart:", e); }
+        try { renderExtraordinarios(); } catch(e) { console.warn("Error en renderExtraordinarios:", e); }
+        try { renderMorosidad(); } catch(e) { console.warn("Error en renderMorosidad:", e); }
+        try { renderFines("todos"); } catch(e) { console.warn("Error en renderFines:", e); }
+        try { renderPatrimonialChart(); } catch(e) { console.warn("Error en renderPatrimonialChart:", e); }
+        try { auditProviders("todos"); } catch(e) { console.warn("Error en auditProviders:", e); }
+        try { loadServicesStatus(); } catch(e) { console.warn("Error en loadServicesStatus:", e); }
     } catch (error) {
         console.error("Error al cargar los datos de expensas:", error);
     }
