@@ -102,6 +102,7 @@ def parse_prorrateo_pdf(filepath):
     
     period = f"{match_date.group(1)}-{match_date.group(2)}"
     records = []
+    seen_ufs = set()
     
     with pdfplumber.open(filepath) as pdf:
         for page in pdf.pages[:2]:
@@ -124,6 +125,9 @@ def parse_prorrateo_pdf(filepath):
                 )
                 if match_uf:
                     uf = int(match_uf.group(1))
+                    if uf in seen_ufs or not (1 <= uf <= 70):
+                        continue
+                    
                     dpto = match_uf.group(2).strip()
                     propietario = match_uf.group(3).strip()
                     pct = clean_amount(match_uf.group(4))
@@ -153,6 +157,7 @@ def parse_prorrateo_pdf(filepath):
                     total_a_pagar = amounts[-1] if len(amounts) > 0 else 0.0
                     deuda = saldo if saldo > 0 else 0.0
                     
+                    seen_ufs.add(uf)
                     records.append({
                         "periodo": period,
                         "uf": uf,

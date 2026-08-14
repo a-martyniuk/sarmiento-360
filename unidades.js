@@ -334,7 +334,21 @@ const renderCajaChart = (period) => {
 // ── TABLE RENDERER ───────────────────────────────────────────────
 const renderTable = () => {
     const tbody = document.getElementById("prorrateoTableBody");
-    const sorted = [...filteredProrrateo].sort((a, b) => a.uf - b.uf);
+    // Deduplicar U.F.s para mostrar exactamente 1 fila por UF
+    const ufMap = new Map();
+    filteredProrrateo.forEach(item => {
+        const existing = ufMap.get(item.uf);
+        if (!existing) {
+            ufMap.set(item.uf, item);
+        } else {
+            const currentPct = Number(item.ga_pct || item.porcentual || 0);
+            const existingPct = Number(existing.ga_pct || existing.porcentual || 0);
+            if (currentPct > existingPct) {
+                ufMap.set(item.uf, item);
+            }
+        }
+    });
+    const sorted = Array.from(ufMap.values()).sort((a, b) => a.uf - b.uf);
 
     if (sorted.length === 0) {
         tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:var(--text-3);padding:2rem;">No se encontraron registros de prorrateo.</td></tr>`;
