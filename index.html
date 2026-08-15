@@ -1447,6 +1447,143 @@
         </div>
     </div>
 
+    <!-- SECCIÓN: AUDITORÍA DOCUMENTAL Y DE DETECCIÓN DE OMITIDOS -->
+    <div style="margin-top: 2rem; margin-bottom: 1rem;" id="secAuditoriaDocumental">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-1); margin-bottom: 0.25rem;">📑 Auditoría Documental y Gastos Omitidos</h2>
+                <p style="font-size: 0.8rem; color: var(--text-3); margin-bottom: 0;">Detección automática de documentos, obligaciones previsionales y gastos recurrentes que podrían faltar respecto del comportamiento histórico.</p>
+            </div>
+            <div>
+                <button class="btn" onclick="exportDocumentaryAuditCSV()" style="background: rgba(6,182,212,0.15); border: 1px solid var(--accent); color: var(--accent); font-weight: 600; font-size: 0.8rem;">📥 Exportar Informe (.csv)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIS DE AUDITORÍA DOCUMENTAL -->
+    <section class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem;">
+        <div class="kpi-card red">
+            <div class="kpi-title">🔴 Alta Prioridad</div>
+            <div class="kpi-val" id="docAuditKpiHigh">0</div>
+            <div class="kpi-sub">Obligaciones/Cargas con alta evidencia</div>
+        </div>
+        <div class="kpi-card" style="border-left: 3px solid #fb923c;">
+            <div class="kpi-title" style="color: #fb923c;">🟠 Por Revisar</div>
+            <div class="kpi-val" id="docAuditKpiMedium" style="color: #fb923c;">0</div>
+            <div class="kpi-sub">Gasto recurrente o proveedor ausente</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-title">🟡 Sugerencias</div>
+            <div class="kpi-val" id="docAuditKpiLow">0</div>
+            <div class="kpi-sub">Patrones irregulares a auditar</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-title">🟢 Sin Inconsistencias</div>
+            <div class="kpi-val" id="docAuditKpiClean">0</div>
+            <div class="kpi-sub">Períodos con 100% de evidencia</div>
+        </div>
+    </section>
+
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <div>
+                <div class="card-title">🔍 Matriz de Hallazgos y Sugerencias de Auditoría</div>
+                <div class="card-subtitle">Listado probabilístico trazable. Las sugerencias sirven como puntos de revisión humana y no alteran los balances oficiales.</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <select id="docAuditPriorityFilter" onchange="renderDocumentaryAuditTable()" style="background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-1); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">
+                    <option value="todos">Todas las Prioridades</option>
+                    <option value="🔴 Alta">🔴 Alta Prioridad</option>
+                    <option value="🟠 Revisar">🟠 Por Revisar</option>
+                    <option value="🟡 Sugerencia">🟡 Sugerencias</option>
+                </select>
+                <select id="docAuditStatusFilter" onchange="renderDocumentaryAuditTable()" style="background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-1); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">
+                    <option value="todos">Todos los Estados</option>
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="REVISADO">REVISADO</option>
+                    <option value="CONFIRMADO">CONFIRMADO</option>
+                    <option value="DESCARTADO">DESCARTADO</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">Prioridad</th>
+                        <th>Período</th>
+                        <th>Concepto / Obligación Esperada</th>
+                        <th>Categoría</th>
+                        <th>Tipo de Alerta</th>
+                        <th style="text-align: center;">Evidencia</th>
+                        <th style="text-align: center;">Confianza</th>
+                        <th style="text-align: center;">Estado Local</th>
+                        <th style="text-align: right;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="docAuditTableBody">
+                    <!-- Se poblará dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL DE EVIDENCIA E HISTORIAL DE CONCEPTO AUDITADO -->
+    <div class="modal" id="docAuditModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="close-btn" onclick="closeDocAuditModal()">✕ Cerrar</button>
+            <h2 style="font-family:'Outfit',sans-serif; margin-bottom:0.25rem;" id="docAuditModalTitle">Detalle de Auditoría Documental</h2>
+            <p style="color:var(--text-3); font-size:0.88rem; margin-bottom:1.5rem;" id="docAuditModalSubtitle">Justificación probabilística y comportamiento histórico</p>
+
+            <div id="docAuditRationaleBox" style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                <!-- Explicación probabilística detallada -->
+            </div>
+
+            <!-- Gráfico de Tendencia e Historial en ApexCharts -->
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.9rem; color: var(--text-1); margin-bottom: 0.5rem;">📈 Línea Temporal de Registros ($)</h4>
+                <div id="docAuditConceptChart" style="min-height: 250px;"></div>
+            </div>
+
+            <!-- Gestión de Estado Local del Auditor -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.85rem; color: var(--text-1); margin-top: 0; margin-bottom: 0.75rem;">✍️ Estado de Auditoría Humana</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--text-3); display: block; margin-bottom: 4px;">Estado Local:</label>
+                        <select id="docAuditStatusSelect" style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-1); padding: 0.4rem; border-radius: 6px; font-size: 0.8rem;">
+                            <option value="PENDIENTE">⏳ PENDIENTE (En revisión)</option>
+                            <option value="REVISADO">👁️ REVISADO (Analizado por auditor)</option>
+                            <option value="CONFIRMADO">🔴 CONFIRMADO (Omisión confirmada)</option>
+                            <option value="DESCARTADO">🟢 DESCARTADO (No aplica / Justificado)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--text-3); display: block; margin-bottom: 4px;">Motivo de Descarte (si aplica):</label>
+                        <select id="docAuditDiscardReasonSelect" style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-1); padding: 0.4rem; border-radius: 6px; font-size: 0.8rem;">
+                            <option value="">-- Seleccionar motivo --</option>
+                            <option value="Contrato finalizado">Contrato finalizado</option>
+                            <option value="Gasto pagado por otra vía">Gasto pagado por otra vía</option>
+                            <option value="No corresponde ese período">No corresponde ese período</option>
+                            <option value="Factura anual/bimestral">Factura anual/bimestral</option>
+                            <option value="Cambio de proveedor">Cambio de proveedor</option>
+                            <option value="Cambio de empleado">Cambio de empleado</option>
+                            <option value="Error del parser">Error del parser</option>
+                            <option value="Otro">Otro motivo</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 0.75rem; color: var(--text-3); display: block; margin-bottom: 4px;">Comentario / Observación:</label>
+                    <input type="text" id="docAuditCommentInput" placeholder="Añadir notas privadas de la auditoría..." style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-1); padding: 0.4rem 0.6rem; border-radius: 6px; font-size: 0.8rem; box-sizing: border-box;">
+                </div>
+                <div style="text-align: right; margin-top: 10px;">
+                    <button class="btn" onclick="saveDocAuditState()" style="background: var(--accent); color: #fff; font-weight: 600; padding: 0.4rem 1rem; border: none; border-radius: 6px; cursor: pointer;">💾 Guardar Estado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- SECCIÓN: EVOLUCIÓN DETALLADA POR RUBRO -->
     <div style="margin-top: 2rem; margin-bottom: 1rem;">
         <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-1); margin-bottom: 0.25rem;">🔍 Desglose y Evolución por Rubro</h2>
@@ -1969,6 +2106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<script src="auditoria_documental.js"></script>
 <script src="dashboard.js"></script>
 </body>
 </html>
