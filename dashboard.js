@@ -1173,7 +1173,7 @@ const renderTable = () => {
             <td>${estadoBadge}</td>
             <td class="concepto-cell">
                 <span class="concepto-text" onclick="openModal('${conceptSafe}')">${item.concepto}</span>
-                <a href="auditoria-documentos.html?periodo=${item.periodo}" title="Ver comprobante respaldatorio de ${item.periodo}" style="margin-left:6px; font-size:0.72rem; text-decoration:none; color:var(--accent); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); display:inline-flex; align-items:center; gap:3px;">📄 Factura</a>
+                <button onclick="openInvoiceViewerModal('${conceptSafe}', '${item.periodo}', ${item.monto})" title="Ver comprobante respaldatorio de ${item.periodo}" style="margin-left:6px; font-size:0.72rem; cursor:pointer; color:var(--accent); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); display:inline-flex; align-items:center; gap:3px;">📄 Factura</button>
             </td>
             <td class="amount-col amount-prev">${prevMonto > 0 ? fmt(prevMonto) : '—'}</td>
             <td style="text-align:right;white-space:nowrap;">${varHtml}</td>
