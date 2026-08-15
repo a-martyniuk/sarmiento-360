@@ -207,7 +207,293 @@ const runDocumentaryAudit = (rawExpenses) => {
     });
 };
 
+// ── 4. AUDITORÍA DOCUMENTAL UI HANDLERS (COMPARTIDOS) ─────────────
+let currentAuditFindings = [];
+let activeModalFindingId = null;
+let chartDocAuditConcept = null;
+let globalRawExpenses = [];
+
+const renderDocumentaryAuditSection = (expenses) => {
+    if (expenses && expenses.length > 0) {
+        globalRawExpenses = expenses;
+    }
+    if (!globalRawExpenses || globalRawExpenses.length === 0) return;
+
+    currentAuditFindings = runDocumentaryAudit(globalRawExpenses);
+    
+    // Contadores para KPIs
+    let high = 0, medium = 0, low = 0;
+    currentAuditFindings.forEach(f => {
+        if (f.prioridad === "🔴 Alta") high++;
+        else if (f.prioridad === "🟠 Revisar") medium++;
+        else low++;
+    });
+    
+    const highEl = document.getElementById("docAuditKpiHigh");
+    if (highEl) highEl.textContent = high;
+    const medEl = document.getElementById("docAuditKpiMedium");
+    if (medEl) medEl.textContent = medium;
+    const lowEl = document.getElementById("docAuditKpiLow");
+    if (lowEl) lowEl.textContent = low;
+    const cleanEl = document.getElementById("docAuditKpiClean");
+    if (cleanEl) {
+        const allP = [...new Set(globalRawExpenses.map(e => e.periodo))];
+        const affectedP = new Set(currentAuditFindings.map(f => f.periodo));
+        cleanEl.textContent = Math.max(0, allP.length - affectedP.size);
+    }
+    
+    renderDocumentaryAuditTable();
+};
+
+const renderDocumentaryAuditTable = () => {
+    const tbody = document.getElementById("docAuditTableBody");
+    if (!tbody) return;
+    
+    const prioFilter = document.getElementById("docAuditPriorityFilter")?.value || "todos";
+    const statusFilter = document.getElementById("docAuditStatusFilter")?.value || "todos";
+    
+    let list = [...currentAuditFindings];
+    
+    if (prioFilter !== "todos") {
+        list = list.filter(f => f.prioridad === prioFilter);
+    }
+    
+    list = list.filter(f => {
+        const saved = JSON.parse(localStorage.getItem(`SARM360_DOCAUDIT_${f.id}`) || "{}");
+        const status = saved.status || "PENDIENTE";
+        if (statusFilter === "todos") return true;
+        return status === statusFilter;
+    });
+    
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-3); padding:2rem;">No se encontraron sugerencias de auditoría documental para los filtros seleccionados.</td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = list.map(f => {
+        const saved = JSON.parse(localStorage.getItem(`SARM360_DOCAUDIT_${f.id}`) || "{}");
+        const status = saved.status || "PENDIENTE";
+        
+        let statusBadgeClass = "badge-warning";
+        let statusLabel = "⏳ PENDIENTE";
+        if (status === "REVISADO") { statusBadgeClass = "badge-info"; statusLabel = "👁️ REVISADO"; }
+        else if (status === "CONFIRMADO") { statusBadgeClass = "badge-danger"; statusLabel = "🔴 CONFIRMADO"; }
+        else if (status === "DESCARTADO") { statusBadgeClass = "badge-success"; statusLabel = "🟢 DESCARTADO"; }
+        
+        const prioStyle = f.prioridad === "🔴 Alta" ? "color:var(--red); font-weight:700;" : (f.prioridad === "🟠 Revisar" ? "color:#fb923c; font-weight:600;" : "color:var(--text-3);");
+        const fmtVal = typeof fmt === 'function' ? fmt(f.montoEstimado) : `$ ${f.montoEstimado.toLocaleString('es-AR')}`;
+        
+        return `
+            <tr>
+                <td style="text-align:center; ${prioStyle}">${f.prioridad}</td>
+                <td style="font-weight:600; color:var(--text-1);">${f.periodo}</td>
+                <td style="font-weight:500;">
+                    <div style="color:var(--text-1); font-size:0.85rem;">${f.concepto}</div>
+                    <div style="font-size:0.7rem; color:var(--text-3);">Monto est. histórico: ${fmtVal} <span style="font-size:0.65rem; color:var(--accent);">(ESTIMACIÓN HISTÓRICA)</span></div>
+                </td>
+                <td style="font-size:0.8rem; color:var(--text-2);">${f.categoria}</td>
+                <td style="font-size:0.78rem; color:var(--text-2);">${f.tipoAlerta}</td>
+                <td style="text-align:center; font-weight:600; font-size:0.8rem; color:var(--text-2);">${f.aparicionesHistoricas}</td>
+                <td style="text-align:center;">
+                    <span style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25); color:var(--accent); padding:2px 8px; border-radius:12px; font-weight:700; font-size:0.75rem;">${f.confianza}%</span>
+                </td>
+                <td style="text-align:center;">
+                    <span class="badge ${statusBadgeClass}" style="font-size:0.7rem;">${statusLabel}</span>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn" onclick="openDocAuditModal('${f.id}')" style="background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:var(--accent); font-size:0.75rem; padding:0.25rem 0.6rem;">🔍 Ver Evidencia</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+};
+
+const openDocAuditModal = (findingId) => {
+    const finding = currentAuditFindings.find(f => f.id === findingId);
+    if (!finding) return;
+    
+    activeModalFindingId = findingId;
+    const modal = document.getElementById("docAuditModal");
+    if (!modal) return;
+    
+    document.getElementById("docAuditModalTitle").textContent = `Auditoría: ${finding.concepto}`;
+    document.getElementById("docAuditModalSubtitle").textContent = `Período Afectado: ${finding.periodo} · Prioridad: ${finding.prioridad} · Confianza: ${finding.confianza}%`;
+    
+    const fmtVal = typeof fmt === 'function' ? fmt(finding.montoEstimado) : `$ ${finding.montoEstimado.toLocaleString('es-AR')}`;
+
+    const rationaleBox = document.getElementById("docAuditRationaleBox");
+    rationaleBox.innerHTML = `
+        <h4 style="margin:0 0 0.5rem 0; font-size:0.9rem; color:var(--accent); display:flex; align-items:center; gap:6px;">
+            💡 Rationale de Auditoría Documental (${finding.estadoProbabilistico})
+        </h4>
+        <div style="font-size:0.82rem; color:var(--text-1); line-height:1.5;">
+            ${finding.explicacion}
+        </div>
+        <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px dashed rgba(6,182,212,0.2); font-size:0.75rem; color:var(--text-3); display:flex; flex-wrap:wrap; gap:12px;">
+            <span>📌 <strong>Categoría:</strong> ${finding.categoria}</span>
+            <span>⏱️ <strong>Frecuencia Inferida:</strong> ${finding.frecuencia}</span>
+            <span>📊 <strong>Presencia Histórica:</strong> ${finding.aparicionesHistoricas}</span>
+            <span>💰 <strong>Promedio Histórico:</strong> ${fmtVal}</span>
+        </div>
+    `;
+    
+    // Cargar formulario localStorage
+    const saved = JSON.parse(localStorage.getItem(`SARM360_DOCAUDIT_${findingId}`) || "{}");
+    document.getElementById("docAuditStatusSelect").value = saved.status || "PENDIENTE";
+    document.getElementById("docAuditDiscardReasonSelect").value = saved.reason || "";
+    document.getElementById("docAuditCommentInput").value = saved.comment || "";
+    
+    modal.classList.add("open");
+    
+    // Renderizar gráfico de línea temporal con ApexCharts
+    renderDocAuditConceptChart(finding);
+};
+
+const closeDocAuditModal = () => {
+    const modal = document.getElementById("docAuditModal");
+    if (modal) modal.classList.remove("open");
+};
+
+const saveDocAuditState = () => {
+    if (!activeModalFindingId) return;
+    
+    const status = document.getElementById("docAuditStatusSelect").value;
+    const reason = document.getElementById("docAuditDiscardReasonSelect").value;
+    const comment = document.getElementById("docAuditCommentInput").value;
+    
+    const dataToSave = { status, reason, comment, updatedAt: new Date().toISOString() };
+    localStorage.setItem(`SARM360_DOCAUDIT_${activeModalFindingId}`, JSON.stringify(dataToSave));
+    
+    closeDocAuditModal();
+    renderDocumentaryAuditTable();
+};
+
+const renderDocAuditConceptChart = (finding) => {
+    const chartDiv = document.getElementById("docAuditConceptChart");
+    if (!chartDiv || typeof ApexCharts === 'undefined') return;
+    
+    if (chartDocAuditConcept) {
+        chartDocAuditConcept.destroy();
+    }
+    
+    const allPeriods = [...new Set(globalRawExpenses.map(e => e.periodo))].sort();
+    const seriesData = [];
+    
+    allPeriods.forEach(p => {
+        if (finding.amountsByPeriod && finding.amountsByPeriod[p] !== undefined) {
+            seriesData.push(finding.amountsByPeriod[p]);
+        } else if (p === finding.periodo) {
+            seriesData.push(finding.montoEstimado); // Omitido / Ausente
+        } else {
+            seriesData.push(0);
+        }
+    });
+    
+    const options = {
+        series: [{
+            name: "Monto Registrado ($ ARS)",
+            data: seriesData
+        }],
+        chart: {
+            type: 'bar',
+            height: 240,
+            background: 'transparent',
+            toolbar: { show: false }
+        },
+        colors: ["#06b6d4"],
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                columnWidth: '45%'
+            }
+        },
+        dataLabels: { enabled: false },
+        xaxis: {
+            categories: allPeriods,
+            labels: { style: { colors: '#94a3b8', fontSize: '11px' } }
+        },
+        yaxis: {
+            labels: {
+                style: { colors: '#94a3b8', fontSize: '11px' },
+                formatter: (val) => val > 0 ? `$ ${(val/1000).toFixed(0)}k` : '$ 0'
+            }
+        },
+        tooltip: {
+            theme: 'dark',
+            y: {
+                formatter: (val, { dataPointIndex }) => {
+                    const p = allPeriods[dataPointIndex];
+                    if (p === finding.periodo) {
+                        return `⚠️ Ausente en liquidación (Est. $ ${val.toLocaleString('es-AR')})`;
+                    }
+                    return val > 0 ? `$ ${val.toLocaleString('es-AR')}` : 'Sin registro ($ 0)';
+                }
+            }
+        },
+        legend: { show: false }
+    };
+    
+    chartDocAuditConcept = new ApexCharts(chartDiv, options);
+    chartDocAuditConcept.render();
+};
+
+const exportDocumentaryAuditCSV = () => {
+    if (!currentAuditFindings || currentAuditFindings.length === 0) {
+        alert("No hay hallazgos de auditoría documental para exportar.");
+        return;
+    }
+    
+    const headers = [
+        "ID Alerta",
+        "Período",
+        "Concepto",
+        "Categoría",
+        "Frecuencia Esperada",
+        "Tipo de Alerta",
+        "Prioridad",
+        "Estado Probabilístico",
+        "Confianza (%)",
+        "Apariciones Históricas",
+        "Monto Estimado Histórico",
+        "Explicación / Rationale",
+        "Estado Auditoría Humana",
+        "Motivo Descarte",
+        "Comentario Auditoría"
+    ];
+    
+    const rows = currentAuditFindings.map(f => {
+        const saved = JSON.parse(localStorage.getItem(`SARM360_DOCAUDIT_${f.id}`) || "{}");
+        return [
+            `"${f.id}"`,
+            `"${f.periodo}"`,
+            `"${f.concepto.replace(/"/g, '""')}"`,
+            `"${f.categoria}"`,
+            `"${f.frecuencia}"`,
+            `"${f.tipoAlerta}"`,
+            `"${f.prioridad}"`,
+            `"${f.estadoProbabilistico}"`,
+            f.confianza,
+            `"${f.aparicionesHistoricas}"`,
+            f.montoEstimado,
+            `"${f.explicacion.replace(/"/g, '""')}"`,
+            `"${saved.status || 'PENDIENTE'}"`,
+            `"${(saved.reason || '').replace(/"/g, '""')}"`,
+            `"${(saved.comment || '').replace(/"/g, '""')}"`
+        ];
+    });
+    
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Sarmiento360_Auditoria_Documental_Omitidos_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
 // Exportar funciones para uso en browser y node
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { runDocumentaryAudit, normalizeConceptKey, AUDIT_EXCEPTIONS };
+    module.exports = { runDocumentaryAudit, normalizeConceptKey, AUDIT_EXCEPTIONS, renderDocumentaryAuditSection, exportDocumentaryAuditCSV };
 }
+

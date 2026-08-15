@@ -23,6 +23,9 @@ async function loadGastosData() {
         populatePeriodFilter();
         setupEventListeners();
         applyFilters();
+        if (typeof renderDocumentaryAuditSection === 'function') {
+            renderDocumentaryAuditSection(data.gastos || []);
+        }
     } catch (err) {
         console.error("Error al cargar gastos.json:", err);
     }
