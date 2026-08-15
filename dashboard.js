@@ -103,6 +103,16 @@ const fmtFull = (n) => new Intl.NumberFormat('es-AR', {
 
 const pct = (n) => `${n >= 0 ? '+' : ''}${n.toFixed(1)}%`;
 
+const formatDpto = (strVal, ufNum) => {
+    if (!strVal) return `U.F. ${ufNum}`;
+    let s = String(strVal).trim();
+    const matchTower = s.match(/(356|360|358)/);
+    let tower = matchTower ? matchTower[1] : (ufNum % 2 !== 0 ? '356' : '360');
+    const matchBase = s.match(/^(\d{1,2}\s*[°°]?\s*[A-Za-z0-9]+)/);
+    let base = matchBase ? matchBase[1].trim() : s.split(' ')[0];
+    return `${base} (Sarmiento ${tower})`;
+};
+
 // ── Category Pill HTML ──────────────────────────────────────────// 7 Categorías EXACTAS del PDF de liquidaciones
 const CAT_CONFIG = {
     "Sueldos y Cargas Sociales":   { cls: "pill-sueldos",   icon: "👤", dot: "#f87171" },
@@ -1764,7 +1774,7 @@ const renderMorosidad = () => {
 
     const moroMaxOwnerEl = document.getElementById("moroMaxOwner");
     if (moroMaxOwnerEl) {
-        const cleanDept = maxMoro.depto ? maxMoro.depto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').replace(/\s+[A-ZÁÉÍÓÚñÑ]{2,}.*$/g, '').trim() : `UF ${maxMoro.uf}`;
+        const cleanDept = formatDpto(maxMoro.depto, maxMoro.uf);
         moroMaxOwnerEl.textContent = `UF ${maxMoro.uf} (${cleanDept})`;
     }
 
@@ -1777,7 +1787,7 @@ const renderMorosidad = () => {
             ? '<span class="badge badge-danger">🚨 Moroso Crítico</span>' 
             : (item.deuda > 100000 ? '<span class="badge badge-warning">⚠️ Con Deuda</span>' : '<span class="badge badge-warning" style="opacity:0.8">⚠️ Saldo Menor</span>');
 
-        const cleanDept = item.depto ? item.depto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').replace(/\s+[A-ZÁÉÍÓÚñÑ]{2,}.*$/g, '').trim() : `UF ${item.uf}`;
+        const cleanDept = formatDpto(item.depto, item.uf);
         const propStr = `Propietario U.F. ${item.uf}`;
 
         html += `

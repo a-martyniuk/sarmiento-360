@@ -17,7 +17,16 @@ La plataforma está diseñada con una arquitectura liviana, de alto rendimiento 
 * **Backend de Ingesta (Local):**
   * Scripts en **Python** (`extract_data.py` y `extract_prorrateo.py`) para procesar, limpiar y parsear los datos brutos extraídos de los PDFs y planillas auxiliares de la administración D&F hacia archivos relacionales `gastos.json` y `prorrateo.json`.
 * **Monitoreo en Tiempo Real (Serverless API):**
-  * **check_servicios.py:** Script de Python encargado de auditar la red de servicios locales (Luz con Edesur, Agua con AySA y Gas con Metrogas) para alertar interrupciones activas en la zona.
+  ---
+
+## 🌟 Funcionalidades Destacadas
+
+* **📋 Desambiguación Explícita por Torre/Dirección:** Distinción clara entre las dos torres residenciales del complejo: **Torre Sarmiento 356** y **Torre Sarmiento 360** (ej: `1°A (Sarmiento 356)` vs `1°A (Sarmiento 360)`).
+* **📎 Link a Factura Digital por Renglón:** Enlaces directos `📄 Factura` en cada renglón de gastos para abrir el PDF del comprobante respaldatorio en la sección de auditoría.
+* **⏰ Tablero de Vencimiento de Contratos e Inspecciones:** Cuenta regresiva con alertas semafóricas para seguros (Allianz), mantenimiento de ascensores (Guillemi), fumigación y matafuegos.
+* **📄 Certificados de U.F. en PDF:** Botón en cada Unidad Funcional para generar un certificado A4 de 1 página listo para imprimir o enviar por WhatsApp con el historial de pagos y estado de libre deuda.
+* **📥 Exportaciones Masivas (XLSX / CSV):** Descarga de datasets completos anonimizados para revisión externa o contadores.
+* **🔒 Anonimización Transparente:** Surnames de propietarios reemplazados por `Propietario U.F. X` y personal del consorcio identificado por su cargo oficial (`Encargado Principal`, `Encargado Auxiliar`, `Ayudante / Suplente`).
 
 ---
 

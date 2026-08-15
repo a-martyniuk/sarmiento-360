@@ -38,15 +38,20 @@ Acceso en producción: **https://alexismartyniuk.com.ar/sarmiento-360**
 | Módulo | Estado |
 |---|---|
 | Dashboard general de gastos del consorcio | En producción |
-| Dashboard de prorrateo por Unidad Funcional | En producción |
+| Dashboard de prorrateo por Unidad Funcional (70 U.F.) | En producción |
+| Desambiguación explícita por Torre/Dirección (Sarmiento 356 vs 360) | En producción |
 | Extracción automática de datos desde PDFs | En producción |
 | Monitoreo de servicios públicos (Luz, Agua, Gas) | En producción |
 | Comparación inflacionaria vs. IPC-INDEC | En producción |
 | Detección automática de facturas faltantes | En producción |
 | Detección de anomalías estadísticas en gastos | En producción |
 | Auditoría de tarifas de proveedores fijos | En producción |
+| Tablero de Vencimiento de Contratos e Inspecciones | En producción |
+| Links a Facturas Digitales por Renglón (`📄 Factura`) | En producción |
+| Generación de Certificados / Fichas Resumen de U.F. en PDF | En producción |
+| Exportación Masiva a Excel (XLSX) y CSV | En producción |
+| Anonimización de Nombres de Propietarios y Empleados por Cargo | En producción |
 | Registro de multas por U.F. | En producción |
-| Exportación CSV y PDF de los datos | En producción |
 | Flyers imprimibles para cartelera física | En producción |
 
 **🔍 Inferido** — El alcance excluye explícitamente:

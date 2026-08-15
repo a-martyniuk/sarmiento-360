@@ -36,6 +36,16 @@ const fmtFull = (n) => {
     }).format(val);
 };
 
+const formatDpto = (strVal, ufNum) => {
+    if (!strVal) return `U.F. ${ufNum}`;
+    let s = String(strVal).trim();
+    const matchTower = s.match(/(356|360|358)/);
+    let tower = matchTower ? matchTower[1] : (ufNum % 2 !== 0 ? '356' : '360');
+    const matchBase = s.match(/^(\d{1,2}\s*[°°]?\s*[A-Za-z0-9]+)/);
+    let base = matchBase ? matchBase[1].trim() : s.split(' ')[0];
+    return `${base} (Sarmiento ${tower})`;
+};
+
 // ── BOOTSTRAP ──────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     Promise.all([
@@ -394,7 +404,7 @@ const renderTable = () => {
         const isDeudor = tPagar > tMes;
 
         const rawDpto = item.dpto || item.ubicacion || item.depto || `U.F. ${item.uf}`;
-        const dptoStr = rawDpto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').replace(/\s+[A-ZÁÉÍÓÚñÑ]{2,}.*$/g, '').trim();
+        const dptoStr = formatDpto(rawDpto, item.uf);
         const propStr = `Propietario U.F. ${item.uf}`;
         const pctVal = Number(item.porcentual || item.ga_pct || 0);
 
