@@ -22,17 +22,71 @@ const AUDIT_EXCEPTIONS = [
     }
 ];
 
-// ── 2. NORMALIZADOR DE CONCEPTOS ─────────────────────────────────
+// ── 2. LIMPIADOR Y NORMALIZADOR DE CONCEPTOS ─────────────────────
+const cleanConceptDisplay = (str) => {
+    if (!str) return "";
+    let s = String(str).trim();
+    
+    // 1. Eliminar aclaraciones entre paréntesis de meses o cuotas (ej: (SEPT Y OCT), (JULIO 2025), (1° SEMESTRE))
+    s = s.replace(/\s*\((?:ene|feb|mar|abr|may|jun|jul|ago|sep|sept|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|\d+[°ª]?\s*semestre).*?\)/gi, '');
+    
+    // 2. Eliminar meses acompañados de año (ej: JULIO 2025, SEPTIEMBRE 2026)
+    s = s.replace(/\b(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|sept|octubre|oct|noviembre|nov|diciembre|dic)\s+(?:202[0-9]|201[0-9])\b/gi, '');
+    
+    // 3. Eliminar números de factura o comprobante al final (ej: FAC N°0002-0022514, FACTURA 123)
+    s = s.replace(/\s*(?:FAC|FACTURA|COMP|COMPROBANTE)\s*N[°º]?\s*[0-9\-]+/gi, '');
+    
+    // 4. Eliminar espacios múltiples
+    s = s.replace(/\s+/g, ' ').trim();
+    
+    return s;
+};
+
+const MONTHS_MAP = {
+    'ene': '01', 'enero': '01',
+    'feb': '02', 'febrero': '02',
+    'mar': '03', 'marzo': '03',
+    'abr': '04', 'abril': '04',
+    'may': '05', 'mayo': '05',
+    'jun': '06', 'junio': '06',
+    'jul': '07', 'julio': '07',
+    'ago': '08', 'agosto': '08',
+    'sep': '09', 'sept': '09', 'septiembre': '09',
+    'oct': '10', 'octubre': '10',
+    'nov': '11', 'noviembre': '11',
+    'dic': '12', 'diciembre': '12'
+};
+
+const extractCoveredPeriods = (rawConcept, currentPeriod) => {
+    const covered = [];
+    if (!rawConcept || !currentPeriod || currentPeriod.length < 7) return covered;
+    const year = currentPeriod.slice(0, 4);
+    
+    const m = rawConcept.match(/\(([^)]+)\)/);
+    if (m) {
+        const inside = m[1].toLowerCase();
+        const found = inside.match(/\b(ene|enero|feb|febrero|mar|marzo|abr|abril|may|mayo|jun|junio|jul|julio|ago|agosto|sep|sept|septiembre|oct|octubre|nov|noviembre|dic|diciembre)\b/gi);
+        if (found) {
+            found.forEach(fm => {
+                const num = MONTHS_MAP[fm.toLowerCase()];
+                if (num) covered.push(`${year}-${num}`);
+            });
+        }
+    }
+    return covered;
+};
+
 const normalizeConceptKey = (str) => {
     if (!str) return "";
-    let s = String(str).toLowerCase().trim();
+    let cleaned = cleanConceptDisplay(str);
+    let s = cleaned.toLowerCase().trim();
     
     // Identificadores críticos a preservar intactos
     const keyMatch = s.match(/(aysa|edesur|telecentro|flow|guillemi|allianz|fateryh|suterh|arca|afip|192498|192499|192500|05637256)/);
     const keyId = keyMatch ? keyMatch[1] : "";
     
-    // Remover meses, fechas, comprobantes y números sueltos
-    s = s.replace(/\b(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/gi, '');
+    // Remover palabras accesorias y símbolos
+    s = s.replace(/\b(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|sept|octubre|oct|noviembre|nov|diciembre|dic)\b/gi, '');
     s = s.replace(/\b(202[0-9]|201[0-9])\b/g, '');
     s = s.replace(/\b\d{1,2}\/\d{1,2}(\/\d{2,4})?\b/g, '');
     s = s.replace(/\b(factura|comprobante|nro|n°|cuota|periodo|período|mes|liq)\b/gi, '');
@@ -62,6 +116,7 @@ const runDocumentaryAudit = (rawExpenses) => {
             conceptsMap[key] = {
                 key,
                 rawSample: rawC,
+                displayConcept: cleanConceptDisplay(rawC),
                 categoria: e.categoria || "Otros",
                 rubro: e.rubro || "",
                 proveedor: e.proveedor || "",
@@ -71,8 +126,19 @@ const runDocumentaryAudit = (rawExpenses) => {
             };
         }
         conceptsMap[key].periods.add(e.periodo);
+        
+        // Cobertura multimes explícita (ej: (SEPT Y OCT))
+        const covered = extractCoveredPeriods(rawC, e.periodo);
+        covered.forEach(cp => conceptsMap[key].periods.add(cp));
+        
         conceptsMap[key].amountsByPeriod[e.periodo] = Number(e.monto || 0);
         conceptsMap[key].itemsByPeriod[e.periodo] = e;
+        
+        // Actualizar el nombre limpio si es más representativo
+        const cleanC = cleanConceptDisplay(rawC);
+        if (cleanC && cleanC.length > 5 && cleanC.length < conceptsMap[key].displayConcept.length) {
+            conceptsMap[key].displayConcept = cleanC;
+        }
     });
     
     const auditFindings = [];
@@ -164,8 +230,10 @@ const runDocumentaryAudit = (rawExpenses) => {
             );
             confidence = Math.min(98, Math.max(35, confidence));
             
+            const conceptNameClean = data.displayConcept || cleanConceptDisplay(data.rawSample);
+            
             // Rationale Explicativa
-            let explicacion = `El concepto "${data.rawSample}" presenta un comportamiento ${frecuencia.toLowerCase()} recurrente (${activeCount} de ${totalPeriods} períodos, ${Math.round(recurrenceRate*100)}% de presencia histórica). `;
+            let explicacion = `El concepto "${conceptNameClean}" presenta un comportamiento ${frecuencia.toLowerCase()} recurrente (${activeCount} de ${totalPeriods} períodos, ${Math.round(recurrenceRate*100)}% de presencia histórica). `;
             if (hasBefore && hasAfter) {
                 explicacion += `Figuraba en liquidaciones previas, desaparece en ${mp} y vuelve a figurar en períodos posteriores.`;
             } else if (isAccumulated) {
@@ -179,7 +247,7 @@ const runDocumentaryAudit = (rawExpenses) => {
             auditFindings.push({
                 id: `AUD-${mp}-${data.key}`,
                 periodo: mp,
-                concepto: data.rawSample,
+                concepto: conceptNameClean,
                 categoria: data.categoria,
                 frecuencia,
                 tipoAlerta,
