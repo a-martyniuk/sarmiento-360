@@ -7220,6 +7220,16 @@
             "saldo_disponibilidades": 0.0
         },
         {
+            "periodo": "2026-09",
+            "ingresos": 0.0,
+            "egresos": 0.0,
+            "saldo_banco": 0.0,
+            "recaudado_termino": 0.0,
+            "deuda_acumulada": 0.0,
+            "patrimonio_neto": 0.0,
+            "saldo_disponibilidades": 0.0
+        },
+        {
             "periodo": "2025-07",
             "ingresos": 1103061.0,
             "egresos": 7530874.72,
