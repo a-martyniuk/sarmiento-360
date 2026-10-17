@@ -19,7 +19,17 @@ async function loadGastosData() {
         const response = await fetch(getRelativeDataUrl("gastos.json"));
         const data = await response.json();
         allGastos = (data.gastos || []).filter(g => g.monto && g.monto > 0);
-        
+
+        const totalEl = document.getElementById("docTotalCount");
+        if (totalEl) {
+            const withDirectPdf = allGastos.filter(g => g.comprobante_url).length;
+            totalEl.textContent = `${allGastos.length} (${withDirectPdf} PDF)`;
+        }
+        const sideEl = document.getElementById("sidebarPeriods");
+        if (sideEl) {
+            sideEl.textContent = `${allGastos.length} Comprobantes Auditados`;
+        }
+
         populatePeriodFilter();
         setupEventListeners();
         applyFilters();
@@ -36,11 +46,11 @@ function populatePeriodFilter() {
     if (!periodSelect) return;
 
     const periods = [...new Set(allGastos.map(g => g.periodo))].sort().reverse();
-    periodSelect.innerHTML = '<option value="todos">Todos los períodos</option>';
+    periodSelect.innerHTML = '<option value="todos">Todos los períodos (14 meses)</option>';
     periods.forEach(p => {
         const opt = document.createElement("option");
         opt.value = p;
-        opt.textContent = p;
+        opt.textContent = p >= "2026-08" ? `${p} (ConsorcioAbierto)` : `${p} (D&F)`;
         periodSelect.appendChild(opt);
     });
 }
@@ -62,16 +72,19 @@ function getDocType(g) {
     if (cat === "Sueldos y Cargas Sociales") {
         return "Boleta Sueldo / F.931";
     }
-    if (cat === "Administración" && (c.includes("25413") || c.includes("banco") || c.includes("comision") || c.includes("comisión"))) {
+    if (cat === "Administración" && (c.includes("25413") || c.includes("banco") || c.includes("mantenimiento de cuenta") || c.includes("comision") || c.includes("comisión") || c.includes("impuesto ley"))) {
         return "Extracto Bancario / Transf.";
     }
-    if (cat === "Seguros" || c.includes("poliza") || c.includes("póliza")) {
+    if (cat === "Seguros" || c.includes("poliza") || c.includes("póliza") || c.includes("integral de consorcio")) {
         return "Contrato / Póliza";
     }
     return "Factura B/C AFIP";
 }
 
 function getDocNumber(g) {
+    if (g.comprobante_nro && g.comprobante_nro !== "-") {
+        return `${g.comprobante_tipo || 'Comp.'} ${g.comprobante_nro}`;
+    }
     const c = g.concepto || "";
     if (c.includes("FACT")) {
         const parts = c.split("FACT");
@@ -86,12 +99,12 @@ function getDocNumber(g) {
         return "N° " + parts[1].trim().split(" ")[0];
     }
     if (g.categoria === "Sueldos y Cargas Sociales") {
-        return "F.931 AFIP / Recibo";
+        return "F.931 ARCA / Recibo";
     }
-    if (c.includes("25413") || c.includes("banco")) {
-        return "Transf. Banco Galicia";
+    if (c.includes("25413") || c.includes("banco") || c.includes("mantenimiento de cuenta")) {
+        return "Débito Banco Galicia";
     }
-    return "Comprobante Fiscal";
+    return "Reg. Liquidación";
 }
 
 function applyFilters() {
@@ -100,17 +113,30 @@ function applyFilters() {
     const docType = document.getElementById("docTypeFilter")?.value || "todos";
 
     filteredGastos = allGastos.filter(g => {
-        const matchesSearch = !search || (g.concepto || "").toLowerCase().includes(search) || (g.categoria || "").toLowerCase().includes(search);
+        const matchesSearch = !search ||
+            (g.concepto || "").toLowerCase().includes(search) ||
+            (g.categoria || "").toLowerCase().includes(search) ||
+            (g.proveedor || "").toLowerCase().includes(search) ||
+            (g.comprobante_nro || "").toLowerCase().includes(search);
         const matchesPeriod = period === "todos" || g.periodo === period;
         const matchesType = docType === "todos" || getDocType(g) === docType;
         return matchesSearch && matchesPeriod && matchesType;
     });
 
+    // Ordenar más recientes primero
+    filteredGastos.sort((a, b) => b.periodo.localeCompare(a.periodo));
     renderTable();
 }
 
 function formatARS(val) {
     return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 2 }).format(val || 0);
+}
+
+function openDocViewerByIndex(idx) {
+    const item = filteredGastos[idx];
+    if (item && typeof openInvoiceViewerModal === "function") {
+        openInvoiceViewerModal(item);
+    }
 }
 
 function renderTable() {
@@ -125,29 +151,38 @@ function renderTable() {
     }
 
     if (countLabel) {
-        countLabel.textContent = `Mostrando ${filteredGastos.length} comprobantes de respaldo auditados`;
+        countLabel.textContent = `Mostrando ${filteredGastos.length} comprobantes de respaldo auditados (clic en cualquier fila para abrir el visor)`;
     }
 
-    tbody.innerHTML = filteredGastos.map(g => {
+    tbody.innerHTML = filteredGastos.map((g, idx) => {
         const docType = getDocType(g);
         const docNum = getDocNumber(g);
         const cat = g.categoria || g.rubro || "General";
-        
+
         let typeBadgeClass = "badge-blue";
         if (docType.includes("Sueldo")) typeBadgeClass = "badge-amber";
         if (docType.includes("Extracto")) typeBadgeClass = "badge-purple";
         if (docType.includes("Contrato")) typeBadgeClass = "badge-success";
 
+        const hasScan = Boolean(g.comprobante_url);
+        const isPending = g.seccion && g.seccion !== "Pagado";
+
+        const respaldoBadge = hasScan
+            ? `<span class="badge badge-success" title="Adjunto escaneado original disponible en ConsorcioAbierto">📎 PDF Escaneado</span>`
+            : `<span class="badge badge-blue">✓ Reg. Liquidación</span>`;
+
+        const actionBtn = `<button class="btn" onclick="event.stopPropagation(); openDocViewerByIndex(${idx})" style="padding:3px 9px; font-size:0.72rem; background:${hasScan ? 'rgba(16,185,129,0.15)' : 'rgba(6,182,212,0.12)'}; border-color:${hasScan ? '#10b981' : 'var(--accent)'}; color:${hasScan ? '#34d399' : 'var(--accent)'};">${hasScan ? '📎 Ver PDF Original' : '🔍 Ver Ficha'}${isPending ? ' ⚠️' : ''}</button>`;
+
         return `
-            <tr>
+            <tr style="cursor:pointer;" onclick="openDocViewerByIndex(${idx})">
                 <td><strong style="color:var(--text-1);">${g.periodo}</strong></td>
                 <td>${cat}</td>
                 <td><span class="badge ${typeBadgeClass}">${docType}</span></td>
                 <td><code style="color:var(--accent); font-family:monospace;">${docNum}</code></td>
                 <td style="max-width:320px; overflow:hidden; text-overflow:ellipsis;" title="${g.concepto}">${g.concepto}</td>
                 <td style="text-align:right; font-weight:700; color:var(--text-1);">${formatARS(g.monto)}</td>
-                <td style="text-align:center;"><span class="badge badge-success">✓ Respaldo Digital</span></td>
-                <td style="text-align:center;"><span class="badge badge-blue">✓ Verificado AFIP/Banco</span></td>
+                <td style="text-align:center;">${respaldoBadge}</td>
+                <td style="text-align:center;">${actionBtn}</td>
             </tr>
         `;
     }).join("");
@@ -155,15 +190,17 @@ function renderTable() {
 
 function exportDocCSV() {
     if (filteredGastos.length === 0) return alert("No hay datos para exportar.");
-    let csv = "Periodo,Categoria,Tipo_Documento,Numero_Comprobante,Concepto_Proveedor,Monto,Estado_Respaldo\n";
+    let csv = "Periodo,Administracion,Categoria,Tipo_Documento,Numero_Comprobante,Concepto_Proveedor,Monto,Estado_Pago,URL_Comprobante\n";
     filteredGastos.forEach(g => {
         const docType = getDocType(g);
         const docNum = getDocNumber(g);
         const conceptoClean = `"${(g.concepto || '').replace(/"/g, '""')}"`;
-        csv += `${g.periodo},"${g.categoria || g.rubro}","${docType}","${docNum}",${conceptoClean},${g.monto},"Auditado"\n`;
+        const adminClean = `"${(g.administracion || 'D&F').replace(/"/g, '""')}"`;
+        const urlClean = `"${(g.comprobante_url || '').replace(/"/g, '""')}"`;
+        csv += `${g.periodo},${adminClean},"${g.categoria || g.rubro}","${docType}","${docNum}",${conceptoClean},${g.monto},"${g.seccion || 'Pagado'}",${urlClean}\n`;
     });
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -180,13 +217,14 @@ function exportDocXLSX() {
 
     const dataRows = filteredGastos.map(g => ({
         "Período": g.periodo,
+        "Administración": g.administracion || (g.periodo >= "2026-08" ? "Fernández - Villasenin" : "D&F"),
         "Categoría": g.categoria || g.rubro,
         "Tipo Documento": getDocType(g),
         "N° Comprobante / CAE": getDocNumber(g),
         "Concepto / Emisor": g.concepto,
         "Monto ($)": g.monto,
-        "Estado Respaldo": "✓ Auditado Respaldo Digital",
-        "Verificación": "✓ Verificado AFIP / Galicia"
+        "Estado Pago": g.seccion || "Pagado",
+        "Comprobante Escaneado URL": g.comprobante_url || `liquidaciones/360_${g.periodo}_liquidacion.pdf`
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataRows);
@@ -205,48 +243,50 @@ function exportFullAuditXLSX() {
 
     const wb = XLSX.utils.book_new();
 
-    // Hoja 1: Checklist Traspaso y Cese de Mandato D&F
+    // Hoja 1: Checklist Traspaso y Cese de Mandato D&F -> Fernández - Villasenin
     const checklistData = [
-        { "Ítem Verificación": "1. Libro de Actas de Asamblea", "Área": "Legal / Consorcio", "Estado": "✓ Auditado y Copiado", "Detalle": "Libros N° 1 y N° 2 foliados con actas de designación de D&F y asambleas." },
-        { "Ítem Verificación": "2. Libro de Administración y Caja", "Área": "Contable / Bancos", "Estado": "✓ Verificado 100%", "Detalle": "Extractos de cuenta corriente Banco Galicia y planillas de caja." },
-        { "Ítem Verificación": "3. Libro de Órdenes e Inspecciones", "Área": "Mantenimiento / Ascensores", "Estado": "⏳ Pendiente Entrega", "Detalle": "Libro de órdenes de portería e inspección técnica de elevadores." },
-        { "Ítem Verificación": "4. Boletas F.931 AFIP y Recibos Sueldo", "Área": "Personal / SUTERH", "Estado": "✓ Auditado al 100%", "Detalle": "Legajo de encargado titular, suplente y vigilancia. F.931 cancelados." },
-        { "Ítem Verificación": "5. Pólizas de Seguro Edilicio", "Área": "Seguros", "Estado": "✓ Póliza Vigente", "Detalle": "Seguro Integral Allianz N° 2000004.5 y Seguro Personal ART." },
-        { "Ítem Verificación": "6. Abono de Ascensores (Guillemi)", "Área": "Contratos / Mantenimiento", "Estado": "✓ Al Día", "Detalle": "Mantenimiento preventivo mensual Torres 356, 358 y 360." },
-        { "Ítem Verificación": "7. Contrato de Seguridad (Bastida S.A.)", "Área": "Seguridad", "Estado": "✓ Verificado", "Detalle": "Servicio de vigilancia física y control de accesos." },
-        { "Ítem Verificación": "8. Fumigación (FB Saneamiento)", "Área": "Saneamiento", "Estado": "✓ Al Día", "Detalle": "Certificados de desinsectación en áreas comunes y subsuelos." },
-        { "Ítem Verificación": "9. Cese de Mandato D&F", "Área": "Legal / Cierre", "Estado": "🚨 20 / AGO / 2026", "Detalle": "Protocolo de traspaso de libros, llaves y firma bancaria." }
+        { "Ítem Verificación": "1. Libro de Actas de Asamblea", "Área": "Legal / Consorcio", "Estado": "✓ Auditado", "Detalle": "Acta de cese D&F y designación de Adm. Fernández - Villasenin (Matr. 862)." },
+        { "Ítem Verificación": "2. Conciliación Cuenta Banco Galicia", "Área": "Contable / Bancos", "Estado": "✓ Verificado 100%", "Detalle": "CC 0009108-8 044-9 · CBU 0070044320000009108891 · Alias SARMIENTO356.58.60." },
+        { "Ítem Verificación": "3. Pago de Deudas Devengadas en Julio 2026", "Área": "Transición Financiera", "Estado": "✓ Abonado en Ago-26", "Detalle": "$ 15.297.607,28 cancelados en agosto (ARCA $ 6.20M, Bastida $ 4.32M, Sueldos $ 3.20M, SUTERH $ 506k)." },
+        { "Ítem Verificación": "4. Clave Fiscal ARCA y Deuda Heredada", "Área": "Fiscal / Previsional", "Estado": "⚠️ En Reclamo", "Detalle": "Saldo ARCA Jul-26 impago ($ 1.571.590,83) + estimado Sep-26 ($ 1.600.000) por falta de acceso a clave fiscal ARCA." },
+        { "Ítem Verificación": "5. Pólizas de Seguro Edilicio y AP", "Área": "Seguros", "Estado": "✓ Vigentes", "Detalle": "La Holando Sudamericana ($ 341.929,35/mes) y Allianz AP ($ 15.533/mes)." },
+        { "Ítem Verificación": "6. Abono de Ascensores (Guillemi)", "Área": "Contratos / Mantenimiento", "Estado": "✓ Verificado", "Detalle": "Mantenimiento preventivo mensual Torres 356, 358 y 360 ($ 146.400/mes)." },
+        { "Ítem Verificación": "7. Contrato de Seguridad (Bastida S.A.)", "Área": "Seguridad", "Estado": "✓ Verificado", "Detalle": "Vigilancia física 24hs - Fc. B 0004-00000979 ($ 4.485.421,20 en Sep-26)." },
+        { "Ítem Verificación": "8. Plataforma ConsorcioAbierto SRL", "Área": "Sistemas / Gestión", "Estado": "✓ Activa", "Detalle": "Consorcio ID 27151 con adjuntos digitales de facturas y recibos de sueldo." }
     ];
     const wsChecklist = XLSX.utils.json_to_sheet(checklistData);
-    wsChecklist['!cols'] = [{ wch: 40 }, { wch: 25 }, { wch: 20 }, { wch: 65 }];
-    XLSX.utils.book_append_sheet(wb, wsChecklist, "Protocolo Traspaso D&F");
+    wsChecklist['!cols'] = [{ wch: 42 }, { wch: 25 }, { wch: 20 }, { wch: 75 }];
+    XLSX.utils.book_append_sheet(wb, wsChecklist, "Protocolo Traspaso");
 
     // Hoja 2: Matriz Completa de Comprobantes Auditados
     const dataRows = allGastos.map(g => ({
         "Período": g.periodo,
+        "Administración": g.administracion || (g.periodo >= "2026-08" ? "Fernández - Villasenin" : "D&F"),
         "Categoría": g.categoria || g.rubro,
         "Tipo Documento": getDocType(g),
         "N° Comprobante / CAE": getDocNumber(g),
         "Concepto / Emisor": g.concepto,
         "Monto ($)": g.monto,
-        "Estado Respaldo": "✓ Auditado Respaldo Digital",
-        "Verificación": "✓ Verificado AFIP / Galicia"
+        "Estado Pago": g.seccion || "Pagado",
+        "URL Comprobante": g.comprobante_url || `liquidaciones/360_${g.periodo}_liquidacion.pdf`
     }));
     const wsDocs = XLSX.utils.json_to_sheet(dataRows);
-    wsDocs['!cols'] = [{ wch: 10 }, { wch: 28 }, { wch: 22 }, { wch: 22 }, { wch: 65 }, { wch: 15 }, { wch: 25 }, { wch: 25 }];
+    wsDocs['!cols'] = [{ wch: 10 }, { wch: 24 }, { wch: 28 }, { wch: 22 }, { wch: 22 }, { wch: 65 }, { wch: 15 }, { wch: 18 }, { wch: 55 }];
     XLSX.utils.book_append_sheet(wb, wsDocs, "Comprobantes Auditados");
 
-    // Hoja 3: Contratos Vigentes
+    // Hoja 3: Contratos Vigentes (Actualizados a Sep 2026)
     const contractsData = [
-        { "Proveedor / Prestador": "Ascensores Guillemi Elevadores", "Servicio": "Mantenimiento Ascensores Torres 356/358/360", "Último Comprobante": "FACT 00002-26453 (Jul-26)", "Monto Mensual": 764351.24, "Estado": "Vigente sin Mora" },
-        { "Proveedor / Prestador": "Bastida S.A. / MM Servicios", "Servicio": "Vigilancia Física y Control de Accesos", "Último Comprobante": "FACT 00001-0842 (Jul-25)", "Monto Mensual": 2067240.00, "Estado": "Verificado" },
-        { "Proveedor / Prestador": "Allianz Argentina Seguro", "Servicio": "Póliza Integral Edilicia N° 2000004.5", "Último Comprobante": "Póliza Vigente Jul-26", "Monto Mensual": 214500.00, "Estado": "Póliza Al Día" },
-        { "Proveedor / Prestador": "FB Saneamiento Ambiental (Eco Plagas)", "Servicio": "Desinsectación y Fumigación Subsuelos", "Último Comprobante": "FACT 00001-1932 (Jun-26)", "Monto Mensual": 76500.00, "Estado": "Al Día" },
-        { "Proveedor / Prestador": "Telecom Argentina (Cablevisión Flow)", "Servicio": "Conectividad y TV SUM Edificio", "Último Comprobante": "FACT 00004-1029 (Jul-26)", "Monto Mensual": 65000.00, "Estado": "Al Día" },
-        { "Proveedor / Prestador": "Ivess Forgione S.A.", "Servicio": "Bidones de Agua Potable Portería / SUM", "Último Comprobante": "FACT 00003-12932 (Jul-26)", "Monto Mensual": 35000.00, "Estado": "Al Día" }
+        { "Proveedor / Prestador": "BASTIDA S.A. SEGURIDAD PRIVADA INTEGRAL", "CUIT": "30-70840520-1", "Servicio": "Vigilancia Física Horas Diurnas / Nocturnas", "Último Comprobante": "Fc. B 0004-00000979 (Sep-26)", "Monto Mensual": 4485421.20, "Estado": "Pagado" },
+        { "Proveedor / Prestador": "EDESUR S.A. (Cliente 05637256)", "CUIT": "30-65511651-2", "Servicio": "Energía Eléctrica Partes Comunes (3789 kWh)", "Último Comprobante": "Liq. B 0501-89050415 (Sep-26)", "Monto Mensual": 1264540.08, "Estado": "Pagado" },
+        { "Proveedor / Prestador": "AySA (Medidores 192498 / 499 / 500)", "CUIT": "30-70956507-5", "Servicio": "Agua Potable y Cloacas Edificio", "Último Comprobante": "Liq. Sep-26 (3 cuentas)", "Monto Mensual": 2081629.44, "Estado": "Pagado" },
+        { "Proveedor / Prestador": "ADM. FERNÁNDEZ - VILLASENIN", "CUIT": "27-29946737-1", "Servicio": "Honorarios Administración Consorcio (Matr. 862)", "Último Comprobante": "Liq. Sep-26", "Monto Mensual": 830000.00, "Estado": "Pago Parcial ($70k pend.)" },
+        { "Proveedor / Prestador": "LA HOLANDO SUDAMERICANA SEGUROS S.A.", "CUIT": "33-50003806-9", "Servicio": "Seguro Integral de Consorcio", "Último Comprobante": "Cuota Sep-26", "Monto Mensual": 341929.35, "Estado": "Pagado" },
+        { "Proveedor / Prestador": "ASCENSORES GUILLEMI INTERIOR S.A.", "CUIT": "30-71148920-4", "Servicio": "Conservación Ascensores Torres 356/358/360", "Último Comprobante": "Fc. 0002-00026453", "Monto Mensual": 146400.00, "Estado": "Vigente" },
+        { "Proveedor / Prestador": "CONSORCIO ABIERTO SRL", "CUIT": "30-71527826-6", "Servicio": "Licencia Sistema de Gestión y Liquidación", "Último Comprobante": "Fc. B 0006-00103633 (Sep-26)", "Monto Mensual": 66193.05, "Estado": "Pagado" },
+        { "Proveedor / Prestador": "PERSONAL / FLOW", "CUIT": "30-63945373-8", "Servicio": "Abono Internet Portería / Cámaras", "Último Comprobante": "Abono Sep-26", "Monto Mensual": 43878.00, "Estado": "Pagado" }
     ];
     const wsContracts = XLSX.utils.json_to_sheet(contractsData);
-    wsContracts['!cols'] = [{ wch: 35 }, { wch: 45 }, { wch: 28 }, { wch: 18 }, { wch: 20 }];
+    wsContracts['!cols'] = [{ wch: 38 }, { wch: 16 }, { wch: 42 }, { wch: 28 }, { wch: 16 }, { wch: 22 }];
     XLSX.utils.book_append_sheet(wb, wsContracts, "Fichas Contratos Vigentes");
 
     const filename = `Informe_Auditoria_Documental_Sarmiento360_${Date.now()}.xlsx`;

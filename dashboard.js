@@ -12,6 +12,8 @@ let rawBalances  = [];
 let rawMultas    = [];
 let rawExtraordinarios = [];
 let rawMorosidad = [];
+let rawMorosidadPorPeriodo = {};
+let consorcioMeta = {};
 let filteredExpenses = [];
 let currentPage  = 1;
 let pageSize     = 20;
@@ -33,7 +35,9 @@ const fetchIPC = async () => {
         "2026-04": { valor: 5985, inflacion: 3.0 },
         "2026-05": { valor: 6165, inflacion: 3.0 },
         "2026-06": { valor: 6350, inflacion: 3.0 },
-        "2026-07": { valor: 6540, inflacion: 3.0 }
+        "2026-07": { valor: 6540, inflacion: 3.0 },
+        "2026-08": { valor: 6814, inflacion: 4.2 },
+        "2026-09": { valor: 7052, inflacion: 3.5 }
     };
     Object.assign(ipcData, baselineIPC);
 
@@ -60,14 +64,14 @@ const fetchIPC = async () => {
             ipcData[p] = { valor: val, inflacion };
         }
 
-        // Proyectar meses futuros hasta 2026-07 para evitar N/D
+        // Proyectar meses futuros hasta 2026-09 para evitar N/D
         const periods = Object.keys(ipcData).sort();
         if (periods.length > 0) {
             let lastPeriod = periods[periods.length - 1];
             let lastVal = ipcData[lastPeriod].valor;
             let [y, m] = lastPeriod.split("-").map(Number);
             const limitYear = 2026;
-            const limitMonth = 7;
+            const limitMonth = 9;
 
             while (y < limitYear || (y === limitYear && m < limitMonth)) {
                 m++;
@@ -340,6 +344,7 @@ const updateDashboard = (multiPeriod = true) => {
     renderDrilldownCharts();
     renderEmployeeChart();
     renderEmployeeKPIs(period);
+    renderMorosidad(period);
     renderFines(period);
     detectMissingInvoices();
     renderTable();
@@ -1355,16 +1360,21 @@ const exportMultiSheetXLSX = async () => {
 
     // Hoja 1: Resumen Ejecutivo
     const summaryData = [
-        { "Métrica Auditoría": "Total Gastos Devengados Auditados", "Valor": rawExpenses.reduce((a,e) => a + (e.monto||0), 0) },
-        { "Métrica Auditoría": "Períodos Auditados", "Valor": "12 Meses (Julio 2025 - Julio 2026)" },
+        { "Métrica Auditoría": "Total Gastos Auditados en Base", "Valor": rawExpenses.reduce((a,e) => a + (e.monto||0), 0) },
+        { "Métrica Auditoría": "Períodos Auditados", "Valor": "14 Meses (Julio 2025 - Septiembre 2026)" },
         { "Métrica Auditoría": "Total Unidades Funcionales", "Valor": "70 UFs (Torres 356, 358 y 360)" },
-        { "Métrica Auditoría": "Morosidad Acumulada (Julio 2026)", "Valor": 4295074 },
-        { "Métrica Auditoría": "UFs en Estado de Morosidad", "Valor": "15 UFs (21,4%)" },
-        { "Métrica Auditoría": "Suma Coeficiente de Prorrateo", "Valor": "99.79% (Descalce teórico 0.21%)" },
-        { "Métrica Auditoría": "Fecha Cese de Mandato D&F", "Valor": "20 de Agosto de 2026" }
+        { "Métrica Auditoría": "Administración Actual", "Valor": "Fernández - Villasenin (Matr. 862 RPA)" },
+        { "Métrica Auditoría": "Plataforma de Gestión", "Valor": "ConsorcioAbierto (ID 27151)" },
+        { "Métrica Auditoría": "Cuenta Bancaria Oficial", "Valor": "Banco Galicia CC 0009108-8 044-9 (Alias: SARMIENTO356.58.60)" },
+        { "Métrica Auditoría": "Deuda Flotante Regularizada (Ago-26)", "Valor": 15297607.28 },
+        { "Métrica Auditoría": "Pasivos Pendientes de Cierre (Sep-26)", "Valor": 3882790.83 },
+        { "Métrica Auditoría": "Morosidad Acumulada (Sep-26)", "Valor": 3189722.63 },
+        { "Métrica Auditoría": "UFs en Estado de Morosidad (Sep-26)", "Valor": "9 UFs (12,9%)" },
+        { "Métrica Auditoría": "Suma Coeficiente de Prorrateo", "Valor": "100.00% (Normalizado ConsorcioAbierto)" },
+        { "Métrica Auditoría": "Traspaso de Mandato", "Valor": "Agosto de 2026 (Cese D&F 20/08/2026)" }
     ];
     const wsSummary = XLSX.utils.json_to_sheet(summaryData);
-    wsSummary['!cols'] = [{ wch: 38 }, { wch: 38 }];
+    wsSummary['!cols'] = [{ wch: 38 }, { wch: 42 }];
     XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen Ejecutivo");
 
     // Hoja 2: Gastos Detallados
@@ -1376,10 +1386,11 @@ const exportMultiSheetXLSX = async () => {
         "Tipo": item.tipo || "Variable",
         "Estado": item.estado || "Pagado",
         "Concepto / Proveedor": item.concepto,
-        "Monto ($)": item.monto
+        "Monto ($)": item.monto,
+        "Administración": item.administracion || (item.periodo >= "2026-08" ? "Adm. Fernández - Villasenin" : "D&F Administración")
     }));
     const wsGastos = XLSX.utils.json_to_sheet(dataGastos);
-    wsGastos['!cols'] = [{ wch: 10 }, { wch: 28 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 65 }, { wch: 16 }];
+    wsGastos['!cols'] = [{ wch: 10 }, { wch: 28 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 65 }, { wch: 16 }, { wch: 28 }];
     XLSX.utils.book_append_sheet(wb, wsGastos, "Desglose Gastos");
 
     // Hoja 3: Prorrateo
@@ -1389,36 +1400,55 @@ const exportMultiSheetXLSX = async () => {
             "UF": p.uf,
             "Depto": p.dpto || p.ubicacion,
             "Propietario": p.propietario,
-            "% Copr.": p.porcentual,
+            "% Copr.": p.porcentual || p.ga_pct,
             "Saldo Ant. ($)": p.saldo_anterior,
             "Pagos ($)": p.pagos,
             "Saldo Mes ($)": p.saldo_mes,
-            "Gastos Comunes ($)": p.gastos_comunes,
-            "Seguridad ($)": p.servicio_seguridad,
-            "Fondo Reserva ($)": p.fondo_reserva,
-            "Gastos Extra ($)": p.gastos_extraordinarios,
+            "Gastos Comunes ($)": p.gastos_comunes || p.ga_monto,
+            "Seguridad ($)": p.servicio_seguridad || p.gb_monto,
+            "Fondo Reserva ($)": p.fondo_reserva || p.fondo_operativo_monto,
+            "Gastos Extra ($)": p.gastos_extraordinarios || p.gastos_extra,
             "Total Mes ($)": p.total_mes,
-            "Int. Mora ($)": p.interes_mora,
-            "Total a Pagar ($)": p.total_a_pagar
+            "Int. Mora ($)": p.interes_mora || p.interes,
+            "Total a Pagar ($)": p.total_a_pagar || p.total
         }));
         const wsProrrateo = XLSX.utils.json_to_sheet(dataProrrateo);
         XLSX.utils.book_append_sheet(wb, wsProrrateo, "Prorrateo 70 UFs");
     }
 
-    // Hoja 4: Morosidad
-    if (prorrateoData.length > 0) {
-        const julProrrateo = prorrateoData.filter(x => x.periodo === '2026-07' && (x.saldo_anterior > 0 || x.saldo_mes > 0));
-        const dataMoro = julProrrateo.map(m => ({
+    // Hoja 4: Morosidad Septiembre 2026
+    const sepMoro = rawMorosidadPorPeriodo["2026-09"] || rawMorosidad || [];
+    if (sepMoro.length > 0) {
+        const dataMoro = sepMoro.map(m => ({
+            "Período": "2026-09",
             "UF": m.uf,
-            "Ubicación / Depto": m.dpto || m.ubicacion,
-            "Consorcista / Propietario": m.propietario,
-            "Saldo Pendiente ($)": m.saldo_anterior || m.saldo_mes,
-            "Interés Mora Recargo (5%) ($)": m.interes_mora || ((m.saldo_anterior || m.saldo_mes) * 0.05),
-            "Total a Pagar ($)": m.total_a_pagar || ((m.saldo_anterior || m.saldo_mes) * 1.05)
+            "Ubicación / Depto": m.depto,
+            "Consorcista": m.consorcista || `Propietario U.F. ${m.uf}`,
+            "Deuda Acumulada ($)": m.deuda
         }));
         const wsMoro = XLSX.utils.json_to_sheet(dataMoro);
-        XLSX.utils.book_append_sheet(wb, wsMoro, "Morosidad Jul-26");
+        XLSX.utils.book_append_sheet(wb, wsMoro, "Morosidad Sep-26");
     }
+
+    // Hoja 5: Pasivos y Traspaso de Administración
+    const pasivosData = [
+        { "Categoría": "Pago Deuda Anterior (Ago-26)", "Proveedor / Concepto": "ARCA (Cargas Sociales Julio 2026)", "Comprobante": "2235242956", "Monto ($)": 6206015.70, "Estado": "Cancelado" },
+        { "Categoría": "Pago Deuda Anterior (Ago-26)", "Proveedor / Concepto": "BASTIDA S.A. SEGURIDAD PRIVADA", "Comprobante": "0004-00000971", "Monto ($)": 4323293.01, "Estado": "Cancelado" },
+        { "Categoría": "Pago Deuda Anterior (Ago-26)", "Proveedor / Concepto": "SUELDOS PERSONAL JULIO 2026", "Comprobante": "Recibos Jul-26", "Monto ($)": 3201690.00, "Estado": "Cancelado" },
+        { "Categoría": "Pago Deuda Anterior (Ago-26)", "Proveedor / Concepto": "MARÍA MERCEDES DELJARANO (D&F)", "Comprobante": "0001-00000344/345", "Monto ($)": 914000.00, "Estado": "Cancelado" },
+        { "Categoría": "Pago Deuda Anterior (Ago-26)", "Proveedor / Concepto": "SUTERH / FATERYH", "Comprobante": "Jul-26", "Monto ($)": 506408.57, "Estado": "Cancelado" },
+        { "Categoría": "Pago Deuda Anterior (Ago-26)", "Proveedor / Concepto": "ASCENSORES GUILLEMI INTERIOR S.A.", "Comprobante": "0002-00026453", "Monto ($)": 146200.00, "Estado": "Cancelado" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "ARCA (Saldo Inicial Cargas Sociales)", "Comprobante": "1663755454", "Monto ($)": 1571590.83, "Estado": "Pendiente (Deuda diferida gestión anterior)" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "ARCA (Cargas Sociales Septiembre 2026)", "Comprobante": "Estimado s/acceso", "Monto ($)": 1600000.00, "Estado": "Pendiente (Falta delegación clave fiscal)" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "RIVAS MARTÍN CARLOS (Gasto Part. 2°A-356)", "Comprobante": "0001-00000074", "Monto ($)": 290000.00, "Estado": "Pendiente (Reimputado U.F. 7)" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "LECOS SERVICIOS (Esteban Linaje)", "Comprobante": "0004-00000427", "Monto ($)": 181000.00, "Estado": "Pendiente (Cámara / Iluminación)" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "PARIANO PABLO DAMIÁN (Contador D&F)", "Comprobante": "0002-00001037", "Monto ($)": 175000.00, "Estado": "Pendiente (Saldo en revisión)" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "ADM. FERNÁNDEZ - VILLASENIN", "Comprobante": "Hon. Sep-26", "Monto ($)": 70000.00, "Estado": "Pendiente (Saldo parcial)" },
+        { "Categoría": "Pasivo Pendiente (Sep-26)", "Proveedor / Concepto": "ASCENSORES GUILLEMI INTERIOR S.A.", "Comprobante": "0002-00026453", "Monto ($)": 200.00, "Estado": "Pendiente (Redondeo Jul-26)" }
+    ];
+    const wsPasivos = XLSX.utils.json_to_sheet(pasivosData);
+    wsPasivos['!cols'] = [{ wch: 30 }, { wch: 42 }, { wch: 22 }, { wch: 16 }, { wch: 40 }];
+    XLSX.utils.book_append_sheet(wb, wsPasivos, "Pasivos y Traspaso");
 
     XLSX.writeFile(wb, `Auditoria_Completa_Multisolapa_Sarmiento360_${Date.now()}.xlsx`);
 };
@@ -1441,6 +1471,77 @@ const exportPDF = () => {
         currentPage = originalCurrentPage;
         renderTable();
     }, 250);
+};
+
+// ── GENERADOR DE RESUMEN EJECUTIVO PARA WHATSAPP ────────────────
+const copyWhatsAppSummary = (periodArg) => {
+    const selPeriod = periodArg || document.getElementById("periodFilter")?.value || "2026-09";
+    const allPeriods = [...new Set(rawExpenses.map(e => e.periodo))].sort();
+    const targetPeriod = (selPeriod === "todos" || !selPeriod) ? allPeriods[allPeriods.length - 1] : selPeriod;
+
+    const bal = rawBalances.find(b => b.periodo === targetPeriod);
+    const pExpenses = rawExpenses.filter(e => e.periodo === targetPeriod);
+    const egr = (bal && bal.egresos > 0) ? bal.egresos : pExpenses.reduce((a, e) => a + e.monto, 0);
+    const ing = (bal && bal.ingresos > 0) ? bal.ingresos : egr * 0.96;
+    const delta = ing - egr;
+    const pn = bal ? bal.patrimonio_neto : null;
+
+    // Morosidad del período
+    const moroList = (rawMorosidadPorPeriodo && rawMorosidadPorPeriodo[targetPeriod])
+        ? rawMorosidadPorPeriodo[targetPeriod]
+        : (rawMorosidad || []);
+    const moroDeuda = moroList.reduce((acc, m) => acc + (m.deuda || 0), 0);
+    const maxMoro = moroList.length > 0 ? [...moroList].sort((a,b) => b.deuda - a.deuda)[0] : null;
+
+    // Formatear mensaje WhatsApp
+    let msg = `🏢 *CONSORCIO SARMIENTO 356-360*\n`;
+    msg += `📊 *Resumen Ejecutivo de Expensas — Período: ${targetPeriod}*\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `💰 *Recaudación Cobrada:* ${fmt(ing)}\n`;
+    msg += `📤 *Gastos Pagados en Caja:* ${fmt(egr)}\n`;
+    msg += `⚖️ *Resultado Operativo:* ${delta >= 0 ? "🟢 Superávit" : "🔴 Déficit"} de ${fmt(Math.abs(delta))}\n`;
+    if (pn !== null && pn > 0) {
+        msg += `🏦 *Saldo Banco / Patrimonio:* ${fmt(pn)}\n`;
+    }
+    msg += `\n🚨 *Estado de Morosidad (${targetPeriod}):*\n`;
+    msg += `• Unidades con Deuda: ${moroList.length} U.F. (${((moroList.length / 70) * 100).toFixed(1)}%)\n`;
+    msg += `• Deuda Acumulada Total: ${fmt(moroDeuda)}\n`;
+    if (maxMoro) {
+        msg += `• Mayor Deuda: UF ${maxMoro.uf} (${formatDpto(maxMoro.depto, maxMoro.uf)}) — ${fmt(maxMoro.deuda)}\n`;
+    }
+    msg += `\n📋 *Administración:* ${targetPeriod >= '2026-08' ? 'Fernández - Villasenin (Matr. 862)' : 'D&F Administración'}\n`;
+    msg += `💻 *Plataforma:* ${targetPeriod >= '2026-08' ? 'ConsorcioAbierto' : 'MisExpensas / Tradicional'}\n`;
+    msg += `🌐 *Panel de Transparencia & Auditoría:* https://alexismartyniuk.com.ar/sarmiento-360/\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `_Generado automáticamente desde el Panel de Auditoría Independiente._`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).then(() => {
+            showWhatsAppToast("✅ Resumen de " + targetPeriod + " copiado al portapapeles listo para WhatsApp");
+        }).catch(err => {
+            console.warn("Error copying to clipboard:", err);
+            prompt("Copia el siguiente texto para WhatsApp:", msg);
+        });
+    } else {
+        prompt("Copia el siguiente texto para WhatsApp:", msg);
+    }
+};
+
+const showWhatsAppToast = (text) => {
+    let toast = document.getElementById("waToastNotification");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "waToastNotification";
+        toast.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:99999;background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.85rem;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.5);display:flex;align-items:center;gap:8px;transition:opacity 0.3s ease, transform 0.3s ease;opacity:0;transform:translateY(10px);pointer-events:none;";
+        document.body.appendChild(toast);
+    }
+    toast.textContent = text;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateY(0)";
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(10px)";
+    }, 3000);
 };
 
 // ── MORA E INTERESES RENDERER ───────────────────────────────────
@@ -1748,23 +1849,49 @@ const renderExtraordinarios = () => {
 };
 
 // ── RENDER ESTADO DE MOROSIDAD ──────────────────────────────────
-const renderMorosidad = () => {
+const renderMorosidad = (period) => {
     const tbody = document.getElementById("morosidadTableBody");
     if (!tbody) return;
 
-    if (!rawMorosidad || rawMorosidad.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:1.5rem;">Sin registros de morosidad.</td></tr>`;
+    const availablePeriods = Object.keys(rawMorosidadPorPeriodo || {}).sort();
+    let activePeriod = period;
+
+    if (!activePeriod || activePeriod === "todos" || !rawMorosidadPorPeriodo[activePeriod]) {
+        // Por defecto usar el período más reciente con morosidad
+        activePeriod = availablePeriods.length > 0 ? availablePeriods[availablePeriods.length - 1] : "2026-09";
+    }
+
+    const moroList = (rawMorosidadPorPeriodo && rawMorosidadPorPeriodo[activePeriod])
+        ? [...rawMorosidadPorPeriodo[activePeriod]]
+        : (rawMorosidad && rawMorosidad.length > 0 ? [...rawMorosidad] : []);
+
+    const badgeHeaderEl = document.getElementById("moroBadgeHeader");
+    if (badgeHeaderEl) {
+        badgeHeaderEl.textContent = `🚨 ${moroList.length} U.F. en Morosidad (${activePeriod})`;
+    }
+
+    const moroCardTitleEl = document.querySelector("#morosidad .card-title");
+    if (moroCardTitleEl) {
+        moroCardTitleEl.textContent = `🚨 Estado de Morosidad de Propietarios — Período ${activePeriod}`;
+    }
+
+    if (moroList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:1.5rem;">Sin registros de morosidad para el período ${activePeriod}.</td></tr>`;
+        const moroCountEl = document.getElementById("moroCount");
+        if (moroCountEl) moroCountEl.textContent = "0 U.F. (0,0%)";
+        const moroTotalDeudaEl = document.getElementById("moroTotalDeuda");
+        if (moroTotalDeudaEl) moroTotalDeudaEl.textContent = "$ 0,00";
         return;
     }
 
-    rawMorosidad.sort((a, b) => b.deuda - a.deuda);
+    moroList.sort((a, b) => b.deuda - a.deuda);
 
-    const totalDeuda = rawMorosidad.reduce((acc, m) => acc + m.deuda, 0);
-    const maxMoro = rawMorosidad[0];
-    const avgDeuda = totalDeuda / rawMorosidad.length;
+    const totalDeuda = moroList.reduce((acc, m) => acc + m.deuda, 0);
+    const maxMoro = moroList[0];
+    const avgDeuda = totalDeuda / moroList.length;
 
     const moroCountEl = document.getElementById("moroCount");
-    if (moroCountEl) moroCountEl.textContent = `${rawMorosidad.length} U.F. (${((rawMorosidad.length / 70) * 100).toFixed(1)}%)`;
+    if (moroCountEl) moroCountEl.textContent = `${moroList.length} U.F. (${((moroList.length / 70) * 100).toFixed(1)}%)`;
 
     const moroTotalDeudaEl = document.getElementById("moroTotalDeuda");
     if (moroTotalDeudaEl) moroTotalDeudaEl.textContent = fmtFull(totalDeuda);
@@ -1782,7 +1909,7 @@ const renderMorosidad = () => {
     if (moroAvgDeudaEl) moroAvgDeudaEl.textContent = fmtFull(avgDeuda);
 
     let html = "";
-    rawMorosidad.forEach(item => {
+    moroList.forEach(item => {
         const badgeStr = item.deuda > 300000 
             ? '<span class="badge badge-danger">🚨 Moroso Crítico</span>' 
             : (item.deuda > 100000 ? '<span class="badge badge-warning">⚠️ Con Deuda</span>' : '<span class="badge badge-warning" style="opacity:0.8">⚠️ Saldo Menor</span>');
@@ -1822,6 +1949,8 @@ const init = async () => {
         rawMultas   = data.multas || [];
         rawExtraordinarios = data.gastos_extraordinarios || data.extraordinarios || [];
         rawMorosidad = data.morosidad || [];
+        rawMorosidadPorPeriodo = data.morosidad_por_periodo || {};
+        consorcioMeta = data.consorcio_meta || {};
 
         // Calcular anomalías cuantitativas con media móvil
         rawExpenses.sort((a, b) => a.periodo.localeCompare(b.periodo));
@@ -1872,11 +2001,27 @@ const renderContractsBoard = () => {
 
     const contracts = [
         {
+            title: "📋 Administración de Consorcios",
+            provider: "Fernández - Villasenin (Matr. 862)",
+            type: "Administración Legal y Contable (Ley 14701)",
+            dueDate: "2027-08-01",
+            cost: "$ 850.000 /mes",
+            status: "Vigente"
+        },
+        {
+            title: "💻 Plataforma de Gestión Digital",
+            provider: "ConsorcioAbierto S.A.S.",
+            type: "Portal de Propietarios y Expensa Digital",
+            dueDate: "2027-08-01",
+            cost: "$ 132.898 /mes",
+            status: "Vigente"
+        },
+        {
             title: "🛡️ Seguro Integral de Consorcio",
             provider: "Holando / Allianz",
-            type: "Póliza Incendio y RC",
-            dueDate: "2026-10-15",
-            cost: "$ 199.165 /mes",
+            type: "Póliza Incendio y RC (Póliza 1184913)",
+            dueDate: "2026-12-15",
+            cost: "$ 224.225 /mes",
             status: "Vigente"
         },
         {
@@ -1891,9 +2036,9 @@ const renderContractsBoard = () => {
             title: "🐛 Fumigación y Desinsectación",
             provider: "Eco Plagas Saneamiento",
             type: "Control Mensual de Plagas",
-            dueDate: "2026-08-25",
+            dueDate: "2026-11-25",
             cost: "$ 29.832 /mes",
-            status: "Próximo"
+            status: "Vigente"
         },
         {
             title: "🧯 Carga de Matafuegos",
@@ -1904,12 +2049,12 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "🎨 Inspección Fachada y Pintura",
+            title: "🎨 Pintura de Fachada",
             provider: "Rafael Morel / Luis Pavón",
-            type: "Auditoría de Avance de Obra",
-            dueDate: "2026-09-30",
-            cost: "$ 1.500.000 /cuota",
-            status: "En Obra"
+            type: "Obra Extraordinaria Finalizada",
+            dueDate: "2026-08-31",
+            cost: "$ 2.000.000 (Cierre Ago-26)",
+            status: "Finalizada"
         }
     ];
 

@@ -80,11 +80,28 @@ const normalizeConceptKey = (str) => {
     if (!str) return "";
     let cleaned = cleanConceptDisplay(str);
     let s = cleaned.toLowerCase().trim();
-    
+
+    // Unificación canónica entre formato histórico D&F (<= 2026-07) y ConsorcioAbierto (>= 2026-08)
+    if (s.includes("192498")) return "aysa:medidor_192498";
+    if (s.includes("192499")) return "aysa:medidor_192499";
+    if (s.includes("192500")) return "aysa:medidor_192500";
+    if (s.includes("05637256") || s.includes("edesur")) return "edesur:cliente_05637256";
+    if (s.includes("encargado principal") && (s.includes("sueldo") || s.includes("jornal"))) return "sueldo:encargado_principal";
+    if (s.includes("ayudante") && (s.includes("sueldo") || s.includes("jornal"))) return "sueldo:ayudante";
+    if (s.includes("vigilancia nocturna") && (s.includes("sueldo") || s.includes("jornal"))) return "sueldo:vigilancia_nocturna";
+    if (s.includes("holando") || s.includes("integral de consorcio")) return "seguro:holando_integral";
+    if (s.includes("allianz")) return "seguro:allianz_ap";
+    if (s.includes("bastida")) return "seguridad:bastida_sa";
+    if (s.includes("guillemi")) return "ascensores:guillemi";
+    if (s.includes("telecentro") || s.includes("flow") || s.includes("abono internet")) return "internet:flow_telecentro";
+    if (s.includes("ivess") || s.includes("botellon agua")) return "insumos:ivess_agua";
+    if (s.includes("honorarios") && (s.includes("administracion") || s.includes("administración") || s.includes("adm"))) return "adm:honorarios_administracion";
+    if (s.includes("mantenimiento de cuenta") || s.includes("comision mantenimiento") || s.includes("banco galicia")) return "banco:mantenimiento_galicia";
+
     // Identificadores críticos a preservar intactos
     const keyMatch = s.match(/(aysa|edesur|telecentro|flow|guillemi|allianz|fateryh|suterh|arca|afip|192498|192499|192500|05637256)/);
     const keyId = keyMatch ? keyMatch[1] : "";
-    
+
     // Remover palabras accesorias y símbolos
     s = s.replace(/\b(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|sept|octubre|oct|noviembre|nov|diciembre|dic)\b/gi, '');
     s = s.replace(/\b(202[0-9]|201[0-9])\b/g, '');
@@ -92,7 +109,7 @@ const normalizeConceptKey = (str) => {
     s = s.replace(/\b(factura|comprobante|nro|n°|cuota|periodo|período|mes|liq)\b/gi, '');
     s = s.replace(/[^a-z0-9áéíóúñ\s]/gi, ' ');
     s = s.replace(/\s+/g, ' ').trim();
-    
+
     if (keyId) return `${keyId}:${s.slice(0, 30)}`;
     return s.slice(0, 40);
 };
@@ -167,19 +184,28 @@ const runDocumentaryAudit = (rawExpenses) => {
         
         missingPeriods.forEach(mp => {
             const mNum = mp.split("-")[1];
-            
+
             // Si el mes está en la lista de excepción configurada, ignorar
             if (matchedException && matchedException.meses_excluidos.includes(mNum)) {
                 return;
             }
-            
+
+            // En ConsorcioAbierto (>= 2026-08), las deducciones de recibo de sueldo (Jubilación, Obra Social, Ley 19032, Cuota Sindical, etc.)
+            // se exponen consolidadas en Sueldo Neto + ARCA + SUTERH/FATERYH, por lo que no constituyen omisión individual.
+            if (mp >= "2026-08" && data.categoria === "Sueldos y Cargas Sociales" && !data.key.startsWith("sueldo:")) {
+                const subKey = data.key.toLowerCase();
+                if (/jubilac|obra social|19032|inssjp|seguro de vida|cuota sindical|aporte|contribuc|res 33|ley 25413/.test(subKey)) {
+                    return;
+                }
+            }
+
             const hasBefore = activePeriods.some(p => p < mp);
             const hasAfter = activePeriods.some(p => p > mp);
-            
+
             // Calcular promedio histórico del concepto
             const amountsArr = Object.values(data.amountsByPeriod);
             const avgMonto = amountsArr.reduce((a, b) => a + b, 0) / (amountsArr.length || 1);
-            
+
             // Detección de acumulación posterior
             let isAccumulated = false;
             if (hasAfter) {
@@ -189,17 +215,17 @@ const runDocumentaryAudit = (rawExpenses) => {
                     isAccumulated = true;
                 }
             }
-            
+
             // Detección de cargas laborales / previsionales asociadas
             const isLabor = data.categoria === "Sueldos y Cargas Sociales" || 
                             /cargas|contribucion|afip|arca|fateryh|suterh|art|jubilac/i.test(data.rawSample) ||
                             /fateryh|suterh|arca|afip/i.test(data.key);
-            
+
             // Clasificación y Estado Probabilístico
             let tipoAlerta = "Posible gasto omitido";
             let prioridad = "🟡 Sugerencia";
             let estadoProbabilistico = "Sugerido";
-            
+
             if (isAccumulated) {
                 tipoAlerta = "Posible acumulación de deuda (salto de monto posterior)";
                 prioridad = "🔴 Alta";
@@ -220,7 +246,7 @@ const runDocumentaryAudit = (rawExpenses) => {
                 prioridad = "🟡 Sugerencia";
                 estadoProbabilistico = "Sin evidencia suficiente";
             }
-            
+
             // Score de Confianza (0 - 100%)
             let confidence = Math.round(
                 (recurrenceRate * 50) + 
@@ -229,12 +255,14 @@ const runDocumentaryAudit = (rawExpenses) => {
                 (isLabor ? 10 : 0)
             );
             confidence = Math.min(98, Math.max(35, confidence));
-            
+
             const conceptNameClean = data.displayConcept || cleanConceptDisplay(data.rawSample);
-            
+
             // Rationale Explicativa
             let explicacion = `El concepto "${conceptNameClean}" presenta un comportamiento ${frecuencia.toLowerCase()} recurrente (${activeCount} de ${totalPeriods} períodos, ${Math.round(recurrenceRate*100)}% de presencia histórica). `;
-            if (hasBefore && hasAfter) {
+            if (mp === "2026-08" && /bastida|guillemi|suterh|arca/.test(data.key)) {
+                explicacion += `En 2026-08 (mes de traspaso a Adm. Fernández - Villasenin), el devengado de julio fue abonado en el cuadro de "Pagos de gastos devengados en meses anteriores" ($ 15.297.607,28) y presupuestado en página 4, sin incluirse como gasto ordinario devengado de agosto.`;
+            } else if (hasBefore && hasAfter) {
                 explicacion += `Figuraba en liquidaciones previas, desaparece en ${mp} y vuelve a figurar en períodos posteriores.`;
             } else if (isAccumulated) {
                 explicacion += `Ausente en ${mp} y reaparece posteriormente con un importe significativamente mayor al promedio histórico ($ ${Math.round(avgMonto).toLocaleString('es-AR')}).`;
@@ -243,7 +271,7 @@ const runDocumentaryAudit = (rawExpenses) => {
             } else {
                 explicacion += `No se encontró comprobante ni registro en la liquidación de ${mp}.`;
             }
-            
+
             auditFindings.push({
                 id: `AUD-${mp}-${data.key}`,
                 periodo: mp,
@@ -263,7 +291,7 @@ const runDocumentaryAudit = (rawExpenses) => {
             });
         });
     });
-    
+
     // Ordenar hallazgos: 1. Prioridad (Alta > Revisar > Sugerencia), 2. Confianza, 3. Período
     const prioOrder = { "🔴 Alta": 1, "🟠 Revisar": 2, "🟡 Sugerencia": 3 };
     return auditFindings.sort((a, b) => {
@@ -284,7 +312,7 @@ const LEY_14701_BOOKS = [
         estado: "VERIFICADO",
         badgeClass: "badge-success",
         rubricacion: "Registro Propiedad Inmueble PBA",
-        observacion: "Rubricado y foliado. Contiene última acta de asamblea donde se fijó el cese de mandato."
+        observacion: "Rubricado y foliado. Contiene el acta de asamblea con cese de mandato de D&F y designación de Adm. Fernández - Villasenin (Ago 2026)."
     },
     {
         id: "book-admin",
@@ -292,17 +320,17 @@ const LEY_14701_BOOKS = [
         articulo: "Art. 9 Inc. h) Ley 14701",
         estado: "VERIFICADO",
         badgeClass: "badge-success",
-        rubricacion: "RPAC Provincia de Buenos Aires",
-        observacion: "Foliado y al día con registraciones periódicas de liquidaciones de expensas."
+        rubricacion: "RPAC Provincia de Buenos Aires (Matr. 862)",
+        observacion: "Digitalizado en plataforma ConsorcioAbierto (ID 27151) con conciliación de Banco Galicia CC 0009108-8 044-9."
     },
     {
         id: "book-ordenes",
         nombre: "Libro de Órdenes del Personal de Portería",
         articulo: "Art. 9 Inc. h) Ley 14701 / Ley 12981",
-        estado: "PENDIENTE ENTREGA",
+        estado: "EN TRASPASO",
         badgeClass: "badge-amber",
         rubricacion: "Ministerio de Trabajo PBA",
-        observacion: "Constancias de consignas fijadas a Encargado Principal, Auxiliar y Suplentes."
+        observacion: "Constancias de consignas para Encargado Permanente y Ayudante; liquidación final de Vigilancia Nocturna en 2026-09."
     },
     {
         id: "book-firmas",
@@ -311,17 +339,17 @@ const LEY_14701_BOOKS = [
         estado: "VERIFICADO",
         badgeClass: "badge-success",
         rubricacion: "Consorcio Sarmiento 356/358/360",
-        observacion: "Padrón verificado de las 70 Unidades Funcionales con domicilios constituidos."
+        observacion: "Padrón verificado de las 70 Unidades Funcionales en ConsorcioAbierto con coeficientes A (Gastos Fijos) y D (Seguridad)."
     }
 ];
 
 const runLey14701ComplianceAudit = (rawExpenses) => {
     return {
         marcoLegal: "Ley 14701 — Provincia de Buenos Aires (Vigente)",
-        rpacMatricula: "RPAC PBA N° 14892 (Vigente)",
-        cuentaBancaria: "Cta. Cte. Banco Galicia N° 0070044320000009108891 (100% Exclusiva Consorcio)",
-        cuitConsorcio: "30-71489201-9",
-        cumplimientoScore: 96,
+        rpacMatricula: "Matr. Adm. N° 862 — Adm. Fernández - Villasenin (CUIT 27-29946737-1)",
+        cuentaBancaria: "Banco Galicia CC 0009108-8 044-9 · CBU 0070044320000009108891 (Alias: SARMIENTO356.58.60)",
+        cuitConsorcio: "30-71412062-6",
+        cumplimientoScore: 98,
         libros: LEY_14701_BOOKS
     };
 };
@@ -649,60 +677,103 @@ const exportDocumentaryAuditCSV = () => {
 // ── 5. VISOR INTERACTIVO DE COMPROBANTES Y FACTURAS AFIP/ARCA ───────
 const getInvoiceMetadata = (item) => {
     const c = String(item.concepto || item.rawSample || '').trim();
-    const p = String(item.periodo || '2026-07');
+    const p = String(item.periodo || '2026-09');
     const m = Number(item.monto || item.montoEstimado || 0);
     const cat = String(item.categoria || item.rubro || 'General');
-    
-    let prov = "Proveedor Registrado";
-    let cuit = "30-70891245-8";
-    let tipoComp = "Factura B (Comprobante Oficial)";
-    
+
+    let prov = item.proveedor || "Proveedor Registrado";
+    let cuit = item.cuit || "30-71412062-6 (Consorcio)";
+    let tipoComp = item.comprobante_tipo && item.comprobante_tipo !== "Sin comprobante"
+        ? item.comprobante_tipo
+        : "Comprobante Oficial";
+
     const cUpper = c.toUpperCase();
-    if (cUpper.includes("EDESUR")) {
-        prov = "EDESUR S.A.";
-        cuit = "30-63951287-2";
-        tipoComp = "Factura B (Servicio Público)";
-    } else if (cUpper.includes("AYSA")) {
-        prov = "Agua y Saneamientos Argentinos S.A. (AySA)";
-        cuit = "30-70956843-9";
-        tipoComp = "Factura B (Servicio Público)";
-    } else if (cUpper.includes("GUILLEMI")) {
-        prov = "Ascensores Guillemi S.A.";
-        cuit = "30-58491204-1";
-        tipoComp = "Factura A (Abono Mantenimiento)";
-    } else if (cUpper.includes("SANEAMIENTO") || cUpper.includes("ECO PLAGAS") || cUpper.includes("FB")) {
-        prov = "FB Saneamiento Ambiental";
-        cuit = "30-71284910-3";
-        tipoComp = "Factura B (Desinsectación)";
-    } else if (cUpper.includes("HOLANDO") || cUpper.includes("ALLIANZ") || cUpper.includes("SEGURO")) {
-        prov = "Holando / Allianz Seguros S.A.";
-        cuit = "30-50004928-1";
-        tipoComp = "Póliza / Cuota Seguro Consorcio";
-    } else if (cUpper.includes("TELECENTRO")) {
-        prov = "Telecentro S.A.";
-        cuit = "30-63910284-5";
-        tipoComp = "Factura B (Telecomunicaciones)";
-    } else if (cUpper.includes("SUTERH") || cUpper.includes("FATERYH") || cUpper.includes("AFIP") || cUpper.includes("CARGAS")) {
-        prov = "AFIP / SUTERH - FATERYH";
-        cuit = "33-63719204-9";
-        tipoComp = "VEP / Formulario F.931 AFIP";
-    } else if (cUpper.includes("SUELDO") || cUpper.includes("ENCARGADO") || cUpper.includes("AYUDANTE")) {
-        prov = "Personal de Consorcio";
-        cuit = "20-34910284-3";
-        tipoComp = "Recibo de Sueldo Ley 20744";
+    if (!item.proveedor) {
+        if (cUpper.includes("EDESUR") || cUpper.includes("05637256")) {
+            prov = "EDESUR - EMPRESA DISTRIBUIDORA SUR S.A.";
+            cuit = "CUIT 30-65511651-2";
+            tipoComp = "Liq. Serv. Púb. B (Energía Eléctrica)";
+        } else if (cUpper.includes("AYSA") || cUpper.includes("192498") || cUpper.includes("192499") || cUpper.includes("192500")) {
+            prov = "Agua y Saneamientos Argentinos S.A. (AySA)";
+            cuit = "CUIT 30-70956507-5";
+            tipoComp = "Liq. Serv. Púb. B (Agua y Cloacas)";
+        } else if (cUpper.includes("BASTIDA")) {
+            prov = "BASTIDA S.A. SEGURIDAD PRIVADA INTEGRAL";
+            cuit = "CUIT 30-70840520-1";
+            tipoComp = "Factura B (Vigilancia Física)";
+        } else if (cUpper.includes("GUILLEMI")) {
+            prov = "ASCENSORES GUILLEMI INTERIOR S.A.";
+            cuit = "CUIT 30-71148920-4";
+            tipoComp = "Factura B (Abono Ascensores)";
+        } else if (cUpper.includes("SANEAMIENTO") || cUpper.includes("ECO PLAGAS") || cUpper.includes("FB")) {
+            prov = "FB Saneamiento Ambiental (Eco Plagas)";
+            cuit = "CUIT 30-71284910-3";
+            tipoComp = "Factura B (Desinsectación)";
+        } else if (cUpper.includes("HOLANDO")) {
+            prov = "LA HOLANDO SUDAMERICANA COMPAÑÍA DE SEGUROS S.A.";
+            cuit = "CUIT 33-50003806-9";
+            tipoComp = "Póliza Integral de Consorcio";
+        } else if (cUpper.includes("ALLIANZ")) {
+            prov = "ALLIANZ ARGENTINA COMPAÑÍA DE SEGUROS S.A.";
+            cuit = "CUIT 30-50003721-7";
+            tipoComp = "Póliza Seguro Accidentes Personales";
+        } else if (cUpper.includes("TELECENTRO") || cUpper.includes("FLOW") || cUpper.includes("PERSONAL")) {
+            prov = "PERSONAL / FLOW (Telecom Argentina S.A.)";
+            cuit = "CUIT 30-63945373-8";
+            tipoComp = "Factura B (Conectividad / Internet)";
+        } else if (cUpper.includes("ARCA") || cUpper.includes("AFIP") || cUpper.includes("JUBILAC") || cUpper.includes("OBRA SOCIAL") || cUpper.includes("19032")) {
+            prov = "ARCA (Ex AFIP) — Seguridad Social F.931";
+            cuit = "CUIT 33-69345023-9";
+            tipoComp = "VEP / Declaración Jurada F.931";
+        } else if (cUpper.includes("SUTERH") || cUpper.includes("FATERYH") || cUpper.includes("SERACARH") || cUpper.includes("SINDICAL")) {
+            prov = "SUTERH / FATERYH / SERACARH";
+            cuit = "Entidad Sindical CCT 589/10";
+            tipoComp = "Boleta Sindical CCT 589/10";
+        } else if (cUpper.includes("SUELDO") || cUpper.includes("ENCARGADO") || cUpper.includes("AYUDANTE") || cUpper.includes("VIGILANCIA NOCTURNA")) {
+            prov = `Personal del Consorcio (${item.empleado || 'Relación de Dependencia'})`;
+            cuit = "CUIL Protegido (Ley 25.326)";
+            tipoComp = "Recibo de Haberes Ley 20.744";
+        } else if (cUpper.includes("DELJARANO") || cUpper.includes("PARIANO") || cUpper.includes("D&F") || (cUpper.includes("HONORARIOS") && p <= "2026-07")) {
+            prov = "D&F Administración (Deljarano / Pariano)";
+            cuit = "CUIT 27-25108998-7";
+            tipoComp = "Factura C (Honorarios Administración)";
+        } else if (cUpper.includes("FERNÁNDEZ") || cUpper.includes("FERNANDEZ") || cUpper.includes("VILLASENIN")) {
+            prov = "ADMINISTRACIÓN DE CONSORCIOS FERNÁNDEZ - VILLASENIN";
+            cuit = "CUIL 27-29946737-1 (Matr. 862)";
+            tipoComp = "Liquidación de Honorarios Administración";
+        } else if (cUpper.includes("GALICIA") || cUpper.includes("25413") || cUpper.includes("MANTENIMIENTO DE CUENTA")) {
+            prov = "BANCO DE GALICIA Y BUENOS AIRES S.A.U.";
+            cuit = "Cta. Cte. 0009108-8 044-9";
+            tipoComp = "Débito Bancario / Imp. Ley 25.413";
+        } else if (cUpper.includes("PAVON")) {
+            prov = "LUIS DE LA PAS PAVON RIVEROS";
+            cuit = "CUIT 20-94698367-6";
+            tipoComp = "Factura C (Obra Pintura)";
+        } else if (cUpper.includes("LECOS") || cUpper.includes("LINAJE")) {
+            prov = "LECOS SERVICIOS de LINAJE ESTEBAN JESÚS";
+            cuit = "CUIT 20-22001035-0";
+            tipoComp = "Factura C (Mantenimiento Eléctrico/Cámaras)";
+        }
     }
-    
+
     let numComp = "";
-    const mFact = c.match(/FAC\s*N[°º]?\s*([0-9\-]+)/i);
-    if (mFact) {
-        numComp = `FACT ${mFact[1]}`;
+    if (item.comprobante_nro && item.comprobante_nro !== "-") {
+        numComp = `${item.comprobante_tipo || 'Comp.'} ${item.comprobante_nro}`;
     } else {
-        const hashVal = Math.abs(c.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)) % 8999 + 1000;
-        numComp = `FACT 0002-${String(hashVal).padStart(8, '0')}`;
+        const mFact = c.match(/(?:FAC|FACT|FC\.?|RECIBO|TICKET)\s*(?:[ABC]\s*)?(?:N[°º]?\s*)?([0-9]{1,5}-[0-9]{4,8}|[0-9]{6,10})/i);
+        if (mFact) {
+            numComp = `COMP. ${mFact[1]}`;
+        } else {
+            numComp = `LIQ-${p} (Reg. Contable)`;
+        }
     }
-    
-    const pdfUrl = `liquidaciones/326_151_${p}_liquidacion.pdf`;
-    
+
+    const settlementPdfUrl = `liquidaciones/360_${p}_liquidacion.pdf`;
+    const comprobanteUrl = item.comprobante_url || null;
+    const pdfUrl = comprobanteUrl || settlementPdfUrl;
+    const estadoPago = item.seccion || "Pagado";
+    const adminName = item.administracion || (p >= "2026-08" ? "Fernández - Villasenin" : "D&F Administración");
+
     return {
         concepto: c,
         periodo: p,
@@ -712,7 +783,13 @@ const getInvoiceMetadata = (item) => {
         cuit: cuit,
         tipoComp: tipoComp,
         numComp: numComp,
-        pdfUrl: pdfUrl
+        comprobanteUrl: comprobanteUrl,
+        settlementPdfUrl: settlementPdfUrl,
+        pdfUrl: pdfUrl,
+        estadoPago: estadoPago,
+        administracion: adminName,
+        cuentaContable: item.cuenta_contable || cat,
+        fechaEmision: item.fecha_emision || null
     };
 };
 
@@ -721,108 +798,128 @@ const openInvoiceViewerModal = (itemOrConcept, periodo, monto) => {
     if (typeof itemOrConcept === 'object' && itemOrConcept !== null) {
         item = itemOrConcept;
     } else if (typeof itemOrConcept === 'string') {
-        item = { concepto: itemOrConcept, periodo: periodo || '2026-07', monto: monto || 0 };
+        // Buscar si existe el ítem completo en globalRawExpenses para recuperar su comprobante_url real
+        const matchItem = (globalRawExpenses || []).find(
+            g => g.periodo === (periodo || '2026-09') && g.concepto === itemOrConcept
+        );
+        item = matchItem || { concepto: itemOrConcept, periodo: periodo || '2026-09', monto: monto || 0 };
     }
-    
+
     const meta = getInvoiceMetadata(item);
     const modal = document.getElementById("invoiceViewerModal");
     if (!modal) return;
-    
+
     document.getElementById("invoiceModalTitle").textContent = `Comprobante: ${meta.concepto}`;
-    document.getElementById("invoiceModalSub").textContent = `Período: ${meta.periodo} · Emisor: ${meta.proveedor}`;
-    
+    document.getElementById("invoiceModalSub").textContent = `Período: ${meta.periodo} · Emisor: ${meta.proveedor} · Adm.: ${meta.administracion}`;
+
     document.getElementById("invoiceMetaProveedor").textContent = meta.proveedor;
     document.getElementById("invoiceMetaCuit").textContent = meta.cuit;
     document.getElementById("invoiceMetaNum").textContent = meta.numComp;
     document.getElementById("invoiceMetaMonto").textContent = typeof fmt === 'function' ? fmt(meta.monto) : `$ ${meta.monto.toLocaleString('es-AR')}`;
     document.getElementById("invoiceMetaPeriodo").textContent = meta.periodo;
-    
+
     const iframe = document.getElementById("invoiceIframe");
     if (iframe) {
         const fmtMonto = typeof fmt === 'function' ? fmt(meta.monto) : `$ ${meta.monto.toLocaleString('es-AR')}`;
+        const statusColor = meta.estadoPago === "Pagado" ? "#10b981" : "#f59e0b";
+        const statusLabel = meta.estadoPago === "Pagado"
+            ? "✓ Pagado y Conciliado"
+            : `⚠️ ${meta.estadoPago} (Pasivo Devengado)`;
+        const hasOriginalScan = Boolean(meta.comprobanteUrl);
+
         const docHtml = `
             <!DOCTYPE html>
             <html lang="es">
             <head>
                 <meta charset="UTF-8">
                 <style>
-                    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0b1120; color: #f1f5f9; margin: 0; padding: 1.5rem; }
-                    .card { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-                    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #06b6d4; padding-bottom: 1rem; margin-bottom: 1rem; }
-                    .logo { font-size: 1.1rem; font-weight: 800; color: #06b6d4; letter-spacing: 1px; }
-                    .comp-type { background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.78rem; }
-                    .row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.85rem; border-bottom: 1px dashed rgba(255,255,255,0.06); padding-bottom: 6px; }
-                    .label { color: #94a3b8; }
-                    .val { font-weight: 600; color: #f1f5f9; }
-                    .total-box { background: rgba(16,185,129,0.1); border: 1px solid #10b981; border-radius: 8px; padding: 1rem; text-align: center; margin-top: 1.25rem; }
-                    .total-title { font-size: 0.78rem; color: #10b981; text-transform: uppercase; font-weight: 700; }
-                    .total-val { font-size: 1.8rem; font-weight: 900; color: #10b981; margin-top: 4px; }
-                    .stamp { margin-top: 1.5rem; text-align: center; font-size: 0.75rem; color: #64748b; }
+                    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0b1120; color: #f1f5f9; margin: 0; padding: 1.25rem; }
+                    .card { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.35rem; max-width: 620px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+                    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #06b6d4; padding-bottom: 0.85rem; margin-bottom: 0.9rem; gap: 10px; }
+                    .logo { font-size: 1.05rem; font-weight: 800; color: #06b6d4; letter-spacing: 0.5px; }
+                    .comp-type { background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.76rem; white-space: nowrap; }
+                    .row { display: flex; justify-content: space-between; margin-bottom: 0.65rem; font-size: 0.84rem; border-bottom: 1px dashed rgba(255,255,255,0.06); padding-bottom: 5px; gap: 12px; }
+                    .label { color: #94a3b8; white-space: nowrap; }
+                    .val { font-weight: 600; color: #f1f5f9; text-align: right; }
+                    .total-box { background: rgba(16,185,129,0.1); border: 1px solid #10b981; border-radius: 8px; padding: 0.9rem; text-align: center; margin-top: 1rem; }
+                    .total-title { font-size: 0.75rem; color: #10b981; text-transform: uppercase; font-weight: 700; }
+                    .total-val { font-size: 1.65rem; font-weight: 900; color: #10b981; margin-top: 4px; }
+                    .scan-actions { display: flex; gap: 10px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+                    .btn-scan { background: #06b6d4; color: #0b1120; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+                    .btn-liq { background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+                    .stamp { margin-top: 1rem; text-align: center; font-size: 0.74rem; color: #64748b; }
                 </style>
             </head>
             <body>
                 <div class="card">
                     <div class="header">
                         <div>
-                            <div class="logo">CONSORCIO SARMIENTO 356/358/360</div>
-                            <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">Comprobante Respaldatorio de Expensas</div>
+                            <div class="logo">CONSORCIO SARMIENTO 356, 358 Y 360</div>
+                            <div style="font-size:0.74rem; color:#94a3b8; margin-top:2px;">CUIT 30-71412062-6 · Auditoría de Comprobante Respaldatorio</div>
                         </div>
                         <div>
                             <span class="comp-type">${meta.tipoComp}</span>
                         </div>
                     </div>
                     <div class="row">
-                        <span class="label">🏢 Emisor / Proveedor:</span>
+                        <span class="label">Emisor / Proveedor:</span>
                         <span class="val">${meta.proveedor}</span>
                     </div>
                     <div class="row">
-                        <span class="label">🆔 CUIT Emisor:</span>
+                        <span class="label">Identificación Tributaria:</span>
                         <span class="val" style="color:#06b6d4;">${meta.cuit}</span>
                     </div>
                     <div class="row">
-                        <span class="label">🔢 Número de Comprobante:</span>
+                        <span class="label">Número de Comprobante:</span>
                         <span class="val">${meta.numComp}</span>
                     </div>
                     <div class="row">
-                        <span class="label">📌 Concepto Imputado:</span>
-                        <span class="val" style="max-width: 60%; text-align: right;">${meta.concepto}</span>
+                        <span class="label">Concepto Imputado:</span>
+                        <span class="val">${meta.concepto}</span>
                     </div>
                     <div class="row">
-                        <span class="label">📅 Período de Expensa:</span>
-                        <span class="val">${meta.periodo}</span>
+                        <span class="label">Período / Administración:</span>
+                        <span class="val">${meta.periodo} · ${meta.administracion}</span>
                     </div>
                     <div class="row">
-                        <span class="label">🏛️ Estado de Validación AFIP/ARCA:</span>
-                        <span class="val" style="color:#10b981;">✓ Verificado & Aprobado</span>
+                        <span class="label">Estado de Pago / Conciliación:</span>
+                        <span class="val" style="color:${statusColor};">${statusLabel}</span>
                     </div>
                     <div class="total-box">
-                        <div class="total-title">Monto Registrado en Liquidación</div>
+                        <div class="total-title">Importe Liquidado</div>
                         <div class="total-val">${fmtMonto}</div>
                     </div>
+                    <div class="scan-actions">
+                        ${hasOriginalScan ? `<a class="btn-scan" href="${meta.comprobanteUrl}" target="_blank" rel="noopener">📎 Abrir Factura / Recibo Escaneado Original (ConsorcioAbierto)</a>` : ''}
+                        <a class="btn-liq" href="${meta.settlementPdfUrl}" target="_blank" rel="noopener">📄 Abrir Liquidación Oficial ${meta.periodo} (PDF)</a>
+                    </div>
                     <div class="stamp">
-                        <span>🛡️ Documento Digital Auditado — Proyecto Sarmiento 360</span>
+                        <span>Documento Auditado — Sarmiento 360 (${hasOriginalScan ? 'Con adjunto digitalizado oficial' : 'Registrado en liquidación mensual'})</span>
                     </div>
                 </div>
             </body>
             </html>
         `;
+        iframe.removeAttribute("src");
         iframe.srcdoc = docHtml;
     }
-    
-    // Configurar botones de acción
+
+    // Configurar botones de acción del pie del modal
     const downloadBtn = document.getElementById("invoiceDownloadBtn");
     if (downloadBtn) {
+        downloadBtn.textContent = meta.comprobanteUrl ? "📎 Descargar Comprobante Original" : "⬇ Descargar Liquidación PDF";
         downloadBtn.onclick = () => {
             window.open(meta.pdfUrl, '_blank');
         };
     }
     const openTabBtn = document.getElementById("invoiceOpenTabBtn");
     if (openTabBtn) {
+        openTabBtn.textContent = "↗ Ver Liquidación Completa";
         openTabBtn.onclick = () => {
-            window.open(meta.pdfUrl, '_blank');
+            window.open(meta.settlementPdfUrl, '_blank');
         };
     }
-    
+
     modal.classList.add("open");
 };
 
@@ -835,5 +932,6 @@ const closeInvoiceViewerModal = () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { runDocumentaryAudit, normalizeConceptKey, AUDIT_EXCEPTIONS, renderDocumentaryAuditSection, exportDocumentaryAuditCSV, openInvoiceViewerModal, closeInvoiceViewerModal };
 }
+
 
 

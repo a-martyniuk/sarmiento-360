@@ -67,27 +67,12 @@ def main():
             elif not is_valid:
                 print(f"El período {expected_period} no está cargado o contiene información incompleta/inválida. Buscando actualización...")
 
-            # 1. Ejecutar descarga de PDFs desde el portal de la administración
+            # Ejecutar sincronización unificada de ConsorcioAbierto + Histórico 360
             try:
-                import download_historico
-                download_historico.DOWNLOAD_DIR = "liquidaciones"
-                download_historico.FORCE_REDOWNLOAD_CURRENT = True
-                download_historico.main()
+                print("Ejecutando ingest_consorcioabierto.py para sincronizar gastos.json y prorrateo.json...")
+                subprocess.run([sys.executable, "ingest_consorcioabierto.py"], check=False)
             except Exception as e:
-                print("⚠️ Error durante descarga de PDFs:", e)
-
-            # 2. Ejecutar extractores de datos para sincronizar gastos.json y prorrateo.json
-            try:
-                print("Ejecutando extract_data.py para actualizar la base de gastos...")
-                subprocess.run([sys.executable, "extract_data.py"], check=False)
-            except Exception as e:
-                print("⚠️ Error en extract_data.py:", e)
-
-            try:
-                print("Ejecutando extract_prorrateo.py para actualizar la base de prorrateos...")
-                subprocess.run([sys.executable, "extract_prorrateo.py"], check=False)
-            except Exception as e:
-                print("⚠️ Error en extract_prorrateo.py:", e)
+                print("⚠️ Error en ingest_consorcioabierto.py:", e)
 
             if is_period_valid(expected_period):
                 print(f"¡Sincronización exitosa! El período {expected_period} cuenta ahora con información válida y completa.")

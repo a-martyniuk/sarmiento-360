@@ -1246,7 +1246,7 @@
             <p class="page-subtitle">Auditoría independiente y control financiero del consorcio — Sarmiento 356-360</p>
         </div>
         <div class="toolbar">
-            <input type="text" id="searchInput" placeholder="🔍 Buscar concepto..." style="padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-1); font-size: 0.8rem; outline: none; width: 180px;">
+            <input type="text" id="searchInput" placeholder="🔍 Buscar concepto..." style="padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-1); font-size: 0.8rem; outline: none; width: 170px;">
             <label for="periodFilter" style="font-size:0.8rem;color:var(--text-3);">Período:</label>
             <select id="periodFilter">
                 <option value="todos">Todos los períodos</option>
@@ -1295,6 +1295,8 @@
                 <option value="Destapaciones y Cloacas">🚽 Destapaciones y Cloacas</option>
                 <option value="Plataforma de Cobranza (Combril)">💳 Plataforma de Cobranza (Combril)</option>
                 <!-- Administración -->
+                <option value="Honorarios Adm. Fernández - Villasenin">📋 Honorarios Adm. Fernández - Villasenin</option>
+                <option value="Plataforma ConsorcioAbierto">💻 Plataforma ConsorcioAbierto</option>
                 <option value="Honorarios Adm. D&F">📋 Honorarios Adm. D&F</option>
                 <option value="Honorarios Contador (Pariano)">📜 Honorarios Contador (Estudio Pariano)</option>
                 <option value="Gastos Bancarios e Impuestos">🏦 Gastos Bancarios e Imp. (Ley 25.413)</option>
@@ -1313,9 +1315,57 @@
                 <option value="Pagado" selected>Pagados (Caja)</option>
                 <option value="Pendiente">Pendientes de Pago</option>
             </select>
+            <button type="button" class="btn" onclick="copyWhatsAppSummary()" style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; padding: 0.45rem 0.8rem; margin-left: 0.5rem;" title="Copiar resumen del período seleccionado al portapapeles para WhatsApp">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                <span>📲 Resumen WhatsApp</span>
+            </button>
         </div>
     </div>
 
+    <!-- BANNER EJECUTIVO: TRASPASO DE ADMINISTRACIÓN & AUDITORÍA DE PASIVOS -->
+    <div id="transitionBanner" style="background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.06)); border: 1px solid rgba(6,182,212,0.25); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.75rem; position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span class="badge" style="background: rgba(16,185,129,0.18); color: #34d399; border: 1px solid rgba(16,185,129,0.3); font-size: 0.72rem; padding: 2px 8px;">🔄 TRASPASO DE ADMINISTRACIÓN EFECTUADO</span>
+                    <span style="font-size: 0.75rem; color: var(--text-3);">Vigente desde Agosto 2026 (Ley 14701 PBA)</span>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-1); margin: 0;">Administración Fernández - Villasenin (Matr. 862 RPA)</h3>
+                <p style="font-size: 0.8rem; color: var(--text-2); margin-top: 2px; margin-bottom: 0;">
+                    Migración a <strong>ConsorcioAbierto</strong> (ID 27151) • Banco Galicia CC 0009108-8 044-9 (Alias: <code>SARMIENTO356.58.60</code>)
+                </p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="liquidaciones/360_2026-08_liquidacion.pdf" target="_blank" class="btn" style="background: rgba(6,182,212,0.1); border-color: rgba(6,182,212,0.3); color: #22d3ee; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                    📄 Liquidación Ago-26 (PDF)
+                </a>
+                <a href="liquidaciones/360_2026-09_liquidacion.pdf" target="_blank" class="btn" style="background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.3); color: #c084fc; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                    📄 Liquidación Sep-26 (PDF)
+                </a>
+                <button type="button" onclick="copyWhatsAppSummary()" class="btn" style="background: rgba(16,185,129,0.15); border-color: #10b981; color: #10b981; font-weight: 600; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                    📲 Compartir Resumen
+                </button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 1rem;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="font-size: 0.72rem; color: #34d399; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">✅ Pasivos Previos Regularizados (Agosto 2026)</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: #34d399; font-family: 'Outfit', sans-serif;">$ 15.297.607,28</div>
+                <div style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px; line-height: 1.4;">
+                    Cancelación de gastos de Julio 2026: ARCA Cargas Sociales ($6.20M), Seguridad Bastida ($4.32M), Sueldos ($3.20M), SUTERH ($506k) y Honorarios D&F ($914k).
+                </div>
+            </div>
+
+            <div style="background: rgba(244,63,94,0.03); border: 1px solid rgba(244,63,94,0.18); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="font-size: 0.72rem; color: #f43f5e; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">⚠️ Pasivos Pendientes de Cierre (Septiembre 2026)</div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: #f43f5e; font-family: 'Outfit', sans-serif;">$ 3.882.790,83</div>
+                <div style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px; line-height: 1.4;">
+                    ARCA Previsional impago ($3.17M: $1.57M inicial diferido + $1.60M Sep-26 pendiente clave fiscal), Part. U.F. 7 ($290k), Lecos ($181k), Pariano ($175k en rev.) y Honorarios ($70k).
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- KPI CARDS -->
     <div class="kpi-grid" id="overview2" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));">
@@ -1801,7 +1851,7 @@
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Pagos de obra de pintura</div>
                 </div>
                 <div style="background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f43f5e;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚖️ Saldo Fondo de Reserva (30-06-2026)</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚖️ Saldo Fondo de Reserva (Cierre)</div>
                     <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="extraSaldo">-$ 5.474.026</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Financiación / Déficit temporal</div>
                 </div>
@@ -1837,12 +1887,12 @@
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">🚨 Estado de Morosidad de Propietarios — Última Liquidación (Julio 2026)</div>
+                    <div class="card-title">🚨 Estado de Morosidad de Propietarios — Período Septiembre 2026</div>
                     <div class="card-subtitle">
                         Listado de Unidades Funcionales con deuda acumulada al cierre del último período liquidado.
                     </div>
                 </div>
-                <span class="badge badge-danger" id="moroBadgeHeader">🚨 15 U.F. en Morosidad</span>
+                <span class="badge badge-danger" id="moroBadgeHeader">🚨 9 U.F. en Morosidad</span>
             </div>
 
             <!-- KPI Cards de Morosidad -->
@@ -1971,48 +2021,48 @@
     <section id="novedades" style="margin-top: 2rem; margin-bottom: 2.5rem;">
         <div style="margin-bottom: 1.25rem;">
             <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-1); display: flex; align-items: center; gap: 8px;">
-                📢 Novedades y Comunicados de la Última Expensa (Julio 2026)
+                📢 Novedades y Comunicados Oficiales de la Administración
             </h3>
             <p style="font-size: 0.85rem; color: var(--text-3); margin-top: 4px;">
-                Avisos oficiales de la administración, recomendaciones permanentes, datos de pago y contactos de urgencia extraídos del último documento impreso.
+                Avisos oficiales de la administración, recomendaciones permanentes, datos de pago y contactos de urgencia de la gestión actual.
             </p>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
             
             <!-- TARJETA 1: NOVEDADES DEL MES -->
-            <div class="card" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.25); border-top: 3px solid #ef4444; border-radius: 12px; padding: 1.25rem;">
-                <div style="font-size: 0.7rem; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></span>
-                    Aviso Oficial del Mes
+            <div class="card" style="background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.25); border-top: 3px solid #06b6d4; border-radius: 12px; padding: 1.25rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #06b6d4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #06b6d4;"></span>
+                    Gestión Vigente & Traspaso
                 </div>
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
-                    📣 Novedades de la Administración
+                    📣 Administración Fernández - Villasenin
                 </div>
-                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 0.9rem; color: var(--text-2); font-size: 0.82rem; line-height: 1.55;">
-                    <strong style="color: #f87171;">CESE DE MANDATO:</strong> SE INFORMA QUE NUESTRO CESE DE MANDATO ES A PARTIR DEL DÍA <strong>20 DE AGOSTO</strong>, POR LO TANTO DURANTE ESE PERÍODO SEGUIMOS SIENDO MANDATARIOS LEGALES DEL CONSORCIO Y DE LA GUARDA DE LA DOCUMENTACIÓN. LA MISMA SERÁ ENTREGADA A LA NUEVA ADMINISTRACIÓN SIGUIENDO LOS PLAZOS LEGALES.
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 8px; padding: 0.9rem; color: var(--text-2); font-size: 0.82rem; line-height: 1.55;">
+                    <strong style="color: #22d3ee;">NUEVA ADMINISTRACIÓN VIGENTE:</strong> A partir de <strong>Agosto 2026</strong>, la administración es ejercida por <strong>Fernández - Villasenin Administradores de Consorcios</strong> (Matr. 862 RPA Prov. de Buenos Aires, Ley 14701). La gestión de liquidaciones y comprobantes opera de forma digital en <strong>ConsorcioAbierto</strong>. En Agosto se completó la cancelación de $15.29M de obligaciones heredadas de Julio 2026.
                 </div>
             </div>
 
             <!-- TARJETA 2: RECOMENDACIONES Y DATOS DE PAGO -->
-            <div class="card" style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.2); border-top: 3px solid #06b6d4; border-radius: 12px; padding: 1.25rem;">
-                <div style="font-size: 0.7rem; font-weight: 700; color: #06b6d4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
-                    💳 Datos de Pago & Normas
+            <div class="card" style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.2); border-top: 3px solid #10b981; border-radius: 12px; padding: 1.25rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
+                    💳 Datos de Pago & Canales Oficiales
                 </div>
                 <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
-                    📌 Recomendaciones Permanentes
+                    📌 Canales y Cuentas Bancarias
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.78rem; color: var(--text-2); line-height: 1.45;">
-                    <div style="background: rgba(6, 182, 212, 0.08); border-radius: 8px; padding: 0.75rem; border: 1px dashed rgba(6, 182, 212, 0.3);">
-                        <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px;">🏦 Banco Galicia (Cuenta Consorcio)</div>
-                        <div><strong>CBU:</strong> <code style="color: #67e8f9; font-family: monospace;">0070044320000009108891</code></div>
-                        <div><strong>ALIAS:</strong> <code style="color: #67e8f9; font-weight: 700;">LOGRO.CENTRO.ACEITE</code></div>
-                        <div style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">* Indicar UF y centavos asignados al enviar el comprobante.</div>
+                    <div style="background: rgba(16, 185, 129, 0.08); border-radius: 8px; padding: 0.75rem; border: 1px dashed rgba(16, 185, 129, 0.3);">
+                        <div style="font-weight: 700; color: #34d399; margin-bottom: 4px;">🏦 Banco Galicia (Cuenta Oficial Consorcio)</div>
+                        <div><strong>CBU:</strong> <code style="color: #6ee7b7; font-family: monospace;">0070044320000009108891</code></div>
+                        <div><strong>NUEVO ALIAS:</strong> <code style="color: #6ee7b7; font-weight: 700;">SARMIENTO356.58.60</code></div>
+                        <div style="font-size: 0.72rem; color: var(--text-3); margin-top: 4px;">* CC 0009108-8 044-9 • Indicar U.F. al transferir.</div>
                     </div>
-                    <div><strong>2) Seguros:</strong> Se abonan en el mes en curso.</div>
-                    <div><strong>3) Abono en fecha:</strong> Evite recargos legales del 20% en honorarios (Arts. 2046/2048 CCyCN).</div>
-                    <div><strong>4) Convivencia:</strong> No estacionar en rampa de ingreso ni subir bicicletas por ascensores.</div>
-                    <div><strong>✉️ Mail Comprobantes:</strong> <a href="mailto:dyfadmconsorcios@gmail.com" style="color: #38bdf8; text-decoration: underline;">dyfadmconsorcios@gmail.com</a></div>
+                    <div><strong>💻 Portal Digital:</strong> <a href="https://app.consorcioabierto.com" target="_blank" style="color: #34d399; text-decoration: underline;">app.consorcioabierto.com</a></div>
+                    <div><strong>✉️ Mail Administración:</strong> <a href="mailto:aconsorcios.f.v@gmail.com" style="color: #34d399; text-decoration: underline;">aconsorcios.f.v@gmail.com</a></div>
+                    <div><strong>📱 Teléfono / WhatsApp:</strong> <a href="tel:1159007443" style="color: #34d399; font-weight: 600;">11-5900-7443</a></div>
+                    <div><strong>⚠️ Vencimiento Expensas:</strong> Abonar antes del 1° y 2° vencimiento para evitar recargos por mora.</div>
                 </div>
             </div>
 

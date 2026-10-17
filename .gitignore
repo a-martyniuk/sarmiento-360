@@ -22,4 +22,5 @@ Thumbs.db
 # Scratch and nested test dirs
 scratch/
 sarmiento-360/
+.codebase-memory/
 
