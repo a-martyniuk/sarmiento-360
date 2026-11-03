@@ -1014,3 +1014,63 @@ const generateCertificadoPDF = (ufNum) => {
     `);
     printWin.document.close();
 };
+
+
+// ── TOOLTIP COLLISION & BOUNDARY CLAMP (ANTI-SOLAPAMIENTO Y ANTI-OVERFLOW) ──
+(function initApexTooltipClamp() {
+    let ticking = false;
+
+    function clampTooltips() {
+        ticking = false;
+        const activeTooltips = document.querySelectorAll('.apexcharts-tooltip.apexcharts-active');
+        if (!activeTooltips.length) return;
+
+        activeTooltips.forEach(tt => {
+            const card = tt.closest('.card') || tt.closest('.kpi-card') || tt.closest('.chart-card') || tt.closest('.apexcharts-canvas');
+            if (!card) return;
+
+            const cardRect = card.getBoundingClientRect();
+            const ttRect = tt.getBoundingClientRect();
+            if (ttRect.width === 0 || ttRect.height === 0) return;
+
+            // 1. Evitar solapamiento vertical con el encabezado de la tarjeta (.card-header)
+            const header = card.querySelector('.card-header');
+            const minAllowedTop = header ? header.getBoundingClientRect().bottom + 6 : cardRect.top + 10;
+            if (ttRect.top < minAllowedTop) {
+                const diff = minAllowedTop - ttRect.top;
+                const currentTop = parseFloat(tt.style.top) || 0;
+                tt.style.top = (currentTop + diff) + 'px';
+            }
+
+            // 2. Evitar desborde horizontal hacia la tarjeta contigua derecha
+            const maxAllowedRight = cardRect.right - 14;
+            if (ttRect.right > maxAllowedRight) {
+                const diff = ttRect.right - maxAllowedRight;
+                const currentLeft = parseFloat(tt.style.left) || 0;
+                tt.style.left = Math.max(8, currentLeft - diff) + 'px';
+            }
+
+            // 3. Evitar recorte en el margen izquierdo
+            const minAllowedLeft = cardRect.left + 14;
+            if (ttRect.left < minAllowedLeft) {
+                const diff = minAllowedLeft - ttRect.left;
+                const currentLeft = parseFloat(tt.style.left) || 0;
+                tt.style.left = (currentLeft + diff) + 'px';
+            }
+        });
+    }
+
+    window.addEventListener('pointermove', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(clampTooltips);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(clampTooltips);
+            ticking = true;
+        }
+    }, { passive: true });
+})();

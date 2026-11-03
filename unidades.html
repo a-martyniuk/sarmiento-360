@@ -335,16 +335,92 @@
             margin-bottom: 2rem;
         }
         .card {
+            position: relative;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover, .card:focus-within {
+            border-color: var(--border-accent);
+            z-index: 50 !important;
         }
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.25rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ── BLINDAJE Y CONTENCIÓN DE TOOLTIPS EN GRÁFICOS (ANTI-SOLAPAMIENTO) ── */
+        .apexcharts-canvas {
+            position: relative !important;
+            overflow: visible !important;
+        }
+        .apexcharts-tooltip {
+            max-width: 280px !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            background: rgba(15, 23, 42, 0.97) !important;
+            backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+            padding: 8px 12px !important;
+            pointer-events: none !important;
+            z-index: 9999 !important;
+        }
+        .apexcharts-tooltip::before,
+        .apexcharts-tooltip::after {
+            display: none !important;
+        }
+        .apexcharts-tooltip-title {
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            color: #f8fafc !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding-bottom: 4px !important;
+            margin-bottom: 6px !important;
+            background: transparent !important;
+        }
+        .apexcharts-tooltip-series-group {
+            padding: 3px 0 !important;
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 6px !important;
+        }
+        .apexcharts-tooltip-marker {
+            width: 8px !important;
+            height: 8px !important;
+            border-radius: 50% !important;
+            margin-top: 4px !important;
+            flex-shrink: 0 !important;
+        }
+        .apexcharts-tooltip-text {
+            flex: 1 !important;
+        }
+        .apexcharts-tooltip-y-group {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: baseline !important;
+            justify-content: space-between !important;
+            gap: 2px 8px !important;
+        }
+        .apexcharts-tooltip-text-y-label {
+            font-size: 0.72rem !important;
+            color: #cbd5e1 !important;
+            font-weight: 500 !important;
+            line-height: 1.35 !important;
+            white-space: normal !important;
+        }
+        .apexcharts-tooltip-text-y-value {
+            font-size: 0.76rem !important;
+            font-weight: 700 !important;
+            color: #38bdf8 !important;
+            white-space: nowrap !important;
         }
         .card-title {
             font-family: 'Outfit', sans-serif;

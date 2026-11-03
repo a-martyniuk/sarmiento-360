@@ -835,6 +835,12 @@ const renderComparisonChart = () => {
     const minIndex = Math.max(1, totalPeriods - 11);
     const maxIndex = totalPeriods;
 
+    let maxComparisonTotal = 0;
+    allPeriods.forEach((_, pIdx) => {
+        const pTotal = series.reduce((acc, s) => acc + (s.data[pIdx] || 0), 0);
+        if (pTotal > maxComparisonTotal) maxComparisonTotal = pTotal;
+    });
+
     const opts = {
         series,
         chart: {
@@ -874,13 +880,14 @@ const renderComparisonChart = () => {
             labels: { rotate: -30, style: { fontSize: '10px' } }
         },
         yaxis: {
+            max: maxComparisonTotal > 0 ? Math.ceil(maxComparisonTotal * 1.2) : undefined,
             labels: {
                 formatter: v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${Math.round(v/1000)}k` : `$${v}`
             }
         },
         grid: {
             borderColor: 'rgba(255,255,255,0.05)',
-            padding: { left: 15, right: 15 }
+            padding: { top: 18, left: 15, right: 15 }
         },
         annotations: {
             xaxis: [{
@@ -982,11 +989,17 @@ const createDrillChart = (selectorId, categoryName, currentInstance) => {
     const minIndex = Math.max(1, totalPeriods - 11);
     const maxIndex = totalPeriods;
 
+    let maxPeriodTotal = 0;
+    allPeriods.forEach((_, pIdx) => {
+        const pTotal = series.reduce((acc, s) => acc + (s.data[pIdx] || 0), 0);
+        if (pTotal > maxPeriodTotal) maxPeriodTotal = pTotal;
+    });
+
     const opts = {
         series,
         chart: {
             type: 'bar',
-            height: 260,
+            height: 285,
             stacked: true,
             foreColor: '#94a3b8',
             toolbar: {
@@ -1021,18 +1034,24 @@ const createDrillChart = (selectorId, categoryName, currentInstance) => {
             labels: { rotate: -40, style: { fontSize: '9px' } }
         },
         yaxis: {
+            max: maxPeriodTotal > 0 ? Math.ceil(maxPeriodTotal * 1.25) : undefined,
             labels: {
                 formatter: v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${Math.round(v/1000)}k` : `$${v}`
             }
         },
         grid: {
             borderColor: 'rgba(255,255,255,0.03)',
-            padding: { left: 15, right: 15 }
+            padding: { top: 18, left: 15, right: 15 }
         },
         legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '10px', height: 45 },
         fill: { opacity: 0.95 },
         dataLabels: { enabled: false },
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        tooltip: {
+            theme: 'dark',
+            shared: false,
+            intersect: true,
+            y: { formatter: v => fmtFull(v) }
+        }
     };
 
     if (currentInstance) currentInstance.destroy();
@@ -2691,3 +2710,63 @@ window.copyReclamoText = () => {
 window.printReclamoLetter = () => {
     window.print();
 };
+
+
+// ── TOOLTIP COLLISION & BOUNDARY CLAMP (ANTI-SOLAPAMIENTO Y ANTI-OVERFLOW) ──
+(function initApexTooltipClamp() {
+    let ticking = false;
+
+    function clampTooltips() {
+        ticking = false;
+        const activeTooltips = document.querySelectorAll('.apexcharts-tooltip.apexcharts-active');
+        if (!activeTooltips.length) return;
+
+        activeTooltips.forEach(tt => {
+            const card = tt.closest('.card') || tt.closest('.kpi-card') || tt.closest('.chart-card') || tt.closest('.apexcharts-canvas');
+            if (!card) return;
+
+            const cardRect = card.getBoundingClientRect();
+            const ttRect = tt.getBoundingClientRect();
+            if (ttRect.width === 0 || ttRect.height === 0) return;
+
+            // 1. Evitar solapamiento vertical con el encabezado de la tarjeta (.card-header)
+            const header = card.querySelector('.card-header');
+            const minAllowedTop = header ? header.getBoundingClientRect().bottom + 6 : cardRect.top + 10;
+            if (ttRect.top < minAllowedTop) {
+                const diff = minAllowedTop - ttRect.top;
+                const currentTop = parseFloat(tt.style.top) || 0;
+                tt.style.top = (currentTop + diff) + 'px';
+            }
+
+            // 2. Evitar desborde horizontal hacia la tarjeta contigua derecha
+            const maxAllowedRight = cardRect.right - 14;
+            if (ttRect.right > maxAllowedRight) {
+                const diff = ttRect.right - maxAllowedRight;
+                const currentLeft = parseFloat(tt.style.left) || 0;
+                tt.style.left = Math.max(8, currentLeft - diff) + 'px';
+            }
+
+            // 3. Evitar recorte en el margen izquierdo
+            const minAllowedLeft = cardRect.left + 14;
+            if (ttRect.left < minAllowedLeft) {
+                const diff = minAllowedLeft - ttRect.left;
+                const currentLeft = parseFloat(tt.style.left) || 0;
+                tt.style.left = (currentLeft + diff) + 'px';
+            }
+        });
+    }
+
+    window.addEventListener('pointermove', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(clampTooltips);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(clampTooltips);
+            ticking = true;
+        }
+    }, { passive: true });
+})();
