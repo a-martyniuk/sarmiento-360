@@ -1,0 +1,241 @@
+{
+  "fuente": "INDEC - Instituto Nacional de Estadística y Censos (apis.datos.gob.ar)",
+  "serie_id": "148.3_INIVELNAL_DICI_M_26",
+  "nombre": "Índice de Precios al Consumidor (IPC) Cobertura Nacional",
+  "periodo_base_auditoria": "2025-07",
+  "ultima_actualizacion": "2026-11-03",
+  "ipc": [
+    {
+      "periodo": "2024-01",
+      "fecha": "2024-01-01",
+      "indice": 4261.53,
+      "variacion_mensual_pct": 0.0,
+      "inflacion_acumulada_desde_2025_07_pct": -52.78
+    },
+    {
+      "periodo": "2024-02",
+      "fecha": "2024-02-01",
+      "indice": 4825.79,
+      "variacion_mensual_pct": 13.24,
+      "inflacion_acumulada_desde_2025_07_pct": -46.52
+    },
+    {
+      "periodo": "2024-03",
+      "fecha": "2024-03-01",
+      "indice": 5357.09,
+      "variacion_mensual_pct": 11.01,
+      "inflacion_acumulada_desde_2025_07_pct": -40.63
+    },
+    {
+      "periodo": "2024-04",
+      "fecha": "2024-04-01",
+      "indice": 5830.23,
+      "variacion_mensual_pct": 8.83,
+      "inflacion_acumulada_desde_2025_07_pct": -35.39
+    },
+    {
+      "periodo": "2024-05",
+      "fecha": "2024-05-01",
+      "indice": 6073.7,
+      "variacion_mensual_pct": 4.18,
+      "inflacion_acumulada_desde_2025_07_pct": -32.69
+    },
+    {
+      "periodo": "2024-06",
+      "fecha": "2024-06-01",
+      "indice": 6351.71,
+      "variacion_mensual_pct": 4.58,
+      "inflacion_acumulada_desde_2025_07_pct": -29.61
+    },
+    {
+      "periodo": "2024-07",
+      "fecha": "2024-07-01",
+      "indice": 6607.75,
+      "variacion_mensual_pct": 4.03,
+      "inflacion_acumulada_desde_2025_07_pct": -26.78
+    },
+    {
+      "periodo": "2024-08",
+      "fecha": "2024-08-01",
+      "indice": 6883.44,
+      "variacion_mensual_pct": 4.17,
+      "inflacion_acumulada_desde_2025_07_pct": -23.72
+    },
+    {
+      "periodo": "2024-09",
+      "fecha": "2024-09-01",
+      "indice": 7122.24,
+      "variacion_mensual_pct": 3.47,
+      "inflacion_acumulada_desde_2025_07_pct": -21.07
+    },
+    {
+      "periodo": "2024-10",
+      "fecha": "2024-10-01",
+      "indice": 7313.95,
+      "variacion_mensual_pct": 2.69,
+      "inflacion_acumulada_desde_2025_07_pct": -18.95
+    },
+    {
+      "periodo": "2024-11",
+      "fecha": "2024-11-01",
+      "indice": 7491.43,
+      "variacion_mensual_pct": 2.43,
+      "inflacion_acumulada_desde_2025_07_pct": -16.98
+    },
+    {
+      "periodo": "2024-12",
+      "fecha": "2024-12-01",
+      "indice": 7694.01,
+      "variacion_mensual_pct": 2.7,
+      "inflacion_acumulada_desde_2025_07_pct": -14.74
+    },
+    {
+      "periodo": "2025-01",
+      "fecha": "2025-01-01",
+      "indice": 7864.13,
+      "variacion_mensual_pct": 2.21,
+      "inflacion_acumulada_desde_2025_07_pct": -12.85
+    },
+    {
+      "periodo": "2025-02",
+      "fecha": "2025-02-01",
+      "indice": 8052.99,
+      "variacion_mensual_pct": 2.4,
+      "inflacion_acumulada_desde_2025_07_pct": -10.76
+    },
+    {
+      "periodo": "2025-03",
+      "fecha": "2025-03-01",
+      "indice": 8353.32,
+      "variacion_mensual_pct": 3.73,
+      "inflacion_acumulada_desde_2025_07_pct": -7.43
+    },
+    {
+      "periodo": "2025-04",
+      "fecha": "2025-04-01",
+      "indice": 8585.61,
+      "variacion_mensual_pct": 2.78,
+      "inflacion_acumulada_desde_2025_07_pct": -4.86
+    },
+    {
+      "periodo": "2025-05",
+      "fecha": "2025-05-01",
+      "indice": 8714.49,
+      "variacion_mensual_pct": 1.5,
+      "inflacion_acumulada_desde_2025_07_pct": -3.43
+    },
+    {
+      "periodo": "2025-06",
+      "fecha": "2025-06-01",
+      "indice": 8855.57,
+      "variacion_mensual_pct": 1.62,
+      "inflacion_acumulada_desde_2025_07_pct": -1.87
+    },
+    {
+      "periodo": "2025-07",
+      "fecha": "2025-07-01",
+      "indice": 9023.97,
+      "variacion_mensual_pct": 1.9,
+      "inflacion_acumulada_desde_2025_07_pct": 0.0
+    },
+    {
+      "periodo": "2025-08",
+      "fecha": "2025-08-01",
+      "indice": 9193.24,
+      "variacion_mensual_pct": 1.88,
+      "inflacion_acumulada_desde_2025_07_pct": 1.88
+    },
+    {
+      "periodo": "2025-09",
+      "fecha": "2025-09-01",
+      "indice": 9384.09,
+      "variacion_mensual_pct": 2.08,
+      "inflacion_acumulada_desde_2025_07_pct": 3.99
+    },
+    {
+      "periodo": "2025-10",
+      "fecha": "2025-10-01",
+      "indice": 9603.86,
+      "variacion_mensual_pct": 2.34,
+      "inflacion_acumulada_desde_2025_07_pct": 6.43
+    },
+    {
+      "periodo": "2025-11",
+      "fecha": "2025-11-01",
+      "indice": 9841.36,
+      "variacion_mensual_pct": 2.47,
+      "inflacion_acumulada_desde_2025_07_pct": 9.06
+    },
+    {
+      "periodo": "2025-12",
+      "fecha": "2025-12-01",
+      "indice": 10121.37,
+      "variacion_mensual_pct": 2.85,
+      "inflacion_acumulada_desde_2025_07_pct": 12.16
+    },
+    {
+      "periodo": "2026-01",
+      "fecha": "2026-01-01",
+      "indice": 10413.03,
+      "variacion_mensual_pct": 2.88,
+      "inflacion_acumulada_desde_2025_07_pct": 15.39
+    },
+    {
+      "periodo": "2026-02",
+      "fecha": "2026-02-01",
+      "indice": 10714.63,
+      "variacion_mensual_pct": 2.9,
+      "inflacion_acumulada_desde_2025_07_pct": 18.74
+    },
+    {
+      "periodo": "2026-03",
+      "fecha": "2026-03-01",
+      "indice": 11077.06,
+      "variacion_mensual_pct": 3.38,
+      "inflacion_acumulada_desde_2025_07_pct": 22.75
+    },
+    {
+      "periodo": "2026-04",
+      "fecha": "2026-04-01",
+      "indice": 11363.09,
+      "variacion_mensual_pct": 2.58,
+      "inflacion_acumulada_desde_2025_07_pct": 25.92
+    },
+    {
+      "periodo": "2026-05",
+      "fecha": "2026-05-01",
+      "indice": 11607.39,
+      "variacion_mensual_pct": 2.15,
+      "inflacion_acumulada_desde_2025_07_pct": 28.63
+    },
+    {
+      "periodo": "2026-06",
+      "fecha": "2026-06-01",
+      "indice": 11826.41,
+      "variacion_mensual_pct": 1.89,
+      "inflacion_acumulada_desde_2025_07_pct": 31.06
+    },
+    {
+      "periodo": "2026-07",
+      "fecha": "2026-07-01",
+      "indice": 12076.39,
+      "variacion_mensual_pct": 2.11,
+      "inflacion_acumulada_desde_2025_07_pct": 33.83
+    },
+    {
+      "periodo": "2026-08",
+      "fecha": "2026-08-01",
+      "indice": 12276.77,
+      "variacion_mensual_pct": 1.66,
+      "inflacion_acumulada_desde_2025_07_pct": 36.05
+    },
+    {
+      "periodo": "2026-09",
+      "fecha": "2026-09-01",
+      "indice": 12497.75,
+      "variacion_mensual_pct": 1.8,
+      "estimado": true,
+      "inflacion_acumulada_desde_2025_07_pct": 38.5
+    }
+  ]
+}

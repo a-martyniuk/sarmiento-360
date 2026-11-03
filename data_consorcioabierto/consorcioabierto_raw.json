@@ -77,7 +77,7 @@
               "comprobante_nro": "259961",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-08 Mensual - BUSTAMANTE, JUAN MANUEL.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-08 Mensual - ENCARGADO TITULAR.pdf",
                 "fecha_upload": "2026-09-07 09:53:19",
                 "links": {
                   "descarga": {
@@ -100,9 +100,9 @@
                   "type": "proveedor",
                   "id": 938853,
                   "attributes": {
-                    "primer_nombre": "Empleado: BUSTAMANTE, JUAN MANUEL",
-                    "identificacion": "CUIL 20-13606437-2",
-                    "nombre": "Empleado: BUSTAMANTE, JUAN MANUEL"
+                    "primer_nombre": "Empleado: ENCARGADO TITULAR",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: ENCARGADO TITULAR"
                   }
                 }
               }
@@ -140,7 +140,7 @@
               "comprobante_nro": "259962",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-08 Mensual - BUSTAMANTE, VICTOR JAVIER.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-08 Mensual - 2° ENCARGADO.pdf",
                 "fecha_upload": "2026-09-07 09:53:19",
                 "links": {
                   "descarga": {
@@ -163,9 +163,9 @@
                   "type": "proveedor",
                   "id": 938854,
                   "attributes": {
-                    "primer_nombre": "Empleado: BUSTAMANTE, VICTOR JAVIER",
-                    "identificacion": "CUIL 20-27737820-6",
-                    "nombre": "Empleado: BUSTAMANTE, VICTOR JAVIER"
+                    "primer_nombre": "Empleado: 2° ENCARGADO",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: 2° ENCARGADO"
                   }
                 }
               }
@@ -203,7 +203,7 @@
               "comprobante_nro": "259963",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-08 Mensual - RAMIREZ, GUILLERMO ALBERTO.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-08 Mensual - PERSONAL NOCTURNO.pdf",
                 "fecha_upload": "2026-09-07 09:53:19",
                 "links": {
                   "descarga": {
@@ -226,9 +226,9 @@
                   "type": "proveedor",
                   "id": 939142,
                   "attributes": {
-                    "primer_nombre": "Empleado: RAMÍREZ, GUILLERMO ALBERTO",
-                    "identificacion": "CUIL 20-14502487-1",
-                    "nombre": "Empleado: RAMÍREZ, GUILLERMO ALBERTO"
+                    "primer_nombre": "Empleado: PERSONAL NOCTURNO",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: PERSONAL NOCTURNO"
                   }
                 }
               }
@@ -2655,7 +2655,7 @@
               "comprobante_nro": "263223",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Mensual - BUSTAMANTE, JUAN MANUEL.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Mensual - ENCARGADO TITULAR.pdf",
                 "fecha_upload": "2026-09-30 16:56:06",
                 "links": {
                   "descarga": {
@@ -2678,9 +2678,9 @@
                   "type": "proveedor",
                   "id": 938853,
                   "attributes": {
-                    "primer_nombre": "Empleado: BUSTAMANTE, JUAN MANUEL",
-                    "identificacion": "CUIL 20-13606437-2",
-                    "nombre": "Empleado: BUSTAMANTE, JUAN MANUEL"
+                    "primer_nombre": "Empleado: ENCARGADO TITULAR",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: ENCARGADO TITULAR"
                   }
                 }
               }
@@ -2718,7 +2718,7 @@
               "comprobante_nro": "263224",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Mensual - BUSTAMANTE, VICTOR JAVIER.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Mensual - 2° ENCARGADO.pdf",
                 "fecha_upload": "2026-09-30 16:56:06",
                 "links": {
                   "descarga": {
@@ -2741,9 +2741,9 @@
                   "type": "proveedor",
                   "id": 938854,
                   "attributes": {
-                    "primer_nombre": "Empleado: BUSTAMANTE, VICTOR JAVIER",
-                    "identificacion": "CUIL 20-27737820-6",
-                    "nombre": "Empleado: BUSTAMANTE, VICTOR JAVIER"
+                    "primer_nombre": "Empleado: 2° ENCARGADO",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: 2° ENCARGADO"
                   }
                 }
               }
@@ -2781,7 +2781,7 @@
               "comprobante_nro": "262812",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Final - RAMIREZ, GUILLERMO ALBERTO.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Final - PERSONAL NOCTURNO.pdf",
                 "fecha_upload": "2026-09-29 17:56:36",
                 "links": {
                   "descarga": {
@@ -2804,9 +2804,9 @@
                   "type": "proveedor",
                   "id": 939142,
                   "attributes": {
-                    "primer_nombre": "Empleado: RAMÍREZ, GUILLERMO ALBERTO",
-                    "identificacion": "CUIL 20-14502487-1",
-                    "nombre": "Empleado: RAMÍREZ, GUILLERMO ALBERTO"
+                    "primer_nombre": "Empleado: PERSONAL NOCTURNO",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: PERSONAL NOCTURNO"
                   }
                 }
               }
@@ -2844,7 +2844,7 @@
               "comprobante_nro": "262767",
               "comprobante_adjunto": {
                 "tipo": "recibo_sueldo",
-                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Mensual - RAMIREZ, GUILLERMO ALBERTO.pdf",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-09 Mensual - PERSONAL NOCTURNO.pdf",
                 "fecha_upload": "2026-09-29 15:48:44",
                 "links": {
                   "descarga": {
@@ -2867,9 +2867,9 @@
                   "type": "proveedor",
                   "id": 939142,
                   "attributes": {
-                    "primer_nombre": "Empleado: RAMÍREZ, GUILLERMO ALBERTO",
-                    "identificacion": "CUIL 20-14502487-1",
-                    "nombre": "Empleado: RAMÍREZ, GUILLERMO ALBERTO"
+                    "primer_nombre": "Empleado: PERSONAL NOCTURNO",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: PERSONAL NOCTURNO"
                   }
                 }
               }

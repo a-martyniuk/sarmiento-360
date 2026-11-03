@@ -1197,6 +1197,22 @@
             <span style="font-size:0.65rem; font-weight:800; color:var(--green); background:rgba(52,211,153,0.12); padding:2px 6px; border-radius:4px;">05</span>
             📋 Desglose Detallado
         </a>
+        <a class="nav-link" href="#asamblea2026">
+            <span style="font-size:0.65rem; font-weight:800; color:#fb7185; background:rgba(244,63,94,0.12); padding:2px 6px; border-radius:4px;">ACT</span>
+            🗳️ Asamblea 02/11/2026
+        </a>
+        <a class="nav-link" href="#reglamentos">
+            <span style="font-size:0.65rem; font-weight:800; color:#a78bfa; background:rgba(167,139,250,0.12); padding:2px 6px; border-radius:4px;">JUR</span>
+            🏛️ Marco Notarial & Reglamentos
+        </a>
+        <a class="nav-link" href="#auditoria">
+            <span style="font-size:0.65rem; font-weight:800; color:#38bdf8; background:rgba(56,189,248,0.12); padding:2px 6px; border-radius:4px;">FOR</span>
+            ⚖️ Auditoría Forense & Legal
+        </a>
+        <a class="nav-link" href="#reclamo">
+            <span style="font-size:0.65rem; font-weight:800; color:#34d399; background:rgba(52,211,153,0.12); padding:2px 6px; border-radius:4px;">REC</span>
+            📝 Generador de Reclamos
+        </a>
         <a class="nav-link" href="unidades.html" style="border-top:1px dashed rgba(255,255,255,0.05); padding-top:0.75rem; margin-top:0.25rem;">
             <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Expensas por U.F.
@@ -1266,10 +1282,10 @@
             <select id="subcomponentFilter">
                 <option value="todos">Todos los Sub-rubros</option>
                 <!-- Sueldos y Cargas Sociales -->
-                <option value="Encargado Permanente">👤 Encargado Permanente</option>
-                <option value="Ayudante / Suplente">👤 Ayudante / Suplente</option>
-                <option value="Vigilancia Nocturna">👤 Vigilancia Nocturna</option>
-                <option value="Cargas Sociales / Sindicato">🟡 Cargas Sociales / SUTERH / AFIP</option>
+                <option value="Encargado Permanente">👤 Encargado Titular (Permanente s/viv.)</option>
+                <option value="Ayudante / Suplente">👤 2° Encargado y Suplencias</option>
+                <option value="Vigilancia Nocturna">👤 Personal Nocturno Propio</option>
+                <option value="Cargas Sociales / Sindicato">🟡 Cargas Sociales / SUTERH / ARCA</option>
                 <!-- Servicios Públicos -->
                 <option value="Edesur (05637256)">⚡ Edesur (05637256)</option>
                 <option value="AySA Cta 192498 (Torre 356)">💧 AySA (Torre 356 - Cta 192498)</option>
@@ -1278,7 +1294,7 @@
                 <option value="Metrogas">🔥 Metrogas</option>
                 <!-- Contratos y Abonos -->
                 <option value="Abono Ascensores">🛗 Abono Ascensores (Guillemi)</option>
-                <option value="Servicios de Seguridad">👮 Servicios de Seguridad (Bastida S.A.)</option>
+                <option value="Servicios de Seguridad">👮 Seguridad Privada 24hs (MM / Bastida S.A.)</option>
                 <option value="Abono Fumigación">🐛 Abono Fumigación (FB Saneamiento)</option>
                 <option value="Conectividad / SUM">🌐 Conectividad / TV SUM (Cablevisión Flow / Telecom)</option>
                 <option value="Bidones de Agua">🥤 Bidones de Agua (Ivess Forgione)</option>
@@ -1311,9 +1327,9 @@
             </select>
             <label for="statusFilter" style="font-size:0.8rem;color:var(--text-3);margin-left:0.5rem;">Estado:</label>
             <select id="statusFilter">
-                <option value="todos">Todos (Pagado/Pendiente)</option>
-                <option value="Pagado" selected>Pagados (Caja)</option>
-                <option value="Pendiente">Pendientes de Pago</option>
+                <option value="todos" selected>Todos los Liquidados</option>
+                <option value="Pagado">Pagados en el Período</option>
+                <option value="Pendiente">Pendientes / Pago Parcial</option>
             </select>
             <button type="button" class="btn" onclick="copyWhatsAppSummary()" style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; padding: 0.45rem 0.8rem; margin-left: 0.5rem;" title="Copiar resumen del período seleccionado al portapapeles para WhatsApp">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -1365,6 +1381,174 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- SECCIÓN: ASAMBLEA EXTRAORDINARIA DEL 02/11/2026 -->
+    <div id="asamblea2026" style="background: rgba(11, 17, 32, 0.85); border: 1px solid rgba(244,63,94,0.3); border-left: 4px solid #f43f5e; border-radius: 14px; padding: 1.35rem 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.35);">
+        
+        <!-- ENCABEZADO Y ALERTA DE PLAZO ART. 2060 CCyC -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span class="badge" style="background: rgba(244,63,94,0.2); color: #fb7185; border: 1px solid rgba(244,63,94,0.35); font-size: 0.72rem; padding: 3px 10px; font-weight: 700;">🗳️ ASAMBLEA EXTRAORDINARIA 02/11/2026</span>
+                    <span style="font-size: 0.75rem; color: var(--text-3);">19:00 hs · Cochera Subsuelo · Duración: 1h 22m 09s</span>
+                </div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-1); margin: 2px 0 4px 0;">Resoluciones, Estado de Cuentas y Oposiciones</h2>
+                <p style="font-size: 0.82rem; color: var(--text-2); margin: 0; line-height: 1.45;">
+                    Presidida por Adm. Agostina Daniela Fernández (Matr. RPAC 862). Resumen fidedigno procesado con Inteligencia Artificial vocal (Whisper <code style="color:var(--accent);">large-v3-turbo</code>, 662 segmentos transcriptos).
+                </p>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 0.75rem 1rem; max-width: 380px;">
+                <div style="font-size: 0.72rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                    <span>⏳ PLAZO LEGAL DE OPOSICIÓN VIGENTE</span>
+                </div>
+                <div style="font-size: 0.76rem; color: var(--text-2); margin-top: 4px; line-height: 1.4;">
+                    Conforme al <strong>Art. 2060 del Código Civil y Comercial de la Nación</strong>, los copropietarios disponen de <strong>30 días corridos</strong> desde la notificación oficial para manifestar su oposición por medio fehaciente.
+                </div>
+            </div>
+        </div>
+
+        <!-- REPRODUCTOR PROBATORIO DE AUDIO & CONFESIÓN -->
+        <div style="background: rgba(6,182,212,0.04); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.6rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.1rem;">🎙️</span>
+                    <div>
+                        <strong style="color: #22d3ee; font-size: 0.85rem;">Audio Probatorio: Confesión de la Administradora sobre Gastos de Seguridad</strong>
+                        <div style="font-size: 0.72rem; color: var(--text-3);">Registro directo de la Asamblea · Minuto 43:53 a 44:19 (26 segundos)</div>
+                    </div>
+                </div>
+                <span class="badge" style="background: rgba(6,182,212,0.15); color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); font-size: 0.7rem;">Evidencia Fidedigna</span>
+            </div>
+
+            <div style="margin-bottom: 0.75rem;">
+                <audio controls style="width: 100%; height: 38px; border-radius: 6px; outline: none;" src="docs_auditoria/AUDIO_PROBATORIO_CONFESION_PRORRATEO_SEGURIDAD_02112026.mp3">
+                    Tu navegador no soporta el reproductor de audio HTML5.
+                </audio>
+            </div>
+
+            <div style="background: rgba(15,23,42,0.6); border-left: 3px solid #06b6d4; padding: 0.6rem 0.85rem; border-radius: 0 6px 6px 0; font-size: 0.78rem; color: var(--text-2); font-style: italic; line-height: 1.45;">
+                <strong style="color: #22d3ee; font-style: normal;">Declaración textual (Min. 44:05):</strong> "...si nosotros sacamos la seguridad y la ponemos por coeficiente, la gente que tiene un departamento más grande va a sufrir un aumento muy significativo..." — Adm. Agostina Fernández (Reconociendo el subsidio que soportaron los departamentos pequeños).
+            </div>
+        </div>
+
+        <!-- GRILLA DE LOS 8 PUNTOS DEL ORDEN DEL DÍA -->
+        <div style="font-size: 0.72rem; font-weight: 800; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+            DESGLOSE Y ESTADO DE LOS 8 PUNTOS DEL ORDEN DEL DÍA
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+            
+            <!-- PUNTO 1 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 1: Deudas & Obra Pintura</strong>
+                    <span class="badge" style="background: rgba(244,63,94,0.15); color: #f43f5e; font-size: 0.65rem;">🔴 OBSERVADO</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Reclamo de <strong>$6.000.000</strong> del pintor Morel <em>sin factura legal ni fondos</em>. Se expusieron <strong>$6.910.000</strong> en recibos informales observados; respecto a la factura Rex ($415.621), en asamblea se aclaró que correspondió a Celina (propietaria piso 14) por filtraciones estructurales del edificio en el último piso. Cuotas extraordinarias bloqueadas.
+                </p>
+            </div>
+
+            <!-- PUNTO 2 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 2: Gestión Anterior D&F</strong>
+                    <span class="badge" style="background: rgba(245,158,11,0.15); color: #fbbf24; font-size: 0.65rem;">🟡 AUDITORÍA</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Rendición de cuentas <strong>no aprobada</strong>. La Administradora confirmó en audio que no puede respaldar los números de D&F y que se requiere una <em>auditoría contable pericial externa</em>.
+                </p>
+            </div>
+
+            <!-- PUNTO 3 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 3: Consejo de Propietarios</strong>
+                    <span class="badge" style="background: rgba(96,165,250,0.15); color: #60a5fa; font-size: 0.65rem;">🔵 EN RENOVACIÓN</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Tratamiento para renovar integrantes y terminar con la falta de control que convalidó pagos sin factura. Reactivación de la exigencia de <strong>3 presupuestos</strong> (Art. 7 REC).
+                </p>
+            </div>
+
+            <!-- PUNTO 4 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 4: Gastos de Seguridad</strong>
+                    <span class="badge" style="background: rgba(245,158,11,0.15); color: #fbbf24; font-size: 0.65rem;">🟠 OPOSICIÓN 30 DÍAS</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Presentación formal del reclamo por coeficientes: <strong>$487.749,34</strong> (UFs 55 y 59) y <strong>$6.765.131,67</strong> (42 unidades chicas). Solicitud de 2 cotizaciones alternativas para negociar tarifas.
+                </p>
+            </div>
+
+            <!-- PUNTO 5 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 5: Ascensores</strong>
+                    <span class="badge" style="background: rgba(167,139,250,0.15); color: #a78bfa; font-size: 0.65rem;">⚙️ EN LICITACIÓN</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Denuncias por cortes de más de 48 hs y sin guardias de fin de semana. Evaluación de rescisión a Ishely y comparativa de presupuestos con empresas con guardia propia.
+                </p>
+            </div>
+
+            <!-- PUNTO 6 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 6: Jardinería</strong>
+                    <span class="badge" style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 0.65rem;">🌱 PRESUPUESTOS</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Revisión de costos y cotizaciones para el mantenimiento del jardín frontal y espacios verdes comunes bajo pautas sustentables.
+                </p>
+            </div>
+
+            <!-- PUNTO 7 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 7: Cámaras CCTV & Apps</strong>
+                    <span class="badge" style="background: rgba(96,165,250,0.15); color: #60a5fa; font-size: 0.65rem;">📹 PROTOCOLO</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Ratificación del derecho inalienable de acceso a grabaciones ante siniestros. Redacción de protocolo de seguridad preservando la intimidad de los residentes.
+                </p>
+            </div>
+
+            <!-- PUNTO 8 -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="font-size: 0.82rem; color: var(--text-1);">Punto 8: Obras Clandestinas</strong>
+                    <span class="badge" style="background: rgba(244,63,94,0.15); color: #f43f5e; font-size: 0.65rem;">⚖️ INTIMACIÓN</span>
+                </div>
+                <p style="font-size: 0.74rem; color: var(--text-2); margin: 0; line-height: 1.4;">
+                    Filtraciones graves en piso 8° por cerramientos sin autorización de asamblea (Art. 13 inc. b RCP). Moción para que los <strong>infractores asuman el 100% de los costos de reparación</strong>.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- BARRA DE ACCIÓN: DESCARGA DE EXPEDIENTES Y DICTÁMENES -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 1rem;">
+            <div style="font-size: 0.74rem; color: var(--text-3);">Respaldo pericial y documentación probatoria de la asamblea:</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="background: rgba(6,182,212,0.12); border: 1px solid var(--accent); color: var(--accent); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                    📄 Reclamo UFs 55 y 59 (Firmado Dr. Parodi)
+                </a>
+                <a href="docs_auditoria/TABLA_SALDOS_70_DEPTOS_SEGURIDAD.pdf" target="_blank" class="btn" style="background: rgba(139,92,246,0.12); border: 1px solid var(--purple); color: var(--purple); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                    📊 Tabla Saldos 70 UFs Seguridad (PDF)
+                </a>
+                <a href="docs_auditoria/INFORME_PINTURA_Y_SOBRECOSTOS_MOREL.pdf" target="_blank" class="btn" style="background: rgba(244,63,94,0.12); border: 1px solid var(--red); color: var(--red); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                    🎨 Informe Sobrecostos Pintura Morel
+                </a>
+                <a href="docs_auditoria/FACTURA_PINTURA_PRIVADA_PUTZ_415MIL.pdf" target="_blank" class="btn" style="background: rgba(245,158,11,0.12); border: 1px solid var(--amber); color: var(--amber); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                    🧾 Factura Rex $415k (Filtración Piso 14 - Celina)
+                </a>
+            </div>
+        </div>
+
     </div>
 
     <!-- KPI CARDS -->
@@ -1506,17 +1690,27 @@
                 <p style="font-size: 0.8rem; color: var(--text-3); margin-bottom: 0;">Inspección normativa obligatoria de Matrícula RPAC, exclusividad bancaria, comprobantes fiscales AFIP/ARCA y libros consorciales rubricados.</p>
             </div>
             <div>
-                <span class="badge badge-success" style="font-size: 0.85rem; padding: 6px 14px; font-weight: 700;" id="ley14701ScoreBadge">Score Normativo: <span id="ley14701ScoreVal">96%</span></span>
+                <span class="badge badge-success" style="font-size: 0.85rem; padding: 6px 14px; font-weight: 700;" id="ley14701ScoreBadge">Score Normativo: <span id="ley14701ScoreVal">100%</span></span>
             </div>
         </div>
     </div>
 
     <!-- TARJETAS DE CERTIFICACIÓN NORMATIVA LEY 14701 -->
     <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
-        <div class="kpi-card" style="border-top: 3px solid var(--accent); background: rgba(6,182,212,0.04);">
-            <div class="kpi-title" style="color: var(--accent);">📜 Matrícula RPAC Administrador (Art. 3)</div>
-            <div class="kpi-value" style="font-size: 1.1rem; color: var(--text-1); margin: 6px 0;" id="ley14701RpacVal">RPAC PBA N° 14892</div>
-            <div class="kpi-sub" style="color: var(--green);">✓ Inscripción activa en Registro Público de Buenos Aires</div>
+        <div class="kpi-card" style="border-top: 3px solid var(--accent); background: rgba(6,182,212,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div class="kpi-title" style="color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                    <span>📜 Matrícula RPAC Administrador (Art. 3)</span>
+                    <span class="badge badge-success" style="font-size: 0.65rem;">VIGENTE</span>
+                </div>
+                <div class="kpi-value" style="font-size: 0.95rem; font-weight: 700; color: var(--text-1); margin: 6px 0;" id="ley14701RpacVal">RPAC PBA N° 862 · Legajo 279455 (Agostina Daniela Fernández)</div>
+                <div class="kpi-sub" style="color: var(--green); line-height: 1.35;">✓ Vigente sin sanciones · Verificado DPPJ Ministerio de Justicia PBA (02/11/2026)</div>
+            </div>
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.08);">
+                <button type="button" onclick="openCertDppjModal()" class="btn" style="width: 100%; font-size: 0.72rem; padding: 4px 8px; background: rgba(6,182,212,0.12); border: 1px solid var(--accent); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                    🔍 Ver Certificado Oficial DPPJ
+                </button>
+            </div>
         </div>
 
         <div class="kpi-card" style="border-top: 3px solid var(--green); background: rgba(16,185,129,0.04);">
@@ -1543,6 +1737,95 @@
         <div class="checklist-grid" id="ley14701BooksContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem;">
             <!-- Se puebla dinámicamente con renderLey14701Section() -->
         </div>
+    </div>
+
+    <!-- SECCIÓN: MARCO JURÍDICO Y NOTARIAL (RCP Y REC) -->
+    <div style="margin-top: 2.5rem; margin-bottom: 1.25rem;" id="reglamentos">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-size: 0.65rem; font-weight: 800; color: #8b5cf6; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                    <span style="background: rgba(139,92,246,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(139,92,246,0.3);">NORMATIVA MATRIZ</span> MARCO NOTARIAL Y REGLAMENTOS VIGENTES
+                </div>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-1); margin-bottom: 0.25rem;">🏛️ Marco Jurídico y Reglamentos del Consorcio</h2>
+                <p style="font-size: 0.8rem; color: var(--text-3); margin-bottom: 0;">Disposiciones estatutarias inmutables del Reglamento de Copropiedad (RCP Matrícula 90.414) y Reglamento Interno de Convivencia (REC 2013).</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <span class="badge" style="background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.3); font-size: 0.78rem; padding: 6px 12px; font-weight: 600;">Reglamento Inscripto RPI PBA</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS COMPARATIVAS DE REGLAMENTOS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+        
+        <!-- CARD 1: RCP -->
+        <div class="card" style="background: rgba(11, 17, 32, 0.75); border: 1px solid rgba(139,92,246,0.25); border-top: 3px solid #8b5cf6; border-radius: 12px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <div>
+                    <span class="badge" style="background: rgba(139,92,246,0.15); color: #a78bfa; font-size: 0.68rem; padding: 2px 8px;">ESCRITURA MATRIZ</span>
+                    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin: 4px 0 2px 0;">Reglamento de Copropiedad y Administración (RCP)</h3>
+                    <div style="font-size: 0.72rem; color: var(--text-3);">Otorgado 05/09/2012 · Esc. Guillermo Lettieri (Reg. 65) · Inscripto 19/09/2012 · Matrícula 90.414 (63 págs.)</div>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem;">
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #06b6d4; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0;">
+                    <strong style="color: #22d3ee;">Art. 8 — Prorrateo Estricto por Porcentual:</strong>
+                    <div style="color: var(--text-2); font-size: 0.76rem; margin-top: 2px;">
+                        Todos los gastos comunes (ordinarios, extraordinarios y fondos de reserva) deben ser solventados <em>estrictamente en proporción al porcentual de dominio fijado en el Art. 2</em>. Cualquier prorrateo en 70 partes iguales es legalmente nulo de nulidad absoluta (Art. 2049 CCyCN).
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #f43f5e; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0;">
+                    <strong style="color: #fb7185;">Art. 13 Inc. b — Unanimidad (100%) para Obras Nuevas:</strong>
+                    <div style="color: var(--text-2); font-size: 0.76rem; margin-top: 2px;">
+                        Se exige inexcusablemente el <strong>voto unánime (100%)</strong> de la totalidad de copropietarios para aprobar construcciones nuevas, alterar superficies comunes o modificar destinos. Los entrepisos y cerramientos de dúplex sin el 100% de votos configuran obras clandestinas ilegales.
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #fbbf24; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0;">
+                    <strong style="color: #fde68a;">Art. 6 & 18 — Fachada y Fiscalización del Consejo:</strong>
+                    <div style="color: var(--text-2); font-size: 0.76rem; margin-top: 2px;">
+                        Prohibición taxativa de colocar cerramientos o alterar la fachada sin autorización asamblearia previa. El Consejo de Propietarios tiene el deber de fiscalizar libros, autorizar contrataciones y resguardar la legalidad.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: REC -->
+        <div class="card" style="background: rgba(11, 17, 32, 0.75); border: 1px solid rgba(16,185,129,0.25); border-top: 3px solid #10b981; border-radius: 12px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <div>
+                    <span class="badge" style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 0.68rem; padding: 2px 8px;">CONVIVENCIA & OPERATORIA</span>
+                    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-1); margin: 4px 0 2px 0;">Reglamento Interno de Espacios Comunes (REC 2013)</h3>
+                    <div style="font-size: 0.72rem; color: var(--text-3);">Aprobado en Asamblea Extraordinaria del 16/09/2013 · Aplicación vinculante (9 págs.)</div>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem;">
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #10b981; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0;">
+                    <strong style="color: #34d399;">Art. 7 — Obligación Ineludible de 3 Presupuestos:</strong>
+                    <div style="color: var(--text-2); font-size: 0.76rem; margin-top: 2px;">
+                        El Administrador debe presentar siempre ante el Consejo de Propietarios <em>tres presupuestos comparativos para gastos mayores o extraordinarios</em>. Su omisión en contrataciones como la obra de pintura vulneró abiertamente esta cláusula.
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #38bdf8; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0;">
+                    <strong style="color: #38bdf8;">Art. 6 — Reunión Mensual de Gestión Obligatoria:</strong>
+                    <div style="color: var(--text-2); font-size: 0.76rem; margin-top: 2px;">
+                        Deber legal de mantener al menos una reunión mensual entre la Administración y el Consejo de Propietarios para verificación de cuentas, auditoría de comprobantes y coordinación de servicios.
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #f43f5e; padding: 0.6rem 0.8rem; border-radius: 0 6px 6px 0;">
+                    <strong style="color: #fb7185;">Art. 2 & 2.1.3 — Cocheras y Responsabilidad por Daños:</strong>
+                    <div style="color: var(--text-2); font-size: 0.76rem; margin-top: 2px;">
+                        Cocheras de uso exclusivo para residentes del edificio (prohibido alquilar a personas ajenas). Quien ejecute obras o genere filtraciones hacia terceros responde patrimonialmente con su propio patrimonio por la reparación integral.
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- SECCIÓN: AUDITORÍA DOCUMENTAL Y DE DETECCIÓN DE OMITIDOS -->
@@ -1692,7 +1975,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">👤 Sueldos y Cargas Sociales</div>
-                    <div class="card-subtitle">Desglose discriminado por puesto: Encargado Principal, Encargado Auxiliar, Ayudante / Suplente y Cargas Sociales</div>
+                    <div class="card-subtitle">Desglose de nómina propia: Encargado Titular, 2° Encargado, Personal Nocturno y Cargas Sociales</div>
                 </div>
             </div>
             <div id="drillSueldosChart"></div>
@@ -1701,7 +1984,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">⚡ Servicios Públicos</div>
-                    <div class="card-subtitle">Desglose discriminado: Edesur, Cuentas AySA (Torres 356/358/360) y Metrogas</div>
+                    <div class="card-subtitle">Desglose discriminado: Edesur (05637256) y Cuentas AySA (Torres 356 / 358 / 360)</div>
                 </div>
             </div>
             <div id="drillServiciosChart"></div>
@@ -1710,7 +1993,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">🛠️ Contratos y Abonos</div>
-                    <div class="card-subtitle">Desglose discriminado: Bastida S.A., Ascensores Guillemi, Eco Plagas, Conectividad y Bidones</div>
+                    <div class="card-subtitle">Desglose discriminado: Seguridad 24hs (MM / Bastida S.A.), Ascensores Guillemi, FB Saneamiento y Conectividad</div>
                 </div>
             </div>
             <div id="drillContratosChart"></div>
@@ -1728,7 +2011,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">📋 Administración</div>
-                    <div class="card-subtitle">Desglose discriminado: Honorarios D&F, Estudio Pariano, Ley 25.413, Fotocopias y Traspaso</div>
+                    <div class="card-subtitle">Desglose discriminado: Honorarios Fernández-Villasenin y D&F, ConsorcioAbierto, Estudio Pariano y Bancarios</div>
                 </div>
             </div>
             <div id="drillAdminChart"></div>
@@ -1769,43 +2052,43 @@
                 </div>
             </div>
 
-            <!-- 4 KPI cards de empleados -->
+            <!-- 4 KPI cards de empleados en relación de dependencia (Sueldos Netos de Bolsillo) -->
             <div class="employee-grid">
 
-                <!-- Encargado Principal -->
+                <!-- Encargado Titular -->
                 <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:12px;padding:1rem;border-top:2px solid #06b6d4;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔵 Encargado Titular</div>
-                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Encargado Principal</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🔵 Nómina Propia · Titular</div>
+                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Encargado Titular</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="empIbrahimMonto">—</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empIbrahimHist">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Encargado Permanente (s/viv.)</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Encargado Permanente (s/viv.) · Sueldo Neto</div>
                 </div>
 
-                <!-- Encargado Auxiliar -->
+                <!-- 2° Encargado y Suplencias -->
                 <div style="background:rgba(244,114,182,0.05);border:1px solid rgba(244,114,182,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f472b6;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🩷 Encargado Auxiliar</div>
-                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Encargado Auxiliar</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🩷 Nómina Propia · 2° Encargado</div>
+                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">2° Encargado y Suplencias</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f472b6;" id="empLourdesMonto">—</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empLourdesHist">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">Reemplazos de Francos y Licencias</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">No Permanente (s/viv.) y Suplencias · Sueldo Neto</div>
                 </div>
 
                 <!-- Cargas Sociales -->
                 <div style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:1rem;border-top:2px solid #fbbf24;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🟡 Cargas Sociales</div>
-                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Cargas Soc. / Sindicato</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🟡 Cargas y Sindicato</div>
+                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">ARCA · SUTERH · FATERYH</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#fbbf24;" id="empCargasMonto">—</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empCargasHist">—</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">ART · SUTERH · FATERYH · AFIP</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px;">F.931 Seguridad Social · Cuota Sindical · SAC</div>
                 </div>
 
-                <!-- Ayudante / Vigilancia -->
+                <!-- Personal Nocturno Propio -->
                 <div style="background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:1rem;border-top:2px solid #a78bfa;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🟣 Personal de Apoyo</div>
-                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Ayudante / Suplente</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🟣 Nómina Propia · Nocturno</div>
+                    <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);margin-bottom:6px;">Personal Nocturno Propio</div>
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Outfit',sans-serif;color:#a78bfa;" id="empYamilRepMonto">—</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:5px;" id="empVigilanciaHist">—</div>
-                    <div style="font-size:0.7rem;color:rgba(167,139,250,0.8);margin-top:2px;">Vigilancia Nocturna / Apoyo</div>
+                    <div style="font-size:0.7rem;color:rgba(167,139,250,0.85);margin-top:2px;">Rel. Dependencia (hasta Sep-26) · Excluye Agencia Bastida</div>
                 </div>
             </div>
 
@@ -1813,7 +2096,7 @@
             <div class="card-header" style="margin-bottom:0.75rem;">
                 <div>
                     <div class="card-title">📊 Evolución Salarial Mensual</div>
-                    <div class="card-subtitle">Comparación discriminada mes a mes (últimos 16 meses)</div>
+                    <div class="card-subtitle">Comparación discriminada mes a mes (14 períodos auditados)</div>
                 </div>
             </div>
             <div id="employeeChart"></div>
@@ -1837,23 +2120,23 @@
             <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.25rem;">
                 <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:12px;padding:1rem;border-top:2px solid #06b6d4;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📊 Provisiones Liquidadas</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="extraLiquidado">$ 35.500.000</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Liquidado en expensas</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="extraLiquidado">$ 40.180.000</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Fondo Reserva D&amp;F ($35,5M) + CA ($4,68M)</div>
                 </div>
                 <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:1rem;border-top:2px solid #10b981;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">💰 Recaudado de Copropietarios</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#10b981;" id="extraRecaudado">$ 33.205.555</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Recaudación acumulada</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#10b981;" id="extraRecaudado">$ 30.780.227</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Recaudación acumulada verificada</div>
                 </div>
                 <div style="background:rgba(236,72,153,0.05);border:1px solid rgba(236,72,153,0.2);border-radius:12px;padding:1rem;border-top:2px solid #ec4899;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📤 Abonado a Contratistas</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f472b6;" id="extraAbonado">$ 38.679.581</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Pagos de obra de pintura</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f472b6;" id="extraAbonado">$ 40.786.796</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">D&amp;F ($38,68M) + Cierre obra Ago-Sep ($2,11M)</div>
                 </div>
                 <div style="background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f43f5e;">
-                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚖️ Saldo Fondo de Reserva (Cierre)</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="extraSaldo">-$ 5.474.026</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Financiación / Déficit temporal</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚖️ Saldo Neto Acumulado</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="extraSaldo">-$ 10.006.569</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Cubierto con caja ordinaria del consorcio</div>
                 </div>
             </div>
 
@@ -1899,22 +2182,22 @@
             <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.25rem;">
                 <div style="background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:1rem;border-top:2px solid #f43f5e;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🚨 Unidades Morosas</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="moroCount">15 U.F. (21,4%)</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#f43f5e;" id="moroCount">9 U.F. (12,9%)</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">De 70 U.F. totales</div>
                 </div>
                 <div style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:1rem;border-top:2px solid #fbbf24;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">💰 Deuda Acumulada Total</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#fbbf24;" id="moroTotalDeuda">$ 4.295.074</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#fbbf24;" id="moroTotalDeuda">$ 3.189.720,88</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Pendiente de cobro</div>
                 </div>
                 <div style="background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:1rem;border-top:2px solid #a78bfa;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">⚠️ Mayor Deuda Individual</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#a78bfa;" id="moroMaxDeuda">$ 969.835</div>
-                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;" id="moroMaxOwner">UF 7 (2º A - 356)</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#a78bfa;" id="moroMaxDeuda">$ 1.355.003,49</div>
+                    <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;" id="moroMaxOwner">UF 7 (2°A - Sarmiento 356)</div>
                 </div>
                 <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:12px;padding:1rem;border-top:2px solid #06b6d4;">
                     <div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">📊 Deuda Promedio por U.F.</div>
-                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="moroAvgDeuda">$ 286.338</div>
+                    <div style="font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif;color:#06b6d4;" id="moroAvgDeuda">$ 354.413,43</div>
                     <div style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Promedio entre morosos</div>
                 </div>
             </div>
@@ -2098,9 +2381,348 @@
                     <div style="margin-top: 4px; font-size: 0.73rem; color: var(--text-3); display: flex; flex-direction: column; gap: 3px; background: rgba(0,0,0,0.2); padding: 6px 8px; border-radius: 6px;">
                         <div>🔥 <strong>Metrogas:</strong> 0800-999-1050</div>
                         <div>💧 <strong>AySA 24hs:</strong> 0800-321-2482</div>
-                        <div>⚡ <strong>Edesur 24hs:</strong> 0800-333-03787 / 4245-1833 <span style="color:var(--text-2);">(Cliente 3974678 // Medidor 2111329)</span></div>
+                        <div>⚡ <strong>Edesur 24hs:</strong> 0800-333-03787 / 4245-1833 <span style="color:var(--text-2);">(Cta. Contrato 05637256 · Cliente 3974678 · Medidor 2111329)</span></div>
                     </div>
                 </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ================================================================= -->
+    <!-- SECCIÓN: AUDITORÍA FORENSE CONTABLE Y LEGAL (#auditoria)          -->
+    <!-- ================================================================= -->
+    <section id="auditoria" style="margin-top: 3rem; margin-bottom: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem;">
+            <div>
+                <div style="font-size: 0.65rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                    <span style="background: rgba(56,189,248,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56,189,248,0.3);">CONTROL FORENSE INTEGRAL</span> LEY 14.701 PBA · AFIP/ARCA · CCCN ARTS. 2044-2069
+                </div>
+                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.35rem;">⚖️ Auditoría Forense y Cruces Legales Consorciales</h2>
+                <p style="font-size: 0.82rem; color: var(--text-3); margin-bottom: 0;">Cruce automatizado entre prorrateos de expensas, movimientos bancarios de Banco Galicia (Cta. Cte. N° 0070044320000009108891), facturación fiscal y normativa de Propiedad Horizontal.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <span class="badge" style="background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); font-size: 0.78rem; padding: 6px 14px; font-weight: 700;">Zero-Backend Audit Pipeline</span>
+            </div>
+        </div>
+
+        <!-- TARJETAS CUÁDRUPLE MARCO NORMATIVO -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 1.75rem;">
+            <div class="kpi-card" style="border-top: 3px solid #38bdf8; background: rgba(56,189,248,0.03);">
+                <div class="kpi-title" style="color: #38bdf8; font-weight: 700;">🏛️ Ley 14.701 PBA (RPAC)</div>
+                <div class="kpi-value" style="font-size: 1rem; color: var(--text-1); margin: 6px 0;">Matrícula N° 862 (Dra. Fernández)</div>
+                <div class="kpi-sub" style="color: var(--green); font-size: 0.75rem; line-height: 1.4;">
+                    ✓ Vigente sin sanciones ante DPPJ PBA.<br>
+                    ✓ Exclusividad bancaria Galicia a nombre del Consorcio (CUIT 30-71412062-6).
+                </div>
+            </div>
+
+            <div class="kpi-card" style="border-top: 3px solid #f43f5e; background: rgba(244,63,94,0.03);">
+                <div class="kpi-title" style="color: #f43f5e; font-weight: 700;">🚨 Violación Prorrateo Seguridad (Art. 8 RCP)</div>
+                <div class="kpi-value" style="font-size: 1.05rem; color: #fb7185; margin: 6px 0;">$6.765.131,67 Sobrefacturados</div>
+                <div class="kpi-sub" style="color: var(--text-2); font-size: 0.75rem; line-height: 1.4;">
+                    42 unidades chicas subsidiaron a semipisos y dúplex durante 26 meses por imposición del 1/70 (1,4286%).<br>
+                    <strong>Crédito Familia Martyniuk:</strong> $487.749,34 (UF 55 + UF 59 + UC BN).
+                </div>
+            </div>
+
+            <div class="kpi-card" style="border-top: 3px solid #fbbf24; background: rgba(251,191,36,0.03);">
+                <div class="kpi-title" style="color: #fbbf24; font-weight: 700;">📑 Fiscalidad AFIP/ARCA (RG 1415)</div>
+                <div class="kpi-value" style="font-size: 1rem; color: var(--text-1); margin: 6px 0;">$20,11M Morel Observados</div>
+                <div class="kpi-sub" style="color: var(--amber); font-size: 0.75rem; line-height: 1.4;">
+                    9 pagos bancarios ($6,91M sobre presupuesto; 5 sin factura por $9,51M y 4 vía tercero monotributista). Reclamo de $6,02M <strong>RECHAZADO en asamblea</strong>.<br>
+                    Pinturerías Rex FC B 7001-00005828 ($415.621,11) aclarada en asamblea: filtración azotea UF 69 (Celina Velayos).
+                </div>
+            </div>
+
+            <div class="kpi-card" style="border-top: 3px solid #34d399; background: rgba(52,211,153,0.03);">
+                <div class="kpi-title" style="color: #34d399; font-weight: 700;">🗳️ Asamblea 02/11/2026 (Art. 2060 CCyCN)</div>
+                <div class="kpi-value" style="font-size: 1rem; color: var(--text-1); margin: 6px 0;">Plazo 30 Días de Oposición</div>
+                <div class="kpi-sub" style="color: var(--green); font-size: 0.75rem; line-height: 1.4;">
+                    Vigencia legal para remitir oposición fehaciente antes del 02/12/2026.<br>
+                    Impugnación formal de cuentas y reserva de acciones por repetición de pago.
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 1: CONCILIACIÓN BANCARIA (EFECTIVO NO BANCARIZADO) -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                        <span>🏦 Conciliación de Cobranza vs. Acreditaciones Bancarias Oficiales (Flujo de Caja)</span>
+                    </div>
+                    <div class="card-subtitle">Comparativa mes a mes: Suma real de cobranzas en prorrateos vs. depósitos acreditados en Cta. Cte. Banco Galicia N° 0070044320000009108891.</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <span id="concilBadgeHeader" class="badge" style="background: rgba(244,63,94,0.15); color: #fb7185; border: 1px solid rgba(244,63,94,0.3); font-weight:700;">
+                        Brecha Meses Deficitarios D&amp;F: +$3.103.458,82
+                    </span>
+                </div>
+            </div>
+
+            <div style="padding: 1.25rem;">
+                <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; text-align: center;">
+                        <div style="font-size: 0.72rem; color: var(--text-3); text-transform: uppercase;">Total Cobrado en Prorrateos (14 Meses)</div>
+                        <div id="concilKpiProrr" style="font-size: 1.3rem; font-weight: 800; color: #38bdf8; font-family: 'Outfit', sans-serif;">$234.090.647,76</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; text-align: center;">
+                        <div style="font-size: 0.72rem; color: var(--text-3); text-transform: uppercase;">Total Ingresos Banco Galicia (Consolidado)</div>
+                        <div id="concilKpiBanco" style="font-size: 1.3rem; font-weight: 800; color: #34d399; font-family: 'Outfit', sans-serif;">$240.158.387,29</div>
+                    </div>
+                    <div style="background: rgba(244,63,94,0.04); border: 1px solid rgba(244,63,94,0.3); border-radius: 8px; padding: 0.85rem; text-align: center;">
+                        <div style="font-size: 0.72rem; color: #fb7185; text-transform: uppercase; font-weight:700;">Brecha Meses Deficitarios D&amp;F (Ago–Dic 25)</div>
+                        <div id="concilKpiBrecha" style="font-size: 1.3rem; font-weight: 800; color: #f43f5e; font-family: 'Outfit', sans-serif;">+$3.103.458,82</div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="max-height: 380px; overflow-y: auto;">
+                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); text-align: left;">
+                                <th style="padding: 8px 10px;">Período</th>
+                                <th style="padding: 8px 10px; text-align: right;">Cobrado Prorrateo</th>
+                                <th style="padding: 8px 10px; text-align: right;">Acreditado Banco Galicia</th>
+                                <th style="padding: 8px 10px; text-align: right;">Diferencia Flujo Caja</th>
+                                <th style="padding: 8px 10px;">Diagnóstico Forense</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conciliacionTableBody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 2: INTEGRIDAD DE COEFICIENTES Y GASTOS B (SEGURIDAD) -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">📐 Auditoría de Coeficientes de Prorrateo e Integridad del 100% (Art. 8 RCP)</div>
+                    <div class="card-subtitle">Verificación de suma de porcentuales legales frente a la imposición forzada de Gastos B (Seguridad al 1/70).</div>
+                </div>
+            </div>
+            <div style="padding: 1.25rem;">
+                <div style="background: rgba(251,191,36,0.04); border-left: 3px solid var(--amber); padding: 0.85rem 1rem; border-radius: 4px; font-size: 0.8rem; color: var(--text-2); margin-bottom: 1.25rem; line-height: 1.5;">
+                    <strong style="color: var(--amber);">Hallazgo de Integridad:</strong> En los períodos 2025-07 a 2026-07, la sumatoria de coeficientes de expensas legales sumó exactamente <code style="color:var(--text-1);">99,7900%</code>, existiendo un faltante de <code style="color:#f43f5e;">0,2100%</code> no asignado en el prorrateo durante 12 meses. Dicho cálculo fue corregido a <code style="color:var(--text-1);">99,9960%</code> recién en agosto de 2026. Al mismo tiempo, el rubro de Seguridad se liquidó durante 26 meses (Ago-24 a Sep-26) bajo una alícuota uniforme fija de <code style="color:#fb7185;">1,4286%</code> (1/70), transfiriendo un subsidio acumulado de <strong>$6.765.131,67</strong> (dictamen C.P. Dr. Pablo Américo Parodi) desde las 42 unidades chicas hacia los pisos superiores.
+                </div>
+                <div class="table-container" style="max-height: 320px; overflow-y: auto;">
+                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); text-align: left;">
+                                <th style="padding: 8px 10px;">Período</th>
+                                <th style="padding: 8px 10px; text-align: center;">Unidades</th>
+                                <th style="padding: 8px 10px; text-align: right;">Suma Porcentual Legal</th>
+                                <th style="padding: 8px 10px; text-align: right;">Desvío s/ 100%</th>
+                                <th style="padding: 8px 10px; text-align: right;">Suma Gastos B (Seguridad)</th>
+                                <th style="padding: 8px 10px;">Estado Normativo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="integridadTableBody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 3: AUDITORÍA DE PROVEEDORES VS. INFLACIÓN INDEC -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="card-title">📈 Auditoría de Proveedores y Abonos Fijos vs. Inflación INDEC (apis.datos.gob.ar)</div>
+                    <div class="card-subtitle">Contraste de aumentos acumulados de prestadores habituales frente a la inflación oficial acumulada (+38,50% base 2025-07 a 2026-09).</div>
+                </div>
+                <div>
+                    <span class="badge" style="background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.3); font-size: 0.78rem; font-weight:700;">
+                        IPC INDEC Acumulado: +38,50%
+                    </span>
+                </div>
+            </div>
+            <div style="padding: 1.25rem;">
+                <div class="table-container" style="max-height: 360px; overflow-y: auto;">
+                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); text-align: left;">
+                                <th style="padding: 8px 10px;">Proveedor / Concepto Normalizado</th>
+                                <th style="padding: 8px 10px; text-align: right;">Monto Inicial (2025-07/08)</th>
+                                <th style="padding: 8px 10px; text-align: right;">Monto Cierre (2026-09)</th>
+                                <th style="padding: 8px 10px; text-align: right;">Aumento Real</th>
+                                <th style="padding: 8px 10px; text-align: right;">Benchmark IPC</th>
+                                <th style="padding: 8px 10px; text-align: right;">Desvío Inflación</th>
+                                <th style="padding: 8px 10px;">Dictamen Auditoría</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proveedoresIpcTableBody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SECCIÓN: GENERADOR DE NOTA FORMAL DE RECLAMO (#reclamo)          -->
+    <!-- ================================================================= -->
+    <section id="reclamo" style="margin-top: 3rem; margin-bottom: 3.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem;">
+            <div>
+                <div style="font-size: 0.65rem; font-weight: 800; color: #34d399; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                    <span style="background: rgba(52,211,153,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(52,211,153,0.3);">AUTOGESTIÓN PROPIETARIOS</span> ART. 2060 CCYCN · ART. 8 RCP · LEY 14.701 PBA
+                </div>
+                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-1); margin-bottom: 0.35rem;">📝 Personalizador de Nota Formal de Reclamo e Intimación Legal</h2>
+                <p style="font-size: 0.82rem; color: var(--text-3); margin-bottom: 0;">Generá tu nota formal fundamentada en la pericia contable del Consorcio Sarmiento 356/358/360. Lista para copiar al portapapeles, imprimir en formato carta PDF o enviar por email a la Administración dentro del plazo legal de 30 días.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <span class="badge badge-success" style="font-size: 0.78rem; padding: 6px 14px; font-weight: 700;">Documento Válido Notificación</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 1.5rem; align-items: start;">
+            
+            <!-- PANEL DE CONTROL Y CONFIGURACIÓN DEL RECLAMO -->
+            <div class="card" style="padding: 1.25rem;">
+                <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-1); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px;">
+                    <span>⚙️ Selección de Unidad y Datos del Propietario</span>
+                </div>
+
+                <!-- SELECTOR DE UF -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-3); margin-bottom: 4px; font-weight: 600;">SELECCIONÁ TU UNIDAD FUNCIONAL (UF 1 A 70):</label>
+                    <select id="reclamoUfSelect" style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-accent); border-radius: 8px; color: var(--text-1); padding: 8px 12px; font-size: 0.85rem; font-weight: 600;">
+                        <!-- Poblado dinámicamente con las 70 UFs -->
+                    </select>
+                </div>
+
+                <!-- BOTONES DE ACCESO RÁPIDO -->
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem;">
+                    <button type="button" class="btn" onclick="selectUfQuick(55)" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(6,182,212,0.12); border: 1px solid var(--accent); color: var(--accent);">
+                        🏢 Alexis Martyniuk (UF 55 - Piso 10°A)
+                    </button>
+                    <button type="button" class="btn" onclick="selectUfQuick(59)" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(6,182,212,0.12); border: 1px solid var(--accent); color: var(--accent);">
+                        🏢 Andrés Martyniuk (UF 59 - Piso 11°A)
+                    </button>
+                    <button type="button" class="btn" onclick="selectUfQuick('both_55_59')" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(52,211,153,0.15); border: 1px solid #34d399; color: #34d399; font-weight: 700;">
+                        ✨ Ambas UFs (10°A y 11°A - $487k)
+                    </button>
+                    <button type="button" class="btn" onclick="selectUfQuick(69)" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(244,63,94,0.12); border: 1px solid #f43f5e; color: #fb7185;">
+                        🔍 UF 69 (Celina Velayos · 14°A 356)
+                    </button>
+                    <button type="button" class="btn" onclick="selectUfQuick(70)" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(244,63,94,0.12); border: 1px solid #f43f5e; color: #fb7185;">
+                        🔍 UF 70 (Putz · 14°A 360)
+                    </button>
+                </div>
+
+                <!-- CAMPOS EDITABLES PROPIETARIO -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.72rem; color: var(--text-3); margin-bottom: 3px;">Nombre y Apellido Titular:</label>
+                        <input type="text" id="reclamoNombreInput" value="Alexis Martyniuk" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; color: var(--text-1); padding: 6px 10px; font-size: 0.8rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.72rem; color: var(--text-3); margin-bottom: 3px;">DNI / CUIT Titular:</label>
+                        <input type="text" id="reclamoDniInput" value="33.857.298" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; color: var(--text-1); padding: 6px 10px; font-size: 0.8rem;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-size: 0.72rem; color: var(--text-3); margin-bottom: 3px;">Email de Contacto Notificante:</label>
+                    <input type="email" id="reclamoEmailInput" value="alexis.martyniuk@gmail.com" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; color: var(--text-1); padding: 6px 10px; font-size: 0.8rem;">
+                </div>
+
+                <!-- TARJETA DE CÁLCULO FINANCIERO DE LA UNIDAD -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-3); letter-spacing: 1px; margin-bottom: 6px;">Liquidación Pericial Seguridad (26 Meses)</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; margin-bottom: 8px;">
+                        <div>Coef. Legal Escritura: <strong id="reclamoLegalPct" style="color:var(--accent);">1,0100%</strong></div>
+                        <div>Coef. Aplicado Indebido: <strong id="reclamoCobradoPct" style="color:#f43f5e;">1,4286%</strong></div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.8rem; color: var(--text-2);">Saldo a Reintegrar por Expensas:</span>
+                        <strong id="reclamoSaldoFavor" style="font-size: 1.2rem; color: #34d399; font-family: 'Outfit', sans-serif;">$246.269,05</strong>
+                    </div>
+                </div>
+
+                <!-- CHECKBOXES DE PUNTOS DE RECLAMO -->
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-1); margin-bottom: 0.6rem;">Puntos y Pretensiones Legales a Incluir:</div>
+                <div style="display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.76rem; color: var(--text-2); margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="chkReclamoImpugnacion" checked style="margin-top: 2px;">
+                        <span><strong>Punto 1:</strong> Oposición e impugnación formal a cuentas y resoluciones de asamblea 02/11/2026 (Art. 2060 CCyCN - Plazo perentorio de 30 días).</span>
+                    </label>
+                    <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="chkReclamoSeguridad" checked style="margin-top: 2px;">
+                        <span><strong>Punto 2:</strong> Intimación de acreditación / reintegro de expensas por cobro ilegal de Seguridad al 1/70 contrario al Art. 8 del RCP y Art. 2049 CCyCN.</span>
+                    </label>
+                    <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="chkReclamoMorel" checked style="margin-top: 2px;">
+                        <span><strong>Punto 3:</strong> Rechazo expreso a la supuesta deuda de Rafael Morel ($6.023.238) por carecer de comprobantes fiscales con CAE (Ley 14.701 PBA / ARCA).</span>
+                    </label>
+                    <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="chkReclamoObras" checked style="margin-top: 2px;">
+                        <span><strong>Punto 4:</strong> Cese de obras clandestinas y prohibición de convalidación de cerramientos o ampliaciones privadas sobre sectores comunes de terraza / quincho en últimos pisos (Art. 13 inc. b RCP).</span>
+                    </label>
+                    <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="chkReclamoRendicion" checked style="margin-top: 2px;">
+                        <span><strong>Punto 5:</strong> Solicitud de rendición documentada de fondos recaudados y estado de conciliación bancaria Galicia (Art. 2067 inc. d y e CCyCN).</span>
+                    </label>
+                </div>
+
+                <!-- ACCIONES RÁPIDAS -->
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button type="button" class="btn" onclick="copyReclamoText()" style="width: 100%; background: #38bdf8; color: #0b1120; font-weight: 700; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        📋 Copiar Nota al Portapapeles
+                    </button>
+                    <div id="copyFeedbackAlert" style="display:none; font-size:0.75rem; color:#34d399; text-align:center; font-weight:600;">
+                        ✓ ¡Nota formal copiada al portapapeles! Lista para pegar en correo o carta.
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button type="button" class="btn" onclick="printReclamoLetter()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text-1); font-weight: 600; padding: 8px; font-size: 0.78rem;">
+                            🖨️ Imprimir Carta PDF
+                        </button>
+                        <a id="reclamoMailtoLink" href="#" class="btn" style="background: rgba(52,211,153,0.15); border: 1px solid #34d399; color: #34d399; font-weight: 600; padding: 8px; font-size: 0.78rem; text-align: center; text-decoration: none;">
+                            ✉️ Enviar Email a Adm.
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VISTA PREVIA FORMAL DE LA CARTA (ESTILO DOCUMENTAL LEGAL) -->
+            <div id="reclamoCartaContainer" style="background: #ffffff; color: #1e293b; border-radius: 12px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; line-height: 1.6; min-height: 600px; position: relative;">
+                
+                <div style="border-bottom: 2px solid #0f172a; padding-bottom: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; font-family: 'Inter', sans-serif; font-weight: 700;">CONSORCIO DE PROPIETARIOS SARMIENTO 356/358/360</div>
+                        <div style="font-size: 1.05rem; font-weight: bold; color: #0f172a; font-family: 'Inter', sans-serif;">NOTIFICACIÓN FORMAL DE OPOSICIÓN E INTIMACIÓN LEGAL</div>
+                    </div>
+                    <div style="text-align: right; font-size: 0.78rem; color: #64748b; font-family: 'Inter', sans-serif;">
+                        <span>Lomas de Zamora, PBA</span><br>
+                        <strong id="cartaFechaDoc">03 de Noviembre de 2026</strong>
+                    </div>
+                </div>
+
+                <div id="reclamoCartaPreviewText" style="white-space: pre-line;">
+                    <!-- Se renderiza dinámicamente con updateReclamoLetter() -->
+                </div>
+
+                <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px dashed #cbd5e1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: #475569;">
+                    <div>
+                        <div>_________________________________________</div>
+                        <div style="font-weight: bold; margin-top: 4px;" id="cartaFirmaNombre">Alexis Martyniuk</div>
+                        <div>DNI: <span id="cartaFirmaDni">33.857.298</span></div>
+                        <div>Propietario U.F. <span id="cartaFirmaUf">55</span></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div>Constancia de Recepción Administración:</div>
+                        <div style="margin-top: 15px; font-size: 0.72rem; color: #94a3b8;">Firma, Aclaración y Fecha de Recepción</div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -2261,10 +2883,64 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === contactModal) closeContactModal();
         });
     }
+    const invoiceModal = document.getElementById('invoiceViewerModal');
+    if (invoiceModal) {
+        invoiceModal.addEventListener('click', (e) => {
+            if (e.target === invoiceModal && typeof closeInvoiceViewerModal === 'function') closeInvoiceViewerModal();
+        });
+    }
 });
 </script>
 
 <script src="auditoria_documental.js"></script>
 <script src="dashboard.js"></script>
+<!-- MODAL CERTIFICADO OFICIAL DPPJ LEY 14701 -->
+<div class="modal-overlay" id="certDppjModal">
+    <div class="modal" style="position:relative; max-width: 820px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-accent); border-radius: 14px;">
+        <button class="btn" style="position:absolute; top:1.25rem; right:1.25rem; padding: 4px 10px;" onclick="closeCertDppjModal()">✕ Cerrar</button>
+        <div style="font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px;">MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS · GOBIERNO DE LA PROVINCIA DE BUENOS AIRES</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-1); margin: 4px 0 2px 0;">Certificado de Habilitación y Vigencia RPAC (Ley 14701 PBA)</h3>
+        <p style="font-size: 0.8rem; color: var(--text-3); margin-bottom: 1.25rem;">Dirección Provincial de Personas Jurídicas (DPPJ) · Consulta Oficial de Administradores de Consorcios</p>
+        
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 1.25rem;">
+            <img src="docs_auditoria/CERTIFICADO_VIGENCIA_DPPJ_ADMINISTRADORA.png" alt="Constancia Oficial DPPJ Administradora Fernández" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.78rem;">
+            <div><span style="color:var(--text-3);">Razón Social:</span> <strong style="color:var(--text-1);">AGOSTINA DANIELA FERNÁNDEZ</strong></div>
+            <div><span style="color:var(--text-3);">CUIT:</span> <code style="color:var(--accent);">27-29946737-1</code></div>
+            <div><span style="color:var(--text-3);">Matrícula RPAC:</span> <strong style="color:#34d399;">862</strong> (Legajo 279455)</div>
+            <div><span style="color:var(--text-3);">Estado Registral:</span> <span class="badge badge-success" style="font-size:0.7rem;">VIGENTE</span></div>
+            <div><span style="color:var(--text-3);">Sanciones:</span> <span style="color:#34d399; font-weight:600;">NO POSEE SANCIONES</span></div>
+            <div><span style="color:var(--text-3);">Constatación:</span> <span>02/11/2026 23:28 hs</span></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+            <span style="font-size: 0.75rem; color: var(--green); font-weight: 600;">✓ Habilitación legal plena para administración consorcial</span>
+            <a href="docs_auditoria/CERTIFICADO_VIGENCIA_DPPJ_ADMINISTRADORA.png" target="_blank" class="btn" style="background: rgba(6,182,212,0.15); border: 1px solid var(--accent); color: var(--accent); font-size: 0.8rem; font-weight: 600;">🔍 Abrir Imagen Completa</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function openCertDppjModal() {
+    const modal = document.getElementById('certDppjModal');
+    if (modal) modal.classList.add('open');
+}
+function closeCertDppjModal() {
+    const modal = document.getElementById('certDppjModal');
+    if (modal) modal.classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const certModal = document.getElementById('certDppjModal');
+    if (certModal) {
+        certModal.addEventListener('click', (e) => {
+            if (e.target === certModal) closeCertDppjModal();
+        });
+    }
+});
+</script>
+
+
 </body>
 </html>

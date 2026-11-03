@@ -1,17 +1,19 @@
 import sys
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 import os
 import re
 import json
-import pdfplumber
+import fitz
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 STEP_DIR = r"C:\Users\Martyniuk-Ntbk-Gmr\.gemini\antigravity\brain\c0211e8c-1c1d-4b0a-af4b-5f5ee25ba132\.system_generated\steps"
-CACHE_DIR = "data_consorcioabierto"
-LIQUIDACIONES_DIR = "liquidaciones"
-GASTOS_JSON = "gastos.json"
-PRORRATEO_JSON = "prorrateo.json"
+CACHE_DIR = os.path.join(SCRIPT_DIR, "data_consorcioabierto")
+LIQUIDACIONES_DIR = os.path.join(SCRIPT_DIR, "liquidaciones")
+GASTOS_JSON = os.path.join(SCRIPT_DIR, "gastos.json")
+PRORRATEO_JSON = os.path.join(SCRIPT_DIR, "prorrateo.json")
 
 CONSORCIO_ID = 27151
 LIQUIDACIONES_CA = {
@@ -23,16 +25,16 @@ LIQUIDACIONES_CA = {
 def sync_from_consorcioabierto_api(ca_bundle):
     """
     Se autentica contra https://app.consorcioabierto.com/login y consulta la API REST
-    del Consorcio 27151 (/consorcios/27151/gastos y /liquidaciones-expensas/{id}/prorrateo)
-    para actualizar o agregar nuevos períodos publicados.
+    del Consorcio 27151 (/consorcios/27151/liquidaciones-expensas, /gastos y /prorrateo)
+    para actualizar o descubrir automáticamente nuevos períodos publicados.
     """
-    import requests
-    email = os.environ.get("CONSORCIOABIERTO_EMAIL", "")
-    password = os.environ.get("CONSORCIOABIERTO_PASSWORD", "")
+    email = os.environ.get("CONSORCIOABIERTO_EMAIL", "").strip()
+    password = os.environ.get("CONSORCIOABIERTO_PASSWORD", "").strip()
     if not email or not password:
-        # Sin credenciales en variables de entorno; opera utilizando el bundle/caché local
-        return ca_bundle
+        return ca_bundle, False
 
+    import requests
+    updated = False
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
     try:
@@ -42,18 +44,42 @@ def sync_from_consorcioabierto_api(ca_bundle):
         session.post(
             "https://app.consorcioabierto.com/login_check",
             data={"_username": email, "_password": password, "_csrf_token": csrf_token},
-            timeout=15
+            timeout=15,
         )
-        for periodo, liq_id in LIQUIDACIONES_CA.items():
+
+        liq_map = dict(LIQUIDACIONES_CA)
+        for p_key, p_val in ca_bundle.get("periodos", {}).items():
+            if p_val.get("liquidacion_id"):
+                liq_map[p_key] = p_val["liquidacion_id"]
+
+        # Auto-descubrir nuevas liquidaciones publicadas en el portal ConsorcioAbierto
+        try:
+            r_list = session.get(
+                f"https://app.consorcioabierto.com/consorcios/{CONSORCIO_ID}/liquidaciones-expensas",
+                headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
+                timeout=15,
+            )
+            if r_list.status_code == 200 and r_list.headers.get("content-type", "").startswith("application/json"):
+                list_json = r_list.json()
+                for item in list_json.get("data", []):
+                    lid = item.get("id")
+                    per = (item.get("attributes") or {}).get("periodo")
+                    cerrada = (item.get("attributes") or {}).get("cerrada", True)
+                    if lid and per and re.match(r"^\d{4}-\d{2}$", str(per)) and per >= "2026-08" and cerrada:
+                        liq_map[str(per)] = int(lid)
+        except Exception as e_disc:
+            print(f"   [Aviso Autodescubrimiento CA] {e_disc}")
+
+        for periodo, liq_id in sorted(liq_map.items()):
             r_gastos = session.get(
                 f"https://app.consorcioabierto.com/consorcios/{CONSORCIO_ID}/gastos?desde={periodo}&hasta={periodo}",
                 headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
-                timeout=15
+                timeout=15,
             )
             r_prorr = session.get(
                 f"https://app.consorcioabierto.com/liquidaciones-expensas/{liq_id}/prorrateo",
                 headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
-                timeout=15
+                timeout=15,
             )
             if r_gastos.status_code == 200 and r_prorr.status_code == 200:
                 g_json = r_gastos.json()
@@ -62,8 +88,9 @@ def sync_from_consorcioabierto_api(ca_bundle):
                     ca_bundle.setdefault("periodos", {})[periodo] = {
                         "liquidacion_id": liq_id,
                         "gastos": g_json,
-                        "prorrateo": p_json
+                        "prorrateo": p_json,
                     }
+                    updated = True
                     print(f"   [API ConsorcioAbierto] Sincronizado período {periodo} (Liquidación #{liq_id})")
             pdf_dest = os.path.join(LIQUIDACIONES_DIR, f"360_{periodo}_liquidacion.pdf")
             if not os.path.exists(pdf_dest):
@@ -74,7 +101,7 @@ def sync_from_consorcioabierto_api(ca_bundle):
                     print(f"   [API ConsorcioAbierto] Descargado PDF oficial -> {pdf_dest}")
     except Exception as e:
         print(f"   [Aviso API ConsorcioAbierto] Usando caché local ({e})")
-    return ca_bundle
+    return ca_bundle, updated
 
 
 def load_step_json(step_num):
@@ -146,13 +173,39 @@ def map_ca_category(cuenta_nombre, detalle, proveedor_nombre, es_sueldo, tipo_ga
         return "Seguros"
     if "SERVICIOS PÚBLICOS" in c or "SERVICIOS PUBLICOS" in c or any(k in p for k in ["AYSA", "EDESUR", "METROGAS"]):
         return "Servicios Públicos"
-    if "ABONO" in c or "INSUMOS" in c or any(k in p for k in ["BASTIDA", "PERSONAL", "FLOW", "CONSORCIO ABIERTO", "IVESS", "GUILLEMI"]):
-        return "Contratos y Abonos"
-    if any(k in c for k in ["ADMINISTRACIÓN", "ADMINISTRACION", "BANCARIOS", "IMPUESTOS, TASAS"]) or any(k in p for k in ["BANCO GALICIA", "MERCADO PAGO", "FERNÁNDEZ", "FERNANDEZ"]):
+    if any(k in c for k in ["ADMINISTRACIÓN", "ADMINISTRACION", "BANCARIOS", "IMPUESTOS, TASAS"]) or any(
+        k in p for k in ["BANCO GALICIA", "MERCADO PAGO", "FERNÁNDEZ", "FERNANDEZ", "CONSORCIO ABIERTO"]
+    ):
         return "Administración"
-    if any(k in c for k in ["MANTENIMIENTO", "REPARACIONES", "REPUESTOS", "LIMPIEZA", "COMBUSTIBLE"]):
+    if "ABONO" in c or any(k in p for k in ["BASTIDA", "PERSONAL", "FLOW", "IVESS", "GUILLEMI", "FB SANEAMIENTO", "ECO PLAGAS"]):
+        # Si es limpieza institucional / toallas de papel (Cleanar), clasificar como Mantenimiento y Reparaciones -> Productos e Insumos Limpieza
+        if "CLEANAR" in p or "DE ARRIBA" in p or "TOALLA" in d:
+            return "Mantenimiento y Reparaciones"
+        return "Contratos y Abonos"
+    if any(k in c for k in ["MANTENIMIENTO", "REPARACIONES", "REPUESTOS", "LIMPIEZA", "COMBUSTIBLE", "INSUMOS"]):
         return "Mantenimiento y Reparaciones"
     return "Varios"
+
+
+def classify_ca_tipo(categoria, cuenta_nombre, detalle, proveedor_nombre):
+    c = (cuenta_nombre or "").upper()
+    d = (detalle or "").upper()
+    p = (proveedor_nombre or "").upper()
+    if categoria in ("Seguros", "Servicios Públicos"):
+        return "Fijo"
+    if categoria == "Sueldos y Cargas Sociales":
+        if "LIQUIDACIÓN FINAL" in c or "LIQUIDACION FINAL" in d or "INDEMNIZ" in d:
+            return "Variable"
+        return "Fijo"
+    if categoria == "Contratos y Abonos":
+        if any(k in p for k in ["BASTIDA", "GUILLEMI", "FLOW", "PERSONAL", "TELECOM", "FB SANEAMIENTO", "IVESS"]):
+            return "Fijo"
+        return "Variable"
+    if categoria == "Administración":
+        if any(k in p for k in ["FERNÁNDEZ", "FERNANDEZ", "CONSORCIO ABIERTO", "BANCO GALICIA", "MERCADO PAGO"]):
+            return "Fijo"
+        return "Variable"
+    return "Variable"
 
 
 def map_ca_rubro(cuenta_nombre, es_sueldo, tipo_gasto):
@@ -179,21 +232,64 @@ def map_ca_rubro(cuenta_nombre, es_sueldo, tipo_gasto):
 def anonymize_employee(proveedor_nombre, detalle):
     p_up = (proveedor_nombre or "").upper()
     d_up = (detalle or "").upper()
-    if "BUSTAMANTE, JUAN" in p_up or "BUSTAMANTE JUAN" in p_up:
-        return "Encargado Permanente", "[Encargado Principal]"
-    if "BUSTAMANTE, VICTOR" in p_up or "BUSTAMANTE VICTOR" in p_up or "JAVIER" in d_up:
-        if "EMPLEADO:" in p_up:
-            return "Ayudante / Suplente", "[Ayudante]"
-    if "RAMÍREZ, GUILLERMO" in p_up or "RAMIREZ, GUILLERMO" in p_up or "RAMIREZ GUILLERMO" in p_up:
-        return "Vigilancia Nocturna", "[Vigilancia Nocturna]"
+    if "BUSTAMANTE, JUAN" in p_up or "BUSTAMANTE JUAN" in p_up or "ENCARGADO TITULAR" in p_up:
+        return "Encargado Permanente", "[Encargado Titular]"
+    if "BUSTAMANTE, VICTOR" in p_up or "BUSTAMANTE VICTOR" in p_up or "2° ENCARGADO" in p_up or ("JAVIER" in d_up and "EMPLEADO:" in p_up):
+        return "Ayudante / Suplente", "[2° Encargado]"
+    if "RAMÍREZ, GUILLERMO" in p_up or "RAMIREZ, GUILLERMO" in p_up or "RAMIREZ GUILLERMO" in p_up or "PERSONAL NOCTURNO" in p_up:
+        return "Vigilancia Nocturna", "[Personal Nocturno]"
     return None, None
+
+
+def sanitize_ca_bundle_pii(ca_bundle):
+    """Anonimiza datos personales de empleados y copropietarios en el caché JSON (Ley 25.326)."""
+    changed = False
+    emp_subs = [
+        (re.compile(r"BUSTAMANTE,?\s*JUAN(?:\s+MANUEL)?", re.IGNORECASE), "ENCARGADO TITULAR"),
+        (re.compile(r"BUSTAMANTE,?\s*V[IÍ]CTOR(?:\s+JAVIER)?", re.IGNORECASE), "2° ENCARGADO"),
+        (re.compile(r"RAM[IÍ]REZ,?\s*GUILLERMO(?:\s+ALBERTO)?", re.IGNORECASE), "PERSONAL NOCTURNO"),
+    ]
+    for _per, pdata in (ca_bundle.get("periodos") or {}).items():
+        for g_item in (pdata.get("gastos") or {}).get("data", []):
+            attrs = g_item.get("attributes") or {}
+            adj = attrs.get("comprobante_adjunto") or {}
+            for k_adj in ("nombre", "nombre_original"):
+                if adj.get(k_adj):
+                    orig = adj[k_adj]
+                    new_n = orig
+                    for rx, rep in emp_subs:
+                        new_n = rx.sub(rep, new_n)
+                    if new_n != orig:
+                        adj[k_adj] = new_n
+                        changed = True
+            prov_attrs = ((g_item.get("relationships") or {}).get("proveedor") or {}).get("data") or {}
+            p_at = prov_attrs.get("attributes") or {}
+            for k in ("nombre", "primer_nombre"):
+                if p_at.get(k):
+                    orig = p_at[k]
+                    new_v = orig
+                    for rx, rep in emp_subs:
+                        new_v = rx.sub(rep, new_v)
+                    if new_v != orig:
+                        p_at[k] = new_v
+                        changed = True
+            if attrs.get("sueldo") and p_at.get("identificacion") and p_at["identificacion"] != "CUIL Protegido":
+                p_at["identificacion"] = "CUIL Protegido"
+                changed = True
+        for idx_uf, fila in enumerate((pdata.get("prorrateo") or {}).get("filas_ufs", []), 1):
+            uf_id = fila.get("orden") or fila.get("id_uf") or idx_uf
+            anon_owner = f"Propietario U.F. {uf_id}"
+            for k_own in ("propietario", "copropietario", "titular", "inquilino"):
+                if k_own in fila and fila[k_own] and fila[k_own] != anon_owner:
+                    fila[k_own] = anon_owner
+                    changed = True
+    return changed
 
 
 def transform_ca_expense(item):
     attrs = item.get("attributes", {})
     particular = attrs.get("particular", False)
     importe = float(attrs.get("importe") or 0.0)
-    # Exclude unit-specific charge + its negative ordinary adjustment so consortium sum equals exact meta.totales.monto_total
     if particular or importe <= 0:
         return None
 
@@ -209,7 +305,6 @@ def transform_ca_expense(item):
     cuit_raw = prov_data.get("identificacion") or None
 
     detalle = (attrs.get("detalle") or "").strip()
-    # Anonymize employee names in detalle or proveedor
     emp_role, emp_tag = anonymize_employee(prov_raw, detalle)
     detalle_clean = re.sub(r"abonado por Javier", "abonado por Encargado", detalle, flags=re.IGNORECASE)
 
@@ -222,6 +317,7 @@ def transform_ca_expense(item):
 
     cat = map_ca_category(cuenta_nombre, detalle_clean, prov_raw, es_sueldo, tipo_gasto)
     rubro = map_ca_rubro(cuenta_nombre, es_sueldo, tipo_gasto)
+    tipo_clasif = classify_ca_tipo(cat, cuenta_nombre, detalle_clean, prov_raw)
 
     empleado = None
     if cat == "Sueldos y Cargas Sociales":
@@ -244,14 +340,32 @@ def transform_ca_expense(item):
         comp_str = f" [{comp_tipo} {comp_nro}]" if comp_nro and comp_nro != "-" else ""
         concepto = f"{prov_raw} - {detalle_clean}{comp_str}"
 
+    observacion_auditoria = None
+    if periodo == "2026-09" and "HONORARIOS ADM" in detalle_clean.upper() and "AGOSTO 2026" in detalle_clean.upper():
+        observacion_auditoria = (
+            "Error material de carga en ConsorcioAbierto: repite la leyenda 'AGOSTO 2026' para los honorarios de Septiembre 2026 ($70.000 pendientes)."
+        )
+        concepto = f"{concepto} [Leyenda 'Agosto 2026' repetida en liq. 09/2026]"
+    elif "VALOR ESTIMADO" in detalle_clean.upper():
+        observacion_auditoria = (
+            "Monto provisorio estimado sin DDJJ F.931 definitiva por falta de traspaso de clave fiscal ARCA de la gestión saliente."
+        )
+
     tiene_pagos = bool(attrs.get("tiene_pagos", True))
     saldo_pend = float(attrs.get("saldo") or 0.0)
-    estado = "Pagado" if (tiene_pagos and saldo_pend == 0) else ("Pago Parcial" if tiene_pagos and saldo_pend > 0 else "Pendiente de Pago")
+    seccion_estado = (
+        "Pagado"
+        if (tiene_pagos and saldo_pend == 0)
+        else ("Pago Parcial" if tiene_pagos and saldo_pend > 0 else "Pendiente de Pago")
+    )
+    estado_std = "Pagado" if saldo_pend == 0 else "Pendiente"
 
-    return {
+    rec_out = {
         "id_ca": item.get("id"),
         "periodo": periodo,
-        "seccion": estado,
+        "seccion": seccion_estado,
+        "estado": estado_std,
+        "tipo": tipo_clasif,
         "rubro": rubro,
         "concepto": concepto,
         "monto": round(importe, 2),
@@ -268,8 +382,11 @@ def transform_ca_expense(item):
         "fecha_emision": attrs.get("fecha_emision") or attrs.get("fecha_creacion"),
         "tiene_pagos": tiene_pagos,
         "saldo_pendiente": round(saldo_pend, 2),
-        "administracion": "Fernández - Villasenin"
+        "administracion": "Fernández - Villasenin",
     }
+    if observacion_auditoria:
+        rec_out["observacion_auditoria"] = observacion_auditoria
+    return rec_out
 
 
 def transform_ca_prorrateo(prorrateo_payload):
@@ -330,14 +447,14 @@ def transform_ca_prorrateo(prorrateo_payload):
             "fondo_operativo_monto": fondo_monto,
             "red_ajustes": eventual_total,
             "interes": interes,
-            "total": total_vto1
+            "total": total_vto1,
         })
     return records
 
 
 def parse_historical_pdf_prorrateo(filepath, dpto_to_uf_map):
     filename = os.path.basename(filepath)
-    m_date = re.search(r"360_(\d{4}-\d{2})_liquidacion\.pdf$", filename)
+    m_date = re.search(r"^360_(\d{4}-\d{2})_liquidacion\.pdf$", filename)
     if not m_date:
         return []
     periodo = m_date.group(1)
@@ -347,105 +464,105 @@ def parse_historical_pdf_prorrateo(filepath, dpto_to_uf_map):
     records = []
     seen_ufs = set()
 
-    with pdfplumber.open(filepath) as pdf:
-        for page in pdf.pages[:2]:
-            words = page.extract_words(x_tolerance=3, y_tolerance=1)
-            dpto_anchors = [w for w in words if w["x0"] < 130 and w["text"] in ("356", "360")]
-            for anc in sorted(dpto_anchors, key=lambda x: x["top"]):
-                row_words = sorted([w for w in words if abs(w["top"] - anc["top"]) <= 3.0], key=lambda x: x["x0"])
-                line_str = " ".join(w["text"] for w in row_words)
-                m = re.search(r"(\d+[°º]?\s*[A-C]\s*-\s*3\d\d)\s+.*?\s+(\d+[.,]\d+)\s*%\s*(.*)$", line_str)
-                if not m:
-                    continue
-                raw_dpto = m.group(1)
-                norm_key = normalize_dpto_key(raw_dpto)
-                uf_info = dpto_to_uf_map.get(norm_key)
-                if not uf_info:
-                    continue
-                uf = uf_info["uf"]
-                if uf in seen_ufs:
-                    continue
-                seen_ufs.add(uf)
+    doc = fitz.open(filepath)
+    for page in doc[:2]:
+        words = page.get_text("words")
+        dpto_anchors = [w for w in words if w[0] < 130 and w[4] in ("356", "360")]
+        for anc in sorted(dpto_anchors, key=lambda x: x[1]):
+            row_words = sorted([w for w in words if abs(w[1] - anc[1]) <= 3.0], key=lambda x: x[0])
+            line_str = " ".join(w[4] for w in row_words)
+            m = re.search(r"(\d+[°º]?\s*[A-C]\s*-\s*3\d\d)\s+.*?\s+(\d+[.,]\d+)\s*%\s*(.*)$", line_str)
+            if not m:
+                continue
+            raw_dpto = m.group(1)
+            norm_key = normalize_dpto_key(raw_dpto)
+            uf_info = dpto_to_uf_map.get(norm_key)
+            if not uf_info:
+                continue
+            uf = uf_info["uf"]
+            if uf in seen_ufs:
+                continue
+            seen_ufs.add(uf)
 
-                dpto = uf_info["dpto"]
-                pct = clean_historical_col(m.group(2))
-                cols_raw = re.findall(r"(-?\$\s*(?:-[\d.,\s]*|\d[\d.,\s]*|-))", m.group(3))
-                cols = [clean_historical_col(c) for c in cols_raw]
+            dpto = uf_info["dpto"]
+            pct = clean_historical_col(m.group(2))
+            cols_raw = re.findall(r"(-?\$\s*(?:-[\d.,\s]*|\d[\d.,\s]*|-))", m.group(3))
+            cols = [clean_historical_col(c) for c in cols_raw]
 
-                if len(cols) < 9:
-                    continue
+            if len(cols) < 9:
+                continue
 
-                if len(cols) == 9:
-                    saldo_anterior = cols[0]
-                    pagos = 0.0
-                    saldo_mes = cols[1]
-                    gastos_comunes = cols[2]
-                    servicio_seguridad = cols[3]
-                    fondo_reserva = cols[4]
-                    eventual = cols[5]
-                    gastos_extra = 0.0
-                    total_mes = cols[6]
-                    interes_mora = cols[7]
-                    total_a_pagar = cols[8]
-                elif len(cols) == 10:
-                    saldo_anterior = cols[0]
-                    pagos = cols[1]
-                    saldo_mes = cols[2]
-                    gastos_comunes = cols[3]
-                    servicio_seguridad = cols[4]
-                    fondo_reserva = cols[5]
-                    eventual = cols[6]
-                    gastos_extra = 0.0
-                    total_mes = cols[7]
-                    interes_mora = cols[8]
-                    total_a_pagar = cols[9]
-                else:
-                    saldo_anterior = cols[0]
-                    pagos = cols[1]
-                    saldo_mes = cols[2]
-                    gastos_comunes = cols[3]
-                    servicio_seguridad = cols[4]
-                    fondo_reserva = cols[5]
-                    eventual = cols[6]
-                    gastos_extra = cols[7]
-                    total_mes = cols[-3]
-                    interes_mora = cols[-2]
-                    total_a_pagar = cols[-1]
+            if len(cols) == 9:
+                saldo_anterior = cols[0]
+                pagos = 0.0
+                saldo_mes = cols[1]
+                gastos_comunes = cols[2]
+                servicio_seguridad = cols[3]
+                fondo_reserva = cols[4]
+                eventual = cols[5]
+                gastos_extra = 0.0
+                total_mes = cols[6]
+                interes_mora = cols[7]
+                total_a_pagar = cols[8]
+            elif len(cols) == 10:
+                saldo_anterior = cols[0]
+                pagos = cols[1]
+                saldo_mes = cols[2]
+                gastos_comunes = cols[3]
+                servicio_seguridad = cols[4]
+                fondo_reserva = cols[5]
+                eventual = cols[6]
+                gastos_extra = 0.0
+                total_mes = cols[7]
+                interes_mora = cols[8]
+                total_a_pagar = cols[9]
+            else:
+                saldo_anterior = cols[0]
+                pagos = cols[1]
+                saldo_mes = cols[2]
+                gastos_comunes = cols[3]
+                servicio_seguridad = cols[4]
+                fondo_reserva = cols[5]
+                eventual = cols[6]
+                gastos_extra = cols[7]
+                total_mes = cols[-3]
+                interes_mora = cols[-2]
+                total_a_pagar = cols[-1]
 
-                deuda = round(saldo_mes, 2) if saldo_mes > 0 else 0.0
+            deuda = round(saldo_mes, 2) if saldo_mes > 0 else 0.0
 
-                records.append({
-                    "periodo": periodo,
-                    "uf": uf,
-                    "dpto": dpto,
-                    "ubicacion": dpto,
-                    "propietario": f"Propietario U.F. {uf}",
-                    "porcentual": pct,
-                    "saldo_anterior": saldo_anterior,
-                    "pagos": pagos,
-                    "saldo_mes": saldo_mes,
-                    "saldo": saldo_mes,
-                    "deuda": deuda,
-                    "gastos_comunes": gastos_comunes,
-                    "servicio_seguridad": servicio_seguridad,
-                    "fondo_reserva": fondo_reserva,
-                    "eventual": eventual,
-                    "gastos_extraordinarios": gastos_extra,
-                    "total_mes": total_mes,
-                    "interes_mora": interes_mora,
-                    "total_a_pagar": total_a_pagar,
-                    "ga_pct": pct,
-                    "ga_monto": gastos_comunes,
-                    "gb_pct": 1.4286,
-                    "gb_monto": servicio_seguridad,
-                    "multa": 0.0,
-                    "gastos_extra": gastos_extra,
-                    "fondo_operativo_pct": pct,
-                    "fondo_operativo_monto": fondo_reserva,
-                    "red_ajustes": eventual,
-                    "interes": interes_mora,
-                    "total": total_a_pagar
-                })
+            records.append({
+                "periodo": periodo,
+                "uf": uf,
+                "dpto": dpto,
+                "ubicacion": dpto,
+                "propietario": f"Propietario U.F. {uf}",
+                "porcentual": pct,
+                "saldo_anterior": saldo_anterior,
+                "pagos": pagos,
+                "saldo_mes": saldo_mes,
+                "saldo": saldo_mes,
+                "deuda": deuda,
+                "gastos_comunes": gastos_comunes,
+                "servicio_seguridad": servicio_seguridad,
+                "fondo_reserva": fondo_reserva,
+                "eventual": eventual,
+                "gastos_extraordinarios": gastos_extra,
+                "total_mes": total_mes,
+                "interes_mora": interes_mora,
+                "total_a_pagar": total_a_pagar,
+                "ga_pct": pct,
+                "ga_monto": gastos_comunes,
+                "gb_pct": 1.4286,
+                "gb_monto": servicio_seguridad,
+                "multa": 0.0,
+                "gastos_extra": gastos_extra,
+                "fondo_operativo_pct": pct,
+                "fondo_operativo_monto": fondo_reserva,
+                "red_ajustes": eventual,
+                "interes": interes_mora,
+                "total": total_a_pagar,
+            })
 
     records.sort(key=lambda r: r["uf"])
     return records
@@ -453,8 +570,8 @@ def parse_historical_pdf_prorrateo(filepath, dpto_to_uf_map):
 
 def build_morosidad_from_prorrateo(prorrateo_records, periodo):
     """
-    Construye el listado de propietarios morosos (deuda histórica sin intereses > $100)
-    directamente desde los registros del período o del período siguiente (anterior_saldo + anterior_pagos).
+    Construye el listado de propietarios morosos (deuda histórica sin intereses >= $100)
+    directamente desde los registros del período.
     """
     morosos = []
     for r in prorrateo_records:
@@ -465,7 +582,7 @@ def build_morosidad_from_prorrateo(prorrateo_records, periodo):
                 "depto": depto_short,
                 "consorcista": f"Propietario U.F. {r['uf']}",
                 "deuda": round(r["deuda"], 2),
-                "periodo": periodo
+                "periodo": periodo,
             })
     morosos.sort(key=lambda x: x["deuda"], reverse=True)
     return morosos
@@ -494,7 +611,7 @@ def main():
                 "telefono": "1159007443",
                 "banco": "Banco Galicia CC 0009108-8 044-9",
                 "cbu": "0070044320000009108891",
-                "alias": "SARMIENTO356.58.60"
+                "alias": "SARMIENTO356.58.60",
             },
             "periodos": {
                 "2026-08": {
@@ -506,20 +623,31 @@ def main():
                     "liquidacion_id": 645048,
                     "gastos": load_step_json(3677),
                     "prorrateo": load_step_json(3725),
-                }
-            }
+                },
+            },
         }
         with open(cache_path, "w", encoding="utf-8") as f:
             json.dump(ca_bundle, f, indent=2, ensure_ascii=False)
         print(f"Guardado caché reproducible en {cache_path}")
 
-    # 1. Procesar Prorrateo (2026-08 y 2026-09 desde ConsorcioAbierto + 2025-07..2026-07 desde PDFs 360_)
-    ca_prorrateo_08 = transform_ca_prorrateo(ca_bundle["periodos"]["2026-08"]["prorrateo"])
-    ca_prorrateo_09 = transform_ca_prorrateo(ca_bundle["periodos"]["2026-09"]["prorrateo"])
+    # Intentar sincronizar en vivo contra ConsorcioAbierto si hay credenciales configuradas
+    ca_bundle, was_updated = sync_from_consorcioabierto_api(ca_bundle)
+    pii_scrubbed = sanitize_ca_bundle_pii(ca_bundle)
+    if was_updated or pii_scrubbed:
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(ca_bundle, f, indent=2, ensure_ascii=False)
+        print(f"Actualizado caché local (anonimizado Ley 25.326) en {cache_path}")
+
+    # 1. Procesar Prorrateo (todos los períodos CA + 2025-07..2026-07 desde PDFs 360_)
+    ca_periods_sorted = sorted(ca_bundle.get("periodos", {}).keys())
+    ca_prorrateo_by_p = {}
+    for per_ca in ca_periods_sorted:
+        ca_prorrateo_by_p[per_ca] = transform_ca_prorrateo(ca_bundle["periodos"][per_ca]["prorrateo"])
 
     # Mapa canónico de Depto -> UF (1..70)
     dpto_to_uf_map = {}
-    for r in ca_prorrateo_08:
+    ref_prorr = ca_prorrateo_by_p.get("2026-08") or next(iter(ca_prorrateo_by_p.values()), [])
+    for r in ref_prorr:
         key = normalize_dpto_key(r["dpto"])
         dpto_to_uf_map[key] = {"uf": r["uf"], "dpto": r["dpto"]}
 
@@ -535,52 +663,49 @@ def main():
             print(f"   [Prorrateo Histórico] {os.path.basename(fp)} -> {len(recs)} U.F.s")
             all_prorrateo.extend(recs)
 
-    all_prorrateo.extend(ca_prorrateo_08)
-    print(f"   [Prorrateo ConsorcioAbierto] 2026-08 -> {len(ca_prorrateo_08)} U.F.s")
-    all_prorrateo.extend(ca_prorrateo_09)
-    print(f"   [Prorrateo ConsorcioAbierto] 2026-09 -> {len(ca_prorrateo_09)} U.F.s")
+    for per_ca in ca_periods_sorted:
+        recs_ca = ca_prorrateo_by_p[per_ca]
+        all_prorrateo.extend(recs_ca)
+        print(f"   [Prorrateo ConsorcioAbierto] {per_ca} -> {len(recs_ca)} U.F.s")
 
     with open(PRORRATEO_JSON, "w", encoding="utf-8") as f:
         json.dump({"prorrateo": all_prorrateo}, f, indent=4, ensure_ascii=False)
-    print(f"✅ Guardado {PRORRATEO_JSON} con {len(all_prorrateo)} registros totales ({len(all_prorrateo)//70} períodos x 70 UFs).")
+    print(f"[OK] Guardado {PRORRATEO_JSON} con {len(all_prorrateo)} registros totales ({len(all_prorrateo)//70} períodos x 70 UFs).")
 
     # 2. Actualizar gastos.json
     with open(GASTOS_JSON, "r", encoding="utf-8") as f:
         gastos_db = json.load(f)
 
-    # Filtrar gastos históricos hasta 2026-07 y etiquetar administración
     hist_gastos = [g for g in gastos_db.get("gastos", []) if g.get("periodo", "") <= "2026-07"]
     for g in hist_gastos:
         g.setdefault("administracion", "D&F Administración")
+        g.setdefault("estado", "Pagado")
 
-    ca_gastos_08 = []
-    for item in ca_bundle["periodos"]["2026-08"]["gastos"].get("data", []):
-        tg = transform_ca_expense(item)
-        if tg:
-            ca_gastos_08.append(tg)
+    ca_gastos_all = []
+    ca_sums_by_p = {}
+    ca_pending_by_p = {}
+    for per_ca in ca_periods_sorted:
+        p_items = []
+        for item in ca_bundle["periodos"][per_ca]["gastos"].get("data", []):
+            tg = transform_ca_expense(item)
+            if tg:
+                p_items.append(tg)
+        ca_gastos_all.extend(p_items)
+        ca_sums_by_p[per_ca] = round(sum(x["monto"] for x in p_items), 2)
+        ca_pending_by_p[per_ca] = round(sum(x.get("saldo_pendiente", 0.0) for x in p_items), 2)
+        print(f"   [Gastos ConsorcioAbierto] {per_ca}: {len(p_items)} ítems -> ${ca_sums_by_p[per_ca]:,.2f}")
 
-    ca_gastos_09 = []
-    for item in ca_bundle["periodos"]["2026-09"]["gastos"].get("data", []):
-        tg = transform_ca_expense(item)
-        if tg:
-            ca_gastos_09.append(tg)
+    all_gastos = hist_gastos + ca_gastos_all
 
-    print(f"   [Gastos ConsorcioAbierto] 2026-08: {len(ca_gastos_08)} ítems -> ${sum(x['monto'] for x in ca_gastos_08):,.2f}")
-    print(f"   [Gastos ConsorcioAbierto] 2026-09: {len(ca_gastos_09)} ítems -> ${sum(x['monto'] for x in ca_gastos_09):,.2f}")
-
-    all_gastos = hist_gastos + ca_gastos_08 + ca_gastos_09
-
-    # Limpiar balances históricos (eliminar los 43 registros basura de 326_151_ y conservar los 12 reales de 360_)
+    # Consolidar balances históricos reales (2025-07..2026-07)
     raw_balances = gastos_db.get("balances", [])
     clean_balances_map = {}
     for b in raw_balances:
         p = b.get("periodo", "")
         if "2025-07" <= p <= "2026-07" and b.get("egresos", 0) > 0:
-            # Preferir el registro que tiene saldo_banco > 0 (el de 360_)
             if p not in clean_balances_map or b.get("saldo_banco", 0) > clean_balances_map[p].get("saldo_banco", 0):
                 clean_balances_map[p] = b
 
-    # Enriquecer balances históricos con recaudado_termino y deuda_acumulada desde prorrateo
     for p, b in clean_balances_map.items():
         p_recs = [r for r in all_prorrateo if r["periodo"] == p]
         if p_recs:
@@ -588,51 +713,81 @@ def main():
             sum_deuda = round(sum(r["deuda"] for r in p_recs), 2)
             b["recaudado_termino"] = sum_pagos
             b["deuda_acumulada"] = sum_deuda
-            if p == "2025-07" and b["ingresos"] < 5000000:
+            if p == "2025-07" and b.get("ingresos", 0.0) == 0.0:
                 b["ingresos"] = sum_pagos
+                b["ingresos_nota"] = "Sin estado bancario impreso en PDF 07/2025; se consigna cobranza efectiva del prorrateo"
             b["saldo_disponibilidades"] = round(b.get("saldo_banco", 0.0), 2)
+            if b.get("patrimonio_neto", 0.0) <= 0.0:
+                b["patrimonio_neto"] = round(b.get("saldo_banco", 0.0) + sum_deuda, 2)
             b["administracion"] = "D&F Administración"
 
-    # Agregar balances oficiales 2026-08 y 2026-09 de ConsorcioAbierto
-    clean_balances_map["2026-08"] = {
-        "periodo": "2026-08",
-        "ingresos": 15703897.79,
-        "egresos": 10953099.28,
-        "egresos_deuda_anterior": 15297607.28,
-        "egresos_caja_total": 20880239.56,
-        "saldo_banco": 4960189.97,
-        "recaudado_termino": 10708191.79,
-        "recaudado_adeudado": 1879135.00,
-        "recaudado_intereses": 173194.00,
-        "recaudado_no_identificado": 2943377.00,
-        "deuda_acumulada": 5693914.00,
-        "pasivos_pendientes": 7117257.83,
-        "patrimonio_neto": 16272406.99,
-        "saldo_disponibilidades": 4960189.97,
-        "fondo_reserva_cierre": 4162505.74,
-        "cuenta_operativa_cierre": 797684.23,
-        "administracion": "Fernández - Villasenin"
+    # Balances verificados de ConsorcioAbierto (2026-08 y 2026-09) + soporte automático para futuros períodos
+    known_ca_balances = {
+        "2026-08": {
+            "periodo": "2026-08",
+            "ingresos": 17968249.03,
+            "ingresos_operativos": 15703897.79,
+            "ingresos_fondo_reserva": 2264351.24,
+            "egresos": 10953099.28,
+            "egresos_deuda_anterior": 15297607.28,
+            "egresos_caja_total": 20880239.56,
+            "saldo_banco": 4960189.97,
+            "recaudado_termino": 10708191.79,
+            "recaudado_adeudado": 1879135.00,
+            "recaudado_intereses": 173194.00,
+            "recaudado_no_identificado": 2943377.00,
+            "deuda_acumulada": 5693914.00,
+            "pasivos_pendientes": 7117257.83,
+            "patrimonio_neto": 16272406.99,
+            "saldo_disponibilidades": 4960189.97,
+            "fondo_reserva_cierre": 4162505.74,
+            "cuenta_operativa_cierre": 797684.23,
+            "administracion": "Fernández - Villasenin",
+        },
+        "2026-09": {
+            "periodo": "2026-09",
+            "ingresos": 17633582.03,
+            "ingresos_operativos": 15351768.69,
+            "ingresos_fondo_reserva": 2281813.34,
+            "egresos": 16695387.84,
+            "egresos_deuda_anterior": 5370467.00,
+            "egresos_caja_total": 20349586.84,
+            "saldo_banco": 4055290.74,
+            "recaudado_termino": 13783727.23,
+            "recaudado_adeudado": 1060166.69,
+            "recaudado_intereses": 115874.77,
+            "recaudado_no_identificado": 392000.00,
+            "deuda_acumulada": 3189720.88,
+            "pasivos_pendientes": 3887790.83,
+            "patrimonio_neto": 18125450.00,
+            "saldo_disponibilidades": -37628.18,
+            "fondo_reserva_cierre": 4055290.74,
+            "cuenta_operativa_cierre": -4092918.92,
+            "administracion": "Fernández - Villasenin",
+        },
     }
 
-    clean_balances_map["2026-09"] = {
-        "periodo": "2026-09",
-        "ingresos": 15351768.69,
-        "egresos": 16695387.84,
-        "egresos_deuda_anterior": 5370467.00,
-        "egresos_caja_total": 20349586.84,
-        "saldo_banco": 4055290.74,
-        "recaudado_termino": 13783727.23,
-        "recaudado_adeudado": 1060166.69,
-        "recaudado_intereses": 115874.77,
-        "recaudado_no_identificado": 392000.00,
-        "deuda_acumulada": 3189722.63,
-        "pasivos_pendientes": 3887790.83,
-        "patrimonio_neto": 18125450.00,
-        "saldo_disponibilidades": -37628.18,
-        "fondo_reserva_cierre": 4055290.74,
-        "cuenta_operativa_cierre": -4092918.92,
-        "administracion": "Fernández - Villasenin"
-    }
+    for per_ca in ca_periods_sorted:
+        if per_ca in known_ca_balances:
+            clean_balances_map[per_ca] = known_ca_balances[per_ca]
+        else:
+            p_recs = ca_prorrateo_by_p.get(per_ca, [])
+            sum_pagos = round(sum(r["pagos"] for r in p_recs), 2)
+            sum_deuda = round(sum(r["deuda"] for r in p_recs), 2)
+            egr_ca = ca_sums_by_p.get(per_ca, 0.0)
+            pend_ca = ca_pending_by_p.get(per_ca, 0.0)
+            clean_balances_map[per_ca] = {
+                "periodo": per_ca,
+                "ingresos": sum_pagos,
+                "egresos": egr_ca,
+                "saldo_banco": max(0.0, round(sum_pagos - (egr_ca - pend_ca), 2)),
+                "recaudado_termino": sum_pagos,
+                "deuda_acumulada": sum_deuda,
+                "pasivos_pendientes": pend_ca,
+                "patrimonio_neto": round(sum_deuda + max(0.0, sum_pagos - (egr_ca - pend_ca)), 2),
+                "saldo_disponibilidades": round(sum_pagos - (egr_ca - pend_ca), 2),
+                "administracion": "Fernández - Villasenin",
+            }
 
     clean_balances = [clean_balances_map[k] for k in sorted(clean_balances_map.keys())]
 
@@ -644,6 +799,7 @@ def main():
     extraordinarios.extend([
         {
             "periodo_expensa": "AGOSTO 2026",
+            "periodo": "2026-08",
             "concepto": "LUIS DE LA PAS PAVON RIVEROS - Reparación y pintura contrafrente [Fc. C 0005-00000136]",
             "liquidado": 2340000.0,
             "recaudado": 2264351.24,
@@ -651,10 +807,12 @@ def main():
             "fecha_pago": "07/08/2026",
             "rubro": "Fondo de Reserva / Obra de Pintura",
             "categoria": "Gastos Extraordinarios",
-            "comprobante_url": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-260907161240306-c216fcc10cedc91a.pdf"
+            "en_gastos_ordinarios_ca": True,
+            "comprobante_url": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-260907161240306-c216fcc10cedc91a.pdf",
         },
         {
             "periodo_expensa": "SEPTIEMBRE 2026",
+            "periodo": "2026-09",
             "concepto": "MIX MASTER MAQ (FERRETERÍA FERNOLUZ) - Carro Zorra Carretilla Portabultos Ropal 200 Kg [Fc. B 0002-00262625]",
             "liquidado": 2340000.0,
             "recaudado": 2281813.34,
@@ -662,26 +820,19 @@ def main():
             "fecha_pago": "22/09/2026",
             "rubro": "Obras y Equipamiento Extraordinario",
             "categoria": "Gastos Extraordinarios",
-            "comprobante_url": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261002135443852-04ef0c91d0714b20.pdf"
-        }
+            "en_gastos_ordinarios_ca": True,
+            "comprobante_url": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261002135443852-04ef0c91d0714b20.pdf",
+        },
     ])
 
-    # 4. Actualizar morosidad (con soporte multi-período y anonimización estricta)
-    morosidad_2026_07 = [
-        m for m in gastos_db.get("morosidad", [])
-        if m.get("periodo") == "2026-07"
-    ]
-    for m in morosidad_2026_07:
-        m["consorcista"] = f"Propietario U.F. {m['uf']}"
+    # 4. Actualizar morosidad multi-período con anonimización estricta
+    morosidad_por_periodo = {}
+    for p_moro in sorted({r["periodo"] for r in all_prorrateo}):
+        if p_moro >= "2026-07":
+            morosidad_por_periodo[p_moro] = build_morosidad_from_prorrateo(all_prorrateo, p_moro)
 
-    morosidad_2026_08 = build_morosidad_from_prorrateo(all_prorrateo, "2026-08")
-    morosidad_2026_09 = build_morosidad_from_prorrateo(all_prorrateo, "2026-09")
-
-    morosidad_por_periodo = {
-        "2026-07": morosidad_2026_07,
-        "2026-08": morosidad_2026_08,
-        "2026-09": morosidad_2026_09,
-    }
+    latest_ca_period = ca_periods_sorted[-1] if ca_periods_sorted else "2026-09"
+    morosidad_actual = morosidad_por_periodo.get(latest_ca_period, [])
 
     # Metadata institucional y de auditoría de transición
     consorcio_meta = {
@@ -694,7 +845,7 @@ def main():
         "administracion_anterior": {
             "nombre": "D&F Administración (María Mercedes Deljarano / Pablo Damián Pariano)",
             "cuit": "27-25108998-7",
-            "periodo_hasta": "2026-07"
+            "periodo_hasta": "2026-07",
         },
         "pagos_deuda_anterior_agosto_2026": [
             {"periodo_origen": "2026-07", "proveedor": "ARCA (Cargas Sociales Julio 2026)", "comprobante": "2235242956", "fecha_pago": "20/08/2026", "monto": 6206015.70},
@@ -702,7 +853,7 @@ def main():
             {"periodo_origen": "2026-07", "proveedor": "SUELDOS PERSONAL JULIO 2026", "comprobante": "Recibos Jul-26", "fecha_pago": "07/08/2026", "monto": 3201690.00},
             {"periodo_origen": "2026-07", "proveedor": "MARÍA MERCEDES DELJARANO (Honorarios D&F)", "comprobante": "0001-00000344 / 345", "fecha_pago": "19/08/2026", "monto": 914000.00},
             {"periodo_origen": "2026-07", "proveedor": "SUTERH / FATERYH", "comprobante": "Jul-26", "fecha_pago": "12/08/2026", "monto": 506408.57},
-            {"periodo_origen": "2026-07", "proveedor": "ASCENSORES GUILLEMI INTERIOR S.A.", "comprobante": "0002-00026453", "fecha_pago": "14/08/2026", "monto": 146200.00}
+            {"periodo_origen": "2026-07", "proveedor": "ASCENSORES GUILLEMI INTERIOR S.A.", "comprobante": "0002-00026453", "fecha_pago": "14/08/2026", "monto": 146200.00},
         ],
         "pasivos_pendientes_cierre_2026_09": [
             {"periodo_origen": "2026-07", "proveedor": "ARCA (Saldo Inicial Cargas Sociales)", "comprobante": "1663755454", "saldo_impago": 1571590.83, "observacion": "Deuda heredada gestión anterior"},
@@ -711,8 +862,8 @@ def main():
             {"periodo_origen": "2026-09", "proveedor": "LECOS SERVICIOS (Esteban Jesús Linaje)", "comprobante": "0004-00000427", "saldo_impago": 181000.00, "observacion": "Luminarias y cámara domo cochera"},
             {"periodo_origen": "2026-07", "proveedor": "PARIANO PABLO DAMIÁN (D&F)", "comprobante": "0002-00001037", "saldo_impago": 175000.00, "observacion": "Saldo anterior en revisión"},
             {"periodo_origen": "2026-09", "proveedor": "ADM. FERNÁNDEZ - VILLASENIN", "comprobante": "Hon. Sep-26", "saldo_impago": 70000.00, "observacion": "Saldo parcial honorarios"},
-            {"periodo_origen": "2026-07", "proveedor": "ASCENSORES GUILLEMI INTERIOR S.A.", "comprobante": "0002-00026453", "saldo_impago": 200.00, "observacion": "Diferencia redondeo Jul-26"}
-        ]
+            {"periodo_origen": "2026-07", "proveedor": "ASCENSORES GUILLEMI INTERIOR S.A.", "comprobante": "0002-00026453", "saldo_impago": 200.00, "observacion": "Diferencia redondeo Jul-26"},
+        ],
     }
 
     result = {
@@ -720,16 +871,16 @@ def main():
         "consorcio_meta": consorcio_meta,
         "gastos": all_gastos,
         "balances": clean_balances,
-        "multas": gastos_db.get("multas", []),
+        "multas": [],
         "extraordinarios": extraordinarios,
-        "morosidad": morosidad_2026_09,
-        "morosidad_por_periodo": morosidad_por_periodo
+        "morosidad": morosidad_actual,
+        "morosidad_por_periodo": morosidad_por_periodo,
     }
 
     with open(GASTOS_JSON, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=4, ensure_ascii=False)
 
-    print(f"✅ Guardado {GASTOS_JSON} con {len(all_gastos)} gastos, {len(clean_balances)} balances limpios y {len(morosidad_2026_09)} morosos actuales.")
+    print(f"[OK] Guardado {GASTOS_JSON} con {len(all_gastos)} gastos, {len(clean_balances)} balances verificados y {len(morosidad_actual)} morosos actuales.")
 
 
 if __name__ == "__main__":

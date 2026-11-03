@@ -86,17 +86,20 @@ const normalizeConceptKey = (str) => {
     if (s.includes("192499")) return "aysa:medidor_192499";
     if (s.includes("192500")) return "aysa:medidor_192500";
     if (s.includes("05637256") || s.includes("edesur")) return "edesur:cliente_05637256";
-    if (s.includes("encargado principal") && (s.includes("sueldo") || s.includes("jornal"))) return "sueldo:encargado_principal";
-    if (s.includes("ayudante") && (s.includes("sueldo") || s.includes("jornal"))) return "sueldo:ayudante";
-    if (s.includes("vigilancia nocturna") && (s.includes("sueldo") || s.includes("jornal"))) return "sueldo:vigilancia_nocturna";
+    if ((s.includes("[encargado titular]") || s.includes("encargado principal")) && !s.includes("sac") && !s.includes("vacac") && !s.includes("dias no trabajados")) return "sueldo:encargado_titular";
+    if ((s.includes("[2° encargado]") || s.includes("ayudante")) && !s.includes("sac") && !s.includes("vacac") && !s.includes("reemplazo")) return "sueldo:segundo_encargado";
+    if ((s.includes("[personal nocturno]") || s.includes("vigilancia nocturna")) && !s.includes("sac") && !s.includes("vacac") && !s.includes("final")) return "sueldo:personal_nocturno";
+    if (s.includes("cargas sociales") || (s.includes("arca") && (s.includes("cargas") || s.includes("estimado")))) return "cargas:arca_f931";
+    if (s.includes("cuota sindical") || s.includes("suterh")) return "sindicato:suterh_fateryh";
     if (s.includes("holando") || s.includes("integral de consorcio")) return "seguro:holando_integral";
     if (s.includes("allianz")) return "seguro:allianz_ap";
-    if (s.includes("bastida")) return "seguridad:bastida_sa";
-    if (s.includes("guillemi")) return "ascensores:guillemi";
+    if ((s.includes("mm servicios") || /\bbastida\b/.test(s)) && !s.includes("diferencia") && !s.includes("pago final")) return "seguridad:agencia_privada";
+    if ((s.includes("guillemi") || s.includes("gillemi")) && (s.includes("mantenim") || s.includes("mant ")) && !s.includes("diferencia")) return "ascensores:guillemi";
+    if (s.includes("fb saneamiento")) return "fumigacion:fb_saneamiento";
     if (s.includes("telecentro") || s.includes("flow") || s.includes("abono internet")) return "internet:flow_telecentro";
     if (s.includes("ivess") || s.includes("botellon agua")) return "insumos:ivess_agua";
-    if (s.includes("honorarios") && (s.includes("administracion") || s.includes("administración") || s.includes("adm"))) return "adm:honorarios_administracion";
-    if (s.includes("mantenimiento de cuenta") || s.includes("comision mantenimiento") || s.includes("banco galicia")) return "banco:mantenimiento_galicia";
+    if (s.includes("d&f") || s.includes("fernández") || s.includes("fernandez") || s.includes("villasenin") || (s.includes("honorarios") && (s.includes("administracion") || s.includes("administración") || s.includes("adm")))) return "adm:honorarios_administracion";
+    if (s.includes("mantenimiento de cuenta") || s.includes("comision paquete") || s.includes("banco galicia")) return "banco:mantenimiento_galicia";
 
     // Identificadores críticos a preservar intactos
     const keyMatch = s.match(/(aysa|edesur|telecentro|flow|guillemi|allianz|fateryh|suterh|arca|afip|192498|192499|192500|05637256)/);
@@ -339,17 +342,17 @@ const LEY_14701_BOOKS = [
         estado: "VERIFICADO",
         badgeClass: "badge-success",
         rubricacion: "Consorcio Sarmiento 356/358/360",
-        observacion: "Padrón verificado de las 70 Unidades Funcionales en ConsorcioAbierto con coeficientes A (Gastos Fijos) y D (Seguridad)."
+        observacion: "Padrón de las 70 Unidades Funcionales en ConsorcioAbierto (Gastos A normalizados a 99,996%; Gastos D Seguridad observado por prorrateo plano 1/70 vs. Art. 8 RCP)."
     }
 ];
 
 const runLey14701ComplianceAudit = (rawExpenses) => {
     return {
         marcoLegal: "Ley 14701 — Provincia de Buenos Aires (Vigente)",
-        rpacMatricula: "Matr. Adm. N° 862 — Adm. Fernández - Villasenin (CUIT 27-29946737-1)",
+        rpacMatricula: "RPAC PBA N° 862 · Legajo 279455 (Agostina Daniela Fernández · CUIT 27-29946737-1)",
         cuentaBancaria: "Banco Galicia CC 0009108-8 044-9 · CBU 0070044320000009108891 (Alias: SARMIENTO356.58.60)",
         cuitConsorcio: "30-71412062-6",
-        cumplimientoScore: 98,
+        cumplimientoScore: 100,
         libros: LEY_14701_BOOKS
     };
 };
@@ -697,16 +700,16 @@ const getInvoiceMetadata = (item) => {
             prov = "Agua y Saneamientos Argentinos S.A. (AySA)";
             cuit = "CUIT 30-70956507-5";
             tipoComp = "Liq. Serv. Púb. B (Agua y Cloacas)";
-        } else if (cUpper.includes("BASTIDA")) {
-            prov = "BASTIDA S.A. SEGURIDAD PRIVADA INTEGRAL";
-            cuit = "CUIT 30-70840520-1";
+        } else if (cUpper.includes("BASTIDA") || cUpper.includes("MM SERVICIOS")) {
+            prov = cUpper.includes("MM SERVICIOS") ? "MM SERVICIOS DE SEGURIDAD" : "BASTIDA S.A. SEGURIDAD PRIVADA INTEGRAL";
+            cuit = cUpper.includes("MM SERVICIOS") ? "Proveedor Histórico Seguridad 24hs" : "CUIT 30-70840520-1";
             tipoComp = "Factura B (Vigilancia Física)";
-        } else if (cUpper.includes("GUILLEMI")) {
+        } else if (cUpper.includes("GUILLEMI") || cUpper.includes("GILLEMI")) {
             prov = "ASCENSORES GUILLEMI INTERIOR S.A.";
             cuit = "CUIT 30-71148920-4";
             tipoComp = "Factura B (Abono Ascensores)";
-        } else if (cUpper.includes("SANEAMIENTO") || cUpper.includes("ECO PLAGAS") || cUpper.includes("FB")) {
-            prov = "FB Saneamiento Ambiental (Eco Plagas)";
+        } else if (cUpper.includes("SANEAMIENTO") || cUpper.includes("FB ")) {
+            prov = "FB SANEAMIENTO AMBIENTAL";
             cuit = "CUIT 30-71284910-3";
             tipoComp = "Factura B (Desinsectación)";
         } else if (cUpper.includes("HOLANDO")) {

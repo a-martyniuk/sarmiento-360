@@ -1,10 +1,17 @@
 import json
+import os
+import sys
 import urllib.request
 import re
 import ssl
 from datetime import datetime, timezone, timedelta
 
-OUTPUT_PATH = "servicios_status.json"
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "servicios_status.json")
+
 
 def _make_request(url, timeout=8):
     """Realiza una request HTTP con múltiples estrategias SSL para compatibilidad entre Windows y Linux."""

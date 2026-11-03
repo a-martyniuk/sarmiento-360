@@ -4,7 +4,14 @@ import json
 import datetime
 import subprocess
 
-def load_json(filepath):
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def load_json(filename):
+    filepath = os.path.join(SCRIPT_DIR, filename)
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -37,13 +44,16 @@ def main():
     if len(sys.argv) > 1:
         mode = sys.argv[1]
 
-    print(f"[{datetime.datetime.now().isoformat()}] Iniciando script de actualización (Modo: {mode})...")
+    print(f"[{datetime.datetime.now().isoformat()}] Iniciando pipeline de actualización (Modo: {mode})...")
 
     # Siempre ejecutar la verificación de servicios (Luz, Agua y Gas)
-    print("Ejecutando monitoreo de servicios locales...")
-    result = subprocess.run([sys.executable, "check_servicios.py"])
+    print("Ejecutando monitoreo de servicios locales (check_servicios.py)...")
+    check_servicios_path = os.path.join(SCRIPT_DIR, "check_servicios.py")
+    result = subprocess.run([sys.executable, check_servicios_path], cwd=SCRIPT_DIR)
     if result.returncode != 0:
-        print("⚠️  check_servicios.py finalizó con errores. El estado de los servicios no fue actualizado, pero el pipeline continúa.")
+        print("[WARN] check_servicios.py finalizó con advertencias. El pipeline continúa.")
+    else:
+        print("[OK] Monitoreo de servicios actualizado.")
 
     if mode == "--all":
         now = datetime.datetime.now()
@@ -63,21 +73,37 @@ def main():
             print(f"El período {expected_period} se encuentra disponible con datos completos (válido). Se omite la descarga repetida.")
         else:
             if is_first_five_days:
-                print(f"Período en ventana de publicación (Día 1-5 del mes). Iniciando búsqueda de versiones nuevas o definitivas...")
+                print(f"Período en ventana de publicación (Día 1-5 del mes). Buscando versiones nuevas o definitivas...")
             elif not is_valid:
                 print(f"El período {expected_period} no está cargado o contiene información incompleta/inválida. Buscando actualización...")
 
-            # Ejecutar sincronización unificada de ConsorcioAbierto + Histórico 360
+            # Ejecutar sincronización unificada de ConsorcioAbierto + Histórico 360 + IPC + Auditoría Forense
             try:
+                extract_path = os.path.join(SCRIPT_DIR, "extract_data.py")
+                if os.path.exists(extract_path):
+                    print("Ejecutando extract_data.py para validar base histórica 360...")
+                    subprocess.run([sys.executable, extract_path], cwd=SCRIPT_DIR, check=False)
+
+                ingest_path = os.path.join(SCRIPT_DIR, "ingest_consorcioabierto.py")
                 print("Ejecutando ingest_consorcioabierto.py para sincronizar gastos.json y prorrateo.json...")
-                subprocess.run([sys.executable, "ingest_consorcioabierto.py"], check=False)
+                subprocess.run([sys.executable, ingest_path], cwd=SCRIPT_DIR, check=False)
+
+                ipc_path = os.path.join(SCRIPT_DIR, "build_ipc_data.py")
+                if os.path.exists(ipc_path):
+                    print("Actualizando serie IPC-INDEC en data_ipc_indec.json...")
+                    subprocess.run([sys.executable, ipc_path], cwd=SCRIPT_DIR, check=False)
+
+                forensic_path = os.path.join(SCRIPT_DIR, "generate_forensic_audit.py")
+                if os.path.exists(forensic_path):
+                    print("Actualizando cruces forenses en forensic_audit.json...")
+                    subprocess.run([sys.executable, forensic_path], cwd=SCRIPT_DIR, check=False)
             except Exception as e:
-                print("⚠️ Error en ingest_consorcioabierto.py:", e)
+                print("[WARN] Error en pipeline de actualización:", e)
 
             if is_period_valid(expected_period):
-                print(f"¡Sincronización exitosa! El período {expected_period} cuenta ahora con información válida y completa.")
+                print(f"[OK] Sincronización exitosa: El período {expected_period} cuenta ahora con información válida y completa.")
             else:
-                print(f"Sincronización completada. El período {expected_period} aún no cuenta con liquidación definitiva publicada por la administración.")
+                print(f"[INFO] Sincronización completada: El período {expected_period} aún no cuenta con liquidación definitiva publicada por la administración (habitual entre el 5 y 10 del mes).")
 
 if __name__ == "__main__":
     main()

@@ -21,30 +21,28 @@ let ipcData      = {}; // Indexa la inflación del IPC por mes
 
 // Fetch inflación oficial del INDEC (Datos Abiertos) - No bloqueante
 const fetchIPC = async () => {
-    // Datos baseline de respaldo para evitar dependencia estricta de la API externa
-    const baselineIPC = {
-        "2025-07": { valor: 4500, inflacion: 4.0 },
-        "2025-08": { valor: 4680, inflacion: 4.0 },
-        "2025-09": { valor: 4844, inflacion: 3.5 },
-        "2025-10": { valor: 5013, inflacion: 3.5 },
-        "2025-11": { valor: 5163, inflacion: 3.0 },
-        "2025-12": { valor: 5318, inflacion: 3.0 },
-        "2026-01": { valor: 5478, inflacion: 3.0 },
-        "2026-02": { valor: 5642, inflacion: 3.0 },
-        "2026-03": { valor: 5811, inflacion: 3.0 },
-        "2026-04": { valor: 5985, inflacion: 3.0 },
-        "2026-05": { valor: 6165, inflacion: 3.0 },
-        "2026-06": { valor: 6350, inflacion: 3.0 },
-        "2026-07": { valor: 6540, inflacion: 3.0 },
-        "2026-08": { valor: 6814, inflacion: 4.2 },
-        "2026-09": { valor: 7052, inflacion: 3.5 }
-    };
-    Object.assign(ipcData, baselineIPC);
+    try {
+        const r = await fetch(getRelativeDataUrl("data_ipc_indec.json"));
+        if (r.ok) {
+            const j = await r.json();
+            if (j && j.ipc) {
+                j.ipc.forEach(item => {
+                    ipcData[item.periodo] = {
+                        valor: item.indice,
+                        inflacion: item.variacion_mensual_pct
+                    };
+                });
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn("Cargando IPC online o baseline:", e);
+    }
 
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2500);
-        const r = await fetch("https://apis.datos.gob.ar/series/api/series?ids=103.1_I2N_2016_M_15&collapse=month&limit=500&format=json", { signal: controller.signal });
+        const r = await fetch("https://apis.datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&limit=36&format=json", { signal: controller.signal });
         clearTimeout(timeoutId);
         if (!r.ok) return;
 
@@ -55,38 +53,13 @@ const fetchIPC = async () => {
             const val = dataRows[i][1];
             const p = dateStr.slice(0, 7);
             let inflacion = null;
-            if (i > 0) {
-                const prevVal = dataRows[i - 1][1];
-                if (prevVal > 0) {
-                    inflacion = ((val - prevVal) / prevVal) * 100;
-                }
+            if (i > 0 && dataRows[i - 1][1] > 0) {
+                inflacion = ((val - dataRows[i - 1][1]) / dataRows[i - 1][1]) * 100;
             }
             ipcData[p] = { valor: val, inflacion };
         }
-
-        // Proyectar meses futuros hasta 2026-09 para evitar N/D
-        const periods = Object.keys(ipcData).sort();
-        if (periods.length > 0) {
-            let lastPeriod = periods[periods.length - 1];
-            let lastVal = ipcData[lastPeriod].valor;
-            let [y, m] = lastPeriod.split("-").map(Number);
-            const limitYear = 2026;
-            const limitMonth = 9;
-
-            while (y < limitYear || (y === limitYear && m < limitMonth)) {
-                m++;
-                if (m > 12) {
-                    m = 1;
-                    y++;
-                }
-                const nextPeriod = `${y}-${String(m).padStart(2, '0')}`;
-                const projectedInf = 4.2; // Tasa promedio proyectada
-                lastVal = lastVal * (1 + projectedInf / 100);
-                ipcData[nextPeriod] = { valor: lastVal, inflacion: projectedInf };
-            }
-        }
     } catch (e) {
-        console.warn("API INDEC no disponible o lenta; usando valores baseline IPC local:", e.message || e);
+        console.warn("API INDEC no disponible; usando valores locales:", e);
     }
 };
 
@@ -105,16 +78,27 @@ const fmtFull = (n) => new Intl.NumberFormat('es-AR', {
     style: 'currency', currency: 'ARS', minimumFractionDigits: 2
 }).format(n);
 
+const formatMoney = (n) => Number(n || 0).toLocaleString('es-AR', {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+});
+
 const pct = (n) => `${n >= 0 ? '+' : ''}${n.toFixed(1)}%`;
 
+let canonicalUfDptoMap = {};
+
 const formatDpto = (strVal, ufNum) => {
-    if (!strVal) return `U.F. ${ufNum}`;
-    let s = String(strVal).trim();
-    const matchTower = s.match(/(356|360|358)/);
-    let tower = matchTower ? matchTower[1] : (ufNum % 2 !== 0 ? '356' : '360');
-    const matchBase = s.match(/^(\d{1,2}\s*[°°]?\s*[A-Za-z0-9]+)/);
-    let base = matchBase ? matchBase[1].trim() : s.split(' ')[0];
-    return `${base} (Sarmiento ${tower})`;
+    const canon = canonicalUfDptoMap[Number(ufNum)] || "";
+    const raw = (strVal && String(strVal).trim()) ? String(strVal).trim() : canon;
+    if (!raw) return `U.F. ${ufNum}`;
+    const matchTower = raw.match(/(356|358|360)/) || canon.match(/(356|358|360)/);
+    const tower = matchTower ? matchTower[1] : "";
+    let base = raw
+        .replace(/\s*\((?:Torre\s*)?(?:Sarmiento\s*)?(?:356|358|360)\).*$/i, "")
+        .replace(/\s*[-–]+\s*(?:Torre\s*)?(?:Sarmiento\s*)?(?:356|358|360).*$/i, "")
+        .replace(/\s+(?:Torre\s*)?(?:Sarmiento\s*)?(?:356|358|360)$/i, "")
+        .trim();
+    if (!base) base = `U.F. ${ufNum}`;
+    return tower ? `${base} (Sarmiento ${tower})` : base;
 };
 
 // ── Category Pill HTML ──────────────────────────────────────────// 7 Categorías EXACTAS del PDF de liquidaciones
@@ -141,14 +125,66 @@ const prevPeriod = (p) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
 
-// ── Match concepts intelligently ───────────────────────────────
+// ── Match concepts intelligently (Semantic Concept Fingerprinting) ──
+const semanticFingerprint = (str) => {
+    if (!str) return null;
+    const s = str.toLowerCase();
+    // 1. Suministros por número de cuenta/cliente exacto
+    if (s.includes("192498")) return "srv:aysa_192498";
+    if (s.includes("192499")) return "srv:aysa_192499";
+    if (s.includes("192500")) return "srv:aysa_192500";
+    if (s.includes("05637256") || s.includes("edesur")) return "srv:edesur_05637256";
+    // 2. Sueldos mensuales por puesto (aislando SAC, Vacaciones, Liquidación Final y ajustes)
+    if (s.includes("[encargado titular]")) {
+        if (s.includes("sac") || s.includes("aguinaldo")) return "sueldo:titular_sac";
+        if (s.includes("vacac")) return "sueldo:titular_vacaciones";
+        if (s.includes("dias no trabajados")) return "sueldo:titular_ajuste";
+        return "sueldo:titular_mensual";
+    }
+    if (s.includes("[2° encargado]")) {
+        if (s.includes("sac") || s.includes("aguinaldo")) return "sueldo:segundo_sac";
+        if (s.includes("vacac")) return "sueldo:segundo_vacaciones";
+        if (s.includes("reemplazo")) return "sueldo:segundo_reemplazo";
+        return "sueldo:segundo_mensual";
+    }
+    if (s.includes("[personal nocturno]")) {
+        if (s.includes("final")) return "sueldo:nocturno_final";
+        if (s.includes("sac") || s.includes("aguinaldo")) return "sueldo:nocturno_sac";
+        if (s.includes("vacac")) return "sueldo:nocturno_vacaciones";
+        return "sueldo:nocturno_mensual";
+    }
+    if (s.includes("cargas sociales") || (s.includes("arca") && (s.includes("cargas") || s.includes("estimado")))) {
+        return "sueldo:cargas_arca";
+    }
+    if (s.includes("cuota sindical")) return "sueldo:sindicato_suterh";
+    // 3. Abonos y contratos recurrentes (excluyendo diferencias retroactivas y reparaciones puntuales)
+    if ((s.includes("mm servicios") || /\bbastida\b/.test(s)) && !s.includes("diferencia") && !s.includes("pago final")) {
+        return "abono:seguridad_privada";
+    }
+    if ((s.includes("guillemi") || s.includes("gillemi")) && (s.includes("mantenim") || s.includes("mant ")) && !s.includes("diferencia")) {
+        return "abono:ascensores_guillemi";
+    }
+    if (s.includes("fb saneamiento")) return "abono:fumigacion_fb";
+    if (s.includes("telecentro") || s.includes("flow") || s.includes("cablevision")) return "abono:internet_consorcio";
+    if (s.includes("holando")) return "seguro:holando_integral";
+    if (s.includes("allianz")) return "seguro:allianz_personal";
+    if (s.includes("d&f") || s.includes("fernández") || s.includes("fernandez") || s.includes("villasenin")) {
+        return "adm:honorarios_administracion";
+    }
+    if ((s.includes("pariano") || s.includes("liquidacion sueldo")) && !s.includes("rendicion") && !s.includes("traspaso") && !s.includes("incumplimiento")) {
+        return "adm:estudio_contable_pariano";
+    }
+    if (s.includes("consorcio abierto")) return "adm:plataforma_consorcioabierto";
+    return null;
+};
+
 const cleanConceptForMatching = (str) => {
     if (!str) return "";
     let s = str.toLowerCase();
     const monthNames = [
         "enero", "febrero", "marzo", "abril", "mayo", "junio",
         "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
-        "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"
+        "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "sept", "oct", "nov", "dic"
     ];
     monthNames.forEach(m => {
         s = s.replace(new RegExp("\\b" + m + "\\b", "gi"), "");
@@ -159,9 +195,13 @@ const cleanConceptForMatching = (str) => {
 
 const matchConcept = (c1, c2) => {
     if (!c1 || !c2) return false;
+    const fp1 = semanticFingerprint(c1);
+    const fp2 = semanticFingerprint(c2);
+    if (fp1 || fp2) return fp1 === fp2;
+
     const raw1 = c1.toLowerCase();
     const raw2 = c2.toLowerCase();
-    
+
     // Si tienen números de cuenta de AySA / Edesur / Servicios diferentes, no deben emparejarse
     const getAccountNum = (s) => { const m = s.match(/\d{6,8}/); return m ? m[0] : null; };
     const acc1 = getAccountNum(raw1), acc2 = getAccountNum(raw2);
@@ -236,8 +276,12 @@ const applyFilters = () => {
             catName.toLowerCase().includes(query) ||
             subComp.toLowerCase().includes(query) ||
             (e.rubro && e.rubro.toLowerCase().includes(query));
-        const defaultExclusion = period === "todos" ? e.estado !== "Pendiente" : true;
-        const okStatus = status === "todos" ? defaultExclusion : (e.estado || "Pagado") === status;
+        let okStatus = true;
+        if (status === "Pagado") {
+            okStatus = (e.estado || "Pagado") === "Pagado";
+        } else if (status === "Pendiente") {
+            okStatus = e.estado === "Pendiente" || (e.saldo_pendiente || 0) > 0;
+        }
 
         return okPeriod && okCat && okSub && okSearch && okStatus;
     });
@@ -293,8 +337,9 @@ const detectMissingInvoices = () => {
         { name: "AySA - Cliente 192500", test: (e) => e.concepto.toLowerCase().includes("aysa") && e.concepto.includes("192500") },
         { name: "Edesur (05637256)", test: (e) => e.concepto.toLowerCase().includes("edesur") },
         { name: "Conectividad (Flow / Telecentro)", test: (e) => e.concepto.toLowerCase().includes("telecentro") || e.concepto.toLowerCase().includes("flow") || e.concepto.toLowerCase().includes("cablevision") },
-        { name: "Abono Ascensores", test: (e) => e.concepto.toLowerCase().includes("ascensor") || e.concepto.toLowerCase().includes("guillemi") },
-        { name: "Abono Fumigación", test: (e) => e.concepto.toLowerCase().includes("fumig") || e.concepto.toLowerCase().includes("desinsect") || e.concepto.toLowerCase().includes("saneamiento") },
+        { name: "Seguridad 24hs (MM / Bastida)", test: (e) => e.concepto.toLowerCase().includes("mm servicios") || /\bbastida\b/i.test(e.concepto) },
+        { name: "Abono Ascensores (Guillemi)", test: (e) => e.categoria === "Contratos y Abonos" && (e.concepto.toLowerCase().includes("guillemi") || e.concepto.toLowerCase().includes("gillemi")) },
+        { name: "Abono Fumigación (FB Saneamiento)", test: (e) => e.concepto.toLowerCase().includes("fumig") || e.concepto.toLowerCase().includes("desinsect") || e.concepto.toLowerCase().includes("saneamiento") },
         { name: "Seguro Consorcio", test: (e) => (e.categoria === "Seguros" || e.rubro === "SEGUROS ORDINARIOS" || e.concepto.toLowerCase().includes("seguro")) }
     ];
 
@@ -359,23 +404,22 @@ const renderKPIs = (period) => {
 
 
 
-    // Gastos Pendientes de Pago (Devengados)
+    // Gastos Pendientes de Pago (Pasivos devengados al cierre del período)
+    const targetPendPeriod = period === "todos" ? allPeriods[allPeriods.length - 1] : period;
+    const targetBal = rawBalances.find(b => b.periodo === targetPendPeriod);
     let pendientesMes = 0;
-    const idx = allPeriods.indexOf(period);
-    const nextPeriod = idx !== -1 && idx < allPeriods.length - 1 ? allPeriods[idx + 1] : null;
-
-    if (period === "todos") {
-        const lastPeriod = allPeriods[allPeriods.length - 1];
-        pendientesMes = rawExpenses.filter(e => e.periodo === lastPeriod && e.estado === "Pendiente").reduce((a,e) => a + e.monto, 0);
-        document.getElementById("kpiPendientesDelta").textContent = `Deuda flotante al cierre (${lastPeriod})`;
-    } else if (nextPeriod) {
-        pendientesMes = rawExpenses.filter(e => e.periodo === nextPeriod && e.estado === "Pendiente").reduce((a,e) => a + e.monto, 0);
-        document.getElementById("kpiPendientesDelta").textContent = "Gastos diferidos al cierre del mes";
-    } else {
-        pendientesMes = rawExpenses.filter(e => e.periodo === period && e.estado === "Pendiente").reduce((a,e) => a + e.monto, 0);
-        document.getElementById("kpiPendientesDelta").textContent = "Gastos diferidos en el período";
+    if (targetBal && typeof targetBal.pasivos_pendientes === "number" && targetBal.pasivos_pendientes > 0) {
+        pendientesMes = targetBal.pasivos_pendientes;
+    } else if (targetPendPeriod) {
+        pendientesMes = rawExpenses
+            .filter(e => e.periodo === targetPendPeriod)
+            .reduce((a, e) => a + (e.saldo_pendiente > 0 ? e.saldo_pendiente : (e.estado === "Pendiente" ? e.monto : 0)), 0);
     }
-    document.getElementById("kpiPendientes").textContent = pendientesMes > 0 ? fmt(pendientesMes) : "—";
+    document.getElementById("kpiPendientesDelta").textContent =
+        pendientesMes > 0
+            ? `Deuda flotante devengada (${targetPendPeriod})`
+            : `Sin pasivos impagos informados (${targetPendPeriod || "—"})`;
+    document.getElementById("kpiPendientes").textContent = pendientesMes > 0 ? fmt(pendientesMes) : "$ 0";
 
     const setBalance = (ing, egr, ingDelta, egrDelta, prevIng, prevEgr, prevPeriodName) => {
         document.getElementById("kpiRecaudado").textContent = ing > 0 ? fmt(ing) : "—";
@@ -390,11 +434,15 @@ const renderKPIs = (period) => {
         const ingDeltaEl = document.getElementById("kpiRecaudadoDelta");
         const egrDeltaEl = document.getElementById("kpiEgresadoDelta");
 
+        const compLabel = (period === "2025-11" && prevPeriodName === "2025-09")
+            ? `vs ${prevPeriodName} (sin PDF Oct-25 D&F)`
+            : "vs mes anterior";
+
         if (ingDeltaEl) {
             if (typeof ingDelta === "number") {
-                ingDeltaEl.textContent = `${pct(ingDelta)} vs mes anterior`;
+                ingDeltaEl.textContent = `${pct(ingDelta)} ${compLabel}`;
                 ingDeltaEl.className = `kpi-delta ${ingDelta >= 0 ? "up" : "down"}`;
-                if (ingDeltaEl.setAttribute) ingDeltaEl.setAttribute("data-tooltip", `Mes anterior (${prevPeriodName}): ${fmt(prevIng)}`);
+                if (ingDeltaEl.setAttribute) ingDeltaEl.setAttribute("data-tooltip", `Período comparado (${prevPeriodName}): ${fmt(prevIng)}`);
                 ingDeltaEl.style.cursor = "help";
                 ingDeltaEl.style.borderBottom = "1px dotted rgba(255,255,255,0.3)";
             } else {
@@ -406,9 +454,9 @@ const renderKPIs = (period) => {
 
         if (egrDeltaEl) {
             if (typeof egrDelta === "number") {
-                egrDeltaEl.textContent = `${pct(egrDelta)} vs mes anterior`;
+                egrDeltaEl.textContent = `${pct(egrDelta)} ${compLabel}`;
                 egrDeltaEl.className = `kpi-delta ${egrDelta <= 0 ? "up" : "down"}`;
-                if (egrDeltaEl.setAttribute) egrDeltaEl.setAttribute("data-tooltip", `Mes anterior (${prevPeriodName}): ${fmt(prevEgr)}`);
+                if (egrDeltaEl.setAttribute) egrDeltaEl.setAttribute("data-tooltip", `Período comparado (${prevPeriodName}): ${fmt(prevEgr)}`);
                 egrDeltaEl.style.cursor = "help";
                 egrDeltaEl.style.borderBottom = "1px dotted rgba(255,255,255,0.3)";
             } else {
@@ -440,16 +488,26 @@ const renderKPIs = (period) => {
     }
 
     const bal  = rawBalances.find(b => b.periodo === period);
-    const prev = prevPeriod(period);
-    const balPrev = rawBalances.find(b => b.periodo === prev);
+    let prev = prevPeriod(period);
+    let balPrev = rawBalances.find(b => b.periodo === prev);
+    let prevExpenses = rawExpenses.filter(e => e.periodo === prev);
+    // 2025-10 no fue entregado en PDF por D&F: comparar 2025-11 contra 2025-09 con aviso explícito
+    if (!balPrev && prevExpenses.length === 0) {
+        const prev2 = prevPeriod(prev);
+        const balPrev2 = rawBalances.find(b => b.periodo === prev2);
+        const prevExpenses2 = rawExpenses.filter(e => e.periodo === prev2);
+        if (balPrev2 || prevExpenses2.length > 0) {
+            prev = prev2;
+            balPrev = balPrev2;
+            prevExpenses = prevExpenses2;
+        }
+    }
 
     const periodExpenses = rawExpenses.filter(e => e.periodo === period);
     const egrMonto = (bal && bal.egresos > 0) ? bal.egresos : periodExpenses.reduce((a, e) => a + e.monto, 0);
-    const ingMonto = (bal && bal.ingresos > 0) ? bal.ingresos : egrMonto * 0.96;
-
-    const prevExpenses = rawExpenses.filter(e => e.periodo === prev);
+    const ingMonto = (bal && bal.ingresos > 0) ? bal.ingresos : 0;
     const prevEgrMonto = (balPrev && balPrev.egresos > 0) ? balPrev.egresos : prevExpenses.reduce((a, e) => a + e.monto, 0);
-    const prevIngMonto = (balPrev && balPrev.ingresos > 0) ? balPrev.ingresos : prevEgrMonto * 0.96;
+    const prevIngMonto = (balPrev && balPrev.ingresos > 0) ? balPrev.ingresos : 0;
 
     const ingDelta = prevIngMonto > 0 ? ((ingMonto - prevIngMonto) / prevIngMonto) * 100 : null;
     const egrDelta = prevEgrMonto > 0 ? ((egrMonto - prevEgrMonto) / prevEgrMonto) * 100 : null;
@@ -501,7 +559,7 @@ const renderAnomalySection = (period) => {
 const renderHistoricalChart = () => {
     if (typeof ApexCharts === 'undefined') return;
     const chartType = document.getElementById("chartTypeFilter").value;
-    const cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
+    const cleanExpenses = [...rawExpenses];
     const periods = [...new Set(cleanExpenses.map(e => e.periodo))].sort();
 
     const sumBy = (rubro) => periods.map(p =>
@@ -547,6 +605,18 @@ const renderHistoricalChart = () => {
                 style: { colors: 'var(--text-3)' },
                 formatter: (v) => fmt(v)
             }
+        },
+        annotations: {
+            xaxis: [{
+                x: '2026-08',
+                borderColor: '#22d3ee',
+                strokeDashArray: 4,
+                label: {
+                    borderColor: '#22d3ee',
+                    style: { color: '#0f172a', background: '#22d3ee', fontWeight: 700, fontSize: '10px' },
+                    text: 'Traspaso Adm. (Ago-26)'
+                }
+            }]
         },
         legend: { labels: { colors: 'var(--text-1)' } },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
@@ -640,15 +710,10 @@ const getSubcategoria = (e) => {
     const cat = e.categoria || e.rubro;
 
     if (cat === "Sueldos y Cargas Sociales") {
-        if (e.empleado && e.empleado !== "Cargas Sociales / Sindicato") return e.empleado;
-        if (c.includes("jubil") || c.includes("obra social") || c.includes("inssjp") || c.includes("suterh") || c.includes("fateryh") || c.includes("seracarh") || c.includes("sindicat") || c.includes("afip") || c.includes("arca") || c.includes("cuota sindic")) {
-            return "Cargas Sociales / Sindicato";
-        }
-        if (c.includes("ayudante") || c.includes("ramirez") || c.includes("vigilancia")) return "Ayudante / Suplente";
-        if (c.includes("encargado auxiliar") || c.includes("victor")) return "Encargado Auxiliar";
-        if (c.includes("encargado principal") || c.includes("bustamante") || c.includes("sueldo") || c.includes("jornal") || c.includes("antiguedad") || c.includes("viatico") || c.includes("sac") || c.includes("aguinaldo") || c.includes("retiro de residuo") || c.includes("vacac") || c.includes("feriado") || c.includes("plus")) {
-            return "Encargado Principal";
-        }
+        if (e.empleado) return e.empleado;
+        if (c.includes("[encargado titular]")) return "Encargado Permanente";
+        if (c.includes("[2° encargado]")) return "Ayudante / Suplente";
+        if (c.includes("[personal nocturno]")) return "Vigilancia Nocturna";
         return "Cargas Sociales / Sindicato";
     }
 
@@ -663,46 +728,51 @@ const getSubcategoria = (e) => {
     }
 
     if (cat === "Contratos y Abonos") {
-        if (c.includes("seguridad") || c.includes("mm servicios") || c.includes("bastida")) return "Servicios de Seguridad";
-        if (c.includes("ascensor") || c.includes("guillemi") || c.includes("elevad")) return "Abono Ascensores";
-        if (c.includes("plaga") || c.includes("desinsect") || c.includes("fumig") || c.includes("saneamiento") || c.includes("eco plagas")) return "Abono Fumigación";
+        if (c.includes("seguridad") || c.includes("mm servicios") || /\bbastida\b/.test(c)) return "Servicios de Seguridad";
+        if (c.includes("ascensor") || c.includes("guillemi") || c.includes("gillemi") || c.includes("elevad")) return "Abono Ascensores";
+        if (c.includes("plaga") || c.includes("desinsect") || c.includes("desinfecc") || c.includes("fumig") || c.includes("saneamiento")) return "Abono Fumigación";
         if (c.includes("telecentro") || c.includes("flow") || c.includes("cablevision") || c.includes("internet")) return "Conectividad / SUM";
         if (c.includes("ivess") || c.includes("bidon") || c.includes("botellon")) return "Bidones de Agua";
-        if (c.includes("correo") || c.includes("carta documento") || c.includes("couceiro")) return "Gastos Postales";
+        if (c.includes("correo") || c.includes("carta doc") || c.includes("couceiro")) return "Gastos Postales";
         if (c.includes("cleaning") || c.includes("limpieza")) return "Productos e Insumos Limpieza";
-        if (c.includes("lecos") || c.includes("electric")) return "Servicios Técnicos Fijos";
         return "Otros Abonos";
     }
 
     if (cat === "Mantenimiento y Reparaciones") {
-        if (c.includes("pintura") || c.includes("pint") || c.includes("grieta") || c.includes("revoque") || c.includes("albañil") || c.includes("pavon") || c.includes("retapizado") || c.includes("sillon") || c.includes("azotea")) return "Pintura, Albañilería y Azotea";
-        if (c.includes("ascensor") || c.includes("acri") || c.includes("contrapeso") || c.includes("asc del 356")) return "Reparación Ascensores";
-        if (c.includes("electric") || c.includes("atila") || c.includes("tablero") || c.includes("disyuntor") || c.includes("lampara") || c.includes("lámpara") || c.includes("lecos") || c.includes("timbre") || c.includes("picaporte") || c.includes("iluminac") || c.includes("combustib") || c.includes("shell") || c.includes("ypf") || c.includes("baterias") || c.includes("bateria") || c.includes("samudio")) return "Electricidad, Iluminación y Combustible";
-        if (c.includes("plomer") || c.includes("cañer") || c.includes("caño") || c.includes("canilla") || c.includes("rodriguez") || c.includes("iglesia") || c.includes("pileta") || c.includes("perdida") || c.includes("techo")) return "Plomería y Cañerías";
-        if (c.includes("bomba") || c.includes("presuriz") || c.includes("sanitarios daniel") || c.includes("locatelli")) return "Bombas de Agua";
-        if (c.includes("ogaz") || c.includes("cesped") || c.includes("césped") || c.includes("corte")) return "Jardinería y Áreas Verdes";
-        if (c.includes("cleaning") || c.includes("limpieza") || c.includes("recchia") || c.includes("bolsas") || c.includes("zapat") || c.includes("pantalon") || c.includes("de la vega") || c.includes("ropa") || c.includes("adornos") || c.includes("navidad")) return "Productos e Insumos Limpieza";
-        if (c.includes("matafuego") || c.includes("protincen") || c.includes("generador") || c.includes("blanco carlos") || c.includes("purpil") || c.includes("escalera")) return "Matafuegos, Generador y Herramientas";
+        if (c.includes("pintura") || c.includes("pint") || c.includes("grieta") || c.includes("revoque") || c.includes("albañil") || c.includes("pavon") || c.includes("retapizado") || c.includes("sillon") || c.includes("azotea") || c.includes("impermeab")) return "Pintura, Albañilería y Azotea";
+        if (c.includes("ascensor") || c.includes("guillemi") || c.includes("gillemi") || c.includes("acri sergio") || /\bacri\b/.test(c) || c.includes("contrapeso") || c.includes("colizas") || c.includes("frecuencia")) return "Reparación Ascensores";
         if (c.includes("destapac") || c.includes("destap") || c.includes("italoamericana") || c.includes("pozo") || c.includes("paz jorge") || c.includes("cloaca")) return "Destapaciones y Cloacas";
+        if (c.includes("plomer") || c.includes("cañer") || c.includes("caño") || c.includes("canilla") || c.includes("sisterna") || c.includes("cisterna") || c.includes("rodriguez") || c.includes("iglesia") || c.includes("rivas") || c.includes("bacha") || c.includes("inodoro") || c.includes("pileta") || c.includes("perdida")) return "Plomería y Cañerías";
+        if (c.includes("bomba") || c.includes("presuriz") || c.includes("sanitarios daniel") || c.includes("locatell") || c.includes("locaelli")) return "Bombas de Agua";
+        if (c.includes("electric") || c.includes("atila") || c.includes("tablero") || c.includes("disyuntor") || c.includes("lampara") || c.includes("lámpara") || c.includes("lecos") || c.includes("timbre") || c.includes("picaporte") || c.includes("iluminac") || c.includes("combustib") || c.includes("shell") || c.includes("ypf") || c.includes("estacion lido") || c.includes("baterias") || c.includes("bateria") || c.includes("samudio")) return "Electricidad, Iluminación y Combustible";
+        if (c.includes("ogaz") || c.includes("floriach") || c.includes("jardin") || c.includes("cesped") || c.includes("césped") || c.includes("cerco")) return "Jardinería y Áreas Verdes";
+        if (c.includes("cleaning") || c.includes("cleannig") || c.includes("cleanar") || c.includes("toalla") || c.includes("limpieza") || c.includes("recchia") || c.includes("bolsas") || c.includes("insumos plásticos") || c.includes("zapat") || c.includes("pantalon") || c.includes("de la vega") || c.includes("ropa") || c.includes("adornos") || c.includes("navidad")) return "Productos e Insumos Limpieza";
+        if (c.includes("matafuego") || c.includes("protincen") || c.includes("generador") || c.includes("blanco carlos") || c.includes("purpil") || c.includes("escalera")) return "Matafuegos, Generador y Herramientas";
         if (c.includes("combril")) return "Plataforma de Cobranza (Combril)";
         return "Mantenimiento General Edificio";
     }
 
     if (cat === "Administración") {
+        if (c.includes("fernández") || c.includes("fernandez") || c.includes("villasenin")) {
+            return "Honorarios Adm. Fernández - Villasenin";
+        }
+        if (c.includes("consorcio abierto") || c.includes("consorcioabierto")) {
+            return "Plataforma ConsorcioAbierto";
+        }
         if (c.includes("d&f") || c.includes("d & f") || c.includes("honorarios adm") || c.includes("honorarios de administracion") || c.includes("honorarios administracion")) {
             return "Honorarios Adm. D&F";
         }
-        if (c.includes("pariano") || c.includes("contable") || c.includes("contador")) {
+        if (c.includes("traspaso") || c.includes("rendicion") || c.includes("incumplimiento")) {
+            return "Gastos Traspaso Adm.";
+        }
+        if (c.includes("pariano") || c.includes("contable") || c.includes("contador") || c.includes("hon0rarios") || c.includes("liquidacion sueldo")) {
             return "Honorarios Contador (Pariano)";
         }
-        if (c.includes("fotocop") || c.includes("impresion") || c.includes("sistema") || c.includes("consocli") || c.includes("sipac")) {
+        if (c.includes("fotocop") || c.includes("impresion") || c.includes("librería") || c.includes("libreria") || c.includes("tall graf") || c.includes("sistema") || c.includes("consocli") || c.includes("sipac")) {
             return "Fotocopias / Impresiones";
         }
-        if (c.includes("banco") || c.includes("comisión") || c.includes("comision") || c.includes("25413") || c.includes("impuesto") || c.includes("paquete") || c.includes("credito") || c.includes("dep.efvo") || c.includes("transferencia")) {
+        if (c.includes("banco") || c.includes("mercado pago") || c.includes("comisión") || c.includes("comision") || c.includes("25413") || c.includes("impuesto") || c.includes("imp ley") || c.includes("paquete")) {
             return "Gastos Bancarios e Impuestos";
-        }
-        if (c.includes("traspaso") || c.includes("rendicion")) {
-            return "Gastos Traspaso Adm.";
         }
         return "Otros Gastos Admin.";
     }
@@ -724,7 +794,7 @@ const renderComparisonChart = () => {
     if (typeof ApexCharts === 'undefined') return;
     const viewSel = document.getElementById("comparisonViewFilter");
     const viewMode = viewSel ? viewSel.value : "categorias";
-    const cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
+    const cleanExpenses = [...rawExpenses];
     const allPeriods = [...new Set(cleanExpenses.map(e => e.periodo))].sort();
 
     let series = [];
@@ -812,6 +882,18 @@ const renderComparisonChart = () => {
             borderColor: 'rgba(255,255,255,0.05)',
             padding: { left: 15, right: 15 }
         },
+        annotations: {
+            xaxis: [{
+                x: '2026-08',
+                borderColor: '#22d3ee',
+                strokeDashArray: 4,
+                label: {
+                    borderColor: '#22d3ee',
+                    style: { color: '#0f172a', background: '#22d3ee', fontWeight: 700, fontSize: '10px' },
+                    text: 'Traspaso Adm. (Ago-26)'
+                }
+            }]
+        },
         legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '11px' },
         fill: { opacity: 0.9 },
         dataLabels: { enabled: false },
@@ -838,21 +920,32 @@ let chartDrillVarios = null;
 
 const createDrillChart = (selectorId, categoryName, currentInstance) => {
     if (typeof ApexCharts === 'undefined') return null;
-    let cleanExpenses = rawExpenses.filter(e => e.estado !== "Pendiente");
+    let cleanExpenses = [...rawExpenses];
 
     if (categoryName === "Gastos Extraordinarios" && rawExtraordinarios.length > 0) {
         const monthMap = {
-            'JULIO': '2025-07', 'AGOSTO': '2025-08', 'SEPTIEMBRE': '2025-09',
-            'OCTUBRE': '2025-10', 'NOVIEMBRE': '2025-11', 'DICIEMBRE': '2025-12',
-            'ENERO': '2026-01', 'FEBRERO': '2026-02', 'MARZO': '2026-03',
-            'ABRIL': '2026-04', 'MAYO': '2026-05', 'JUNIO': '2026-06'
+            'JULIO': '2025-07', 'JULIO 2025': '2025-07',
+            'AGOSTO': '2025-08', 'AGOSTO 2025': '2025-08',
+            'SEPTIEMBRE': '2025-09', 'SEPTIEMBRE 2025': '2025-09',
+            'OCTUBRE': '2025-10', 'OCTUBRE 2025': '2025-10',
+            'NOVIEMBRE': '2025-11', 'NOVIEMBRE 2025': '2025-11',
+            'DICIEMBRE': '2025-12', 'DICIEMBRE 2025': '2025-12',
+            'ENERO': '2026-01', 'ENERO 2026': '2026-01',
+            'FEBRERO': '2026-02', 'FEBRERO 2026': '2026-02',
+            'MARZO': '2026-03', 'MARZO 2026': '2026-03',
+            'ABRIL': '2026-04', 'ABRIL 2026': '2026-04',
+            'MAYO': '2026-05', 'MAYO 2026': '2026-05',
+            'JUNIO': '2026-06', 'JUNIO 2026': '2026-06',
+            'JULIO 2026': '2026-07',
+            'AGOSTO 2026': '2026-08',
+            'SEPTIEMBRE 2026': '2026-09'
         };
-        const existingKeys = new Set(cleanExpenses.map(e => `${e.periodo}_${e.monto}`));
+        const existingKeys = new Set(cleanExpenses.map(e => `${e.periodo}_${Math.round(e.monto)}`));
         rawExtraordinarios.forEach(x => {
-            if (x.abonado > 0) {
+            if (x.abonado > 0 && !x.en_gastos_ordinarios_ca) {
                 const pRaw = (x.periodo_expensa || '').trim().toUpperCase();
-                const p = monthMap[pRaw] || x.periodo || pRaw;
-                if (p && !existingKeys.has(`${p}_${x.abonado}`)) {
+                const p = x.periodo || monthMap[pRaw] || (/^\d{4}-\d{2}$/.test(pRaw) ? pRaw : null);
+                if (p && !existingKeys.has(`${p}_${Math.round(x.abonado)}`)) {
                     cleanExpenses.push({
                         periodo: p,
                         categoria: "Gastos Extraordinarios",
@@ -978,10 +1071,10 @@ const renderEmployeeChart = () => {
     );
 
     const series = [
-        { name: 'Encargado Permanente',    data: sumBy('Encargado Permanente') },
-        { name: 'Ayudante / Suplente',      data: sumBy('Ayudante / Suplente') },
-        { name: 'Cargas Sociales / ART',   data: sumBy('Cargas Sociales / Sindicato') },
-        { name: 'Vigilancia Nocturna',      data: sumBy('Vigilancia Nocturna') },
+        { name: 'Encargado Titular (Permanente s/viv.)',     data: sumBy('Encargado Permanente') },
+        { name: '2° Encargado y Suplencias',                 data: sumBy('Ayudante / Suplente') },
+        { name: 'Cargas Sociales, Sindicato y SAC',          data: sumBy('Cargas Sociales / Sindicato') },
+        { name: 'Personal Nocturno Propio',                  data: sumBy('Vigilancia Nocturna') },
     ];
 
     const totalPeriods = periods.length;
@@ -1094,7 +1187,7 @@ const renderEmployeeKPIs = (period) => {
     if (elEncHist) elEncHist.textContent = 'Acum. histórico: ' + fmt(ibHist);
     if (elAyuHist) elAyuHist.textContent = 'Acum. histórico: ' + fmt(loHist);
     if (elCarHist) elCarHist.textContent = 'Acum. histórico: ' + fmt(crHist);
-    if (elVigHist) elVigHist.textContent = 'Acum. histórico: ' + fmt(vnHist) + ' (Liquidado en Mar-26)';
+    if (elVigHist) elVigHist.textContent = 'Acum. histórico: ' + fmt(vnHist) + ' (Rel. Dep. — Liq. Final Sep-26)';
 };
 
 // ── TABLE ────────────────────────────────────────────────────────
@@ -1128,19 +1221,28 @@ const renderTable = () => {
     tbody.innerHTML = pageItems.map(item => {
         const isSAC = item.concepto.toLowerCase().includes("sac") || item.concepto.toLowerCase().includes("aguinaldo");
         const pp = prevPeriod(item.periodo);
+        const pp2 = prevPeriod(pp);
 
-        const prevItem = isSAC ? null : rawExpenses.find(x =>
+        let prevItem = isSAC ? null : rawExpenses.find(x =>
             x.periodo === pp &&
             matchConcept(x.concepto, item.concepto)
         );
+        if (!prevItem && !isSAC && (item.periodo === "2025-11" || semanticFingerprint(item.concepto))) {
+            prevItem = rawExpenses.find(x =>
+                x.periodo === pp2 &&
+                matchConcept(x.concepto, item.concepto)
+            );
+        }
 
         let prevMonto = 0, varHtml = `<span class="var-null">—</span>`, diff = 0;
         if (prevItem) {
             prevMonto = prevItem.monto;
             diff = ((item.monto - prevMonto) / prevMonto) * 100;
-            if (diff > 0.5)       varHtml = `<span class="var-up">+${diff.toFixed(1)}% ▲</span>`;
-            else if (diff < -0.5) varHtml = `<span class="var-down">${diff.toFixed(1)}% ▼</span>`;
-            else                  varHtml = `<span class="var-null">≈ 0%</span>`;
+            const lbTitle = prevItem.periodo !== pp ? ` title="Comparado vs ${prevItem.periodo} (sin PDF ${pp})"` : "";
+            const lbTag = prevItem.periodo !== pp ? ` <small style="opacity:0.7;">(vs ${prevItem.periodo.slice(5)})</small>` : "";
+            if (diff > 0.5)       varHtml = `<span class="var-up"${lbTitle}>+${diff.toFixed(1)}% ▲${lbTag}</span>`;
+            else if (diff < -0.5) varHtml = `<span class="var-down"${lbTitle}>${diff.toFixed(1)}% ▼${lbTag}</span>`;
+            else                  varHtml = `<span class="var-null"${lbTitle}>≈ 0%${lbTag}</span>`;
         }
 
         const tipoBadge     = item.tipo === "Fijo"
@@ -1163,9 +1265,11 @@ const renderTable = () => {
             ? `<div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">${badges.join('')}</div>` 
             : `<span class="badge-normal">Normal</span>`;
 
-        const estadoBadge   = item.estado === "Pendiente"
-            ? `<span class="badge badge-pendiente" title="Devengado pendiente de pago">Pendiente</span>`
-            : `<span class="badge badge-pagado">Pagado</span>`;
+        const estadoBadge = item.seccion === "Pago Parcial"
+            ? `<span class="badge badge-pendiente" title="Pago parcial — Saldo impago: ${fmtFull(item.saldo_pendiente || 0)}">Pago Parcial</span>`
+            : (item.estado === "Pendiente"
+                ? `<span class="badge badge-pendiente" title="Devengado pendiente de pago">Pendiente</span>`
+                : `<span class="badge badge-pagado">Pagado</span>`);
 
         const conceptSafe = item.concepto.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
@@ -1349,7 +1453,7 @@ const exportMultiSheetXLSX = async () => {
 
     let prorrateoData = [];
     try {
-        const res = await fetch("prorrateo.json");
+        const res = await fetch(getRelativeDataUrl("prorrateo.json"));
         const json = await res.json();
         prorrateoData = json.prorrateo || [];
     } catch(e) {
@@ -1368,7 +1472,7 @@ const exportMultiSheetXLSX = async () => {
         { "Métrica Auditoría": "Cuenta Bancaria Oficial", "Valor": "Banco Galicia CC 0009108-8 044-9 (Alias: SARMIENTO356.58.60)" },
         { "Métrica Auditoría": "Deuda Flotante Regularizada (Ago-26)", "Valor": 15297607.28 },
         { "Métrica Auditoría": "Pasivos Pendientes de Cierre (Sep-26)", "Valor": 3882790.83 },
-        { "Métrica Auditoría": "Morosidad Acumulada (Sep-26)", "Valor": 3189722.63 },
+        { "Métrica Auditoría": "Morosidad Acumulada (Sep-26)", "Valor": 3189720.88 },
         { "Métrica Auditoría": "UFs en Estado de Morosidad (Sep-26)", "Valor": "9 UFs (12,9%)" },
         { "Métrica Auditoría": "Suma Coeficiente de Prorrateo", "Valor": "100.00% (Normalizado ConsorcioAbierto)" },
         { "Métrica Auditoría": "Traspaso de Mandato", "Valor": "Agosto de 2026 (Cese D&F 20/08/2026)" }
@@ -1558,7 +1662,7 @@ const renderFines = async (period) => {
 
     let prorrateo = [];
     try {
-        const r = await fetch("prorrateo.json");
+        const r = await fetch(getRelativeDataUrl("prorrateo.json"));
         const data = await r.json();
         prorrateo = data.prorrateo || [];
     } catch(e) {
@@ -1595,7 +1699,7 @@ const renderPatrimonialChart = async () => {
 
     let prorrateo = [];
     try {
-        const r = await fetch("prorrateo.json");
+        const r = await fetch(getRelativeDataUrl("prorrateo.json"));
         const data = await r.json();
         prorrateo = data.prorrateo || [];
     } catch(e) {
@@ -1643,6 +1747,18 @@ const renderPatrimonialChart = async () => {
             min: minIndex,
             max: maxIndex
         },
+        annotations: {
+            xaxis: [{
+                x: '2026-08',
+                borderColor: '#22d3ee',
+                strokeDashArray: 4,
+                label: {
+                    borderColor: '#22d3ee',
+                    style: { color: '#0f172a', background: '#22d3ee', fontWeight: 700, fontSize: '10px' },
+                    text: 'Traspaso Adm. (Ago-26)'
+                }
+            }]
+        },
         yaxis: { labels: { formatter: v => fmt(v) } },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
         tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
@@ -1671,43 +1787,43 @@ const auditProviders = (period) => {
     const [y, m] = targetPeriod.split("-").map(Number);
     const prevPeriod = `${y - 1}-${String(m).padStart(2, '0')}`;
 
-    // Proveedores y sus palabras clave múltiples para mejor cobertura
+    // Proveedores canónicos de Sarmiento 356/358/360 sin colisiones entre rubros
     const targetProviders = [
-        { name: "💼 Honorarios Administración", keys: ["d&f", "honorario", "adm", "pariano"], rubro: "Honorarios Admin" },
-        { name: "🛗 Guillemi (Ascensores)", keys: ["guillemi", "bastida", "ascensor"], rubro: "Abono Ascensores" },
-        { name: "⚡ Edesur (Suministro Eléctrico)", keys: ["edesur", "05637256", "luz"], rubro: "Servicio Eléctrico" },
-        { name: "💧 AySA Cta 192499 (Torre 358)", keys: ["192499"], rubro: "Servicio de Agua" },
-        { name: "💧 AySA Cta 192500 (Torre 360)", keys: ["192500"], rubro: "Servicio de Agua" },
-        { name: "🛡️ Allianz / Holando (Seguro)", keys: ["holando", "allianz", "seguro"], rubro: "Seguro Consorcio" },
-        { name: "🌐 Cablevisión Flow / Telecom", keys: ["flow", "cablevision", "telecom", "telecentro", "internet"], rubro: "Servicio Conectividad" },
-        { name: "🐛 Eco Plagas (Fumigación)", keys: ["eco plagas", "plaga", "fumig", "desinsect"], rubro: "Abono Desinsectación" },
-        { name: "🧹 Cleaning Service (Limpieza)", keys: ["cleaning", "limpieza"], rubro: "Insumos Limpieza" },
-        { name: "💻 Software / Expensas", keys: ["sipac", "consocli", "expensa", "sistema"], rubro: "Plataforma Gestión" }
+        { name: "👮 Seguridad Privada (MM / Bastida)", fp: "abono:seguridad_privada", rubro: "Seguridad 24hs" },
+        { name: "💼 Honorarios Administración", fp: "adm:honorarios_administracion", rubro: "Honorarios Admin" },
+        { name: "📜 Estudio Contable (Pariano)", fp: "adm:estudio_contable_pariano", rubro: "Liquidación Sueldos" },
+        { name: "🛗 Guillemi (Abono Ascensores)", fp: "abono:ascensores_guillemi", rubro: "Abono Ascensores" },
+        { name: "⚡ Edesur (Cta. 05637256)", fp: "srv:edesur_05637256", rubro: "Servicio Eléctrico" },
+        { name: "💧 AySA Cta 192499 (Torre 358)", fp: "srv:aysa_192499", rubro: "Servicio de Agua" },
+        { name: "💧 AySA Cta 192500 (Torre 360)", fp: "srv:aysa_192500", rubro: "Servicio de Agua" },
+        { name: "🛡️ La Holando (Seguro Integral)", fp: "seguro:holando_integral", rubro: "Seguro Consorcio" },
+        { name: "👷 Allianz (Seguro Personal / AP)", fp: "seguro:allianz_personal", rubro: "Seguro Personal" },
+        { name: "🌐 Conectividad (Flow / Telecentro)", fp: "abono:internet_consorcio", rubro: "Internet Consorcio" },
+        { name: "🐛 FB Saneamiento (Fumigación)", fp: "abono:fumigacion_fb", rubro: "Desinsectación" },
+        { name: "💻 Plataforma ConsorcioAbierto", fp: "adm:plataforma_consorcioabierto", rubro: "Sistema Gestión" }
     ];
 
     let rowsHtml = "";
-    
-    // Obtener inflación acumulada oficial INDEC
-    const ipcActual = ipcData[period]?.valor;
-    const ipcPrev = ipcData[prevPeriod]?.valor;
-    const ipcAcum = (ipcActual && ipcPrev) ? ((ipcActual - ipcPrev) / ipcPrev) * 100 : null;
-    const ipcText = ipcAcum !== null ? `${ipcAcum.toFixed(1)}%` : "N/D";
+    const ipcActual = ipcData[targetPeriod]?.valor;
 
     targetProviders.forEach(p => {
-        // Buscar el gasto del mes actual
-        const actualExpense = rawExpenses.find(e => e.periodo === targetPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
-        // Buscar el gasto del año anterior
-        let prevExpense = rawExpenses.find(e => e.periodo === prevPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
+        const matchesFp = (e) => semanticFingerprint(e.concepto) === p.fp;
+        const actualExpense = rawExpenses.find(e => e.periodo === targetPeriod && matchesFp(e));
+        let prevExpense = rawExpenses.find(e => e.periodo === prevPeriod && matchesFp(e));
 
-        // Fallback: Si no hay registro exactamente hace 12 meses, buscar la primera factura histórica del proveedor
+        // Fallback: primera factura histórica anterior al período evaluado
         if (!prevExpense && actualExpense) {
-            prevExpense = rawExpenses.find(e => e.periodo !== targetPeriod && p.keys.some(k => e.concepto.toLowerCase().includes(k)));
+            prevExpense = rawExpenses.find(e => e.periodo < targetPeriod && matchesFp(e));
         }
 
         if (actualExpense) {
-            const prevAmount = prevExpense ? prevExpense.monto : actualExpense.monto;
+            const refPeriod = prevExpense ? prevExpense.periodo : prevPeriod;
+            const ipcRef = ipcData[refPeriod]?.valor;
+            const ipcAcum = (ipcActual && ipcRef) ? ((ipcActual - ipcRef) / ipcRef) * 100 : null;
+            const ipcText = ipcAcum !== null ? `${ipcAcum.toFixed(1)}%` : "N/D";
+
             const varPct = prevExpense ? ((actualExpense.monto - prevExpense.monto) / prevExpense.monto) * 100 : 0;
-            
+
             let badge = `<span class="badge badge-success">🟢 Estable</span>`;
             if (ipcAcum !== null && prevExpense) {
                 if (varPct > ipcAcum + 25) {
@@ -1717,13 +1833,12 @@ const auditProviders = (period) => {
                 }
             }
 
-            // Calcular el desvío en pesos
             let diffHtml = `<td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-3); font-size: 0.85rem;">N/D</td>`;
             if (ipcAcum !== null && prevExpense) {
                 const expected = prevExpense.monto * (1 + (ipcAcum / 100));
                 const diffValue = actualExpense.monto - expected;
                 const diffFmt = fmt(Math.abs(diffValue));
-                if (diffValue > 50) { // Tolerancia para diferencias mínimas de redondeo
+                if (diffValue > 50) {
                     diffHtml = `<td style="padding: 0.75rem 0.5rem; text-align: right; color: #f43f5e; font-weight: 700; font-size: 0.85rem;">+${diffFmt}</td>`;
                 } else if (diffValue < -50) {
                     diffHtml = `<td style="padding: 0.75rem 0.5rem; text-align: right; color: #10b981; font-weight: 700; font-size: 0.85rem;">-${diffFmt}</td>`;
@@ -1732,14 +1847,16 @@ const auditProviders = (period) => {
                 }
             }
 
+            const prevLabel = prevExpense ? `${fmt(prevExpense.monto)} <span style="font-size:0.7rem;opacity:0.75;">(${prevExpense.periodo})</span>` : 'Sin antecedente';
+
             rowsHtml += `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                     <td style="padding: 0.75rem 0.5rem; text-align: left; font-weight: 600; color: var(--text-2);">${p.name}</td>
                     <td style="padding: 0.75rem 0.5rem; text-align: left; color: var(--text-3); font-size: 0.8rem;">${p.rubro}</td>
                     <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: var(--text-1);">${fmt(actualExpense.monto)}</td>
-                    <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-3);">${prevExpense ? fmt(prevExpense.monto) : 'Sin antecedente'}</td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-3);">${prevLabel}</td>
                     <td style="padding: 0.75rem 0.5rem; text-align: right; font-weight: 700; color: ${ipcAcum !== null && varPct > ipcAcum ? '#f43f5e' : '#10b981'};">${prevExpense ? varPct.toFixed(1) + '%' : '—'}</td>
-                    <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-2); font-weight: 500;">${ipcText}</td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: right; color: var(--text-2); font-weight: 500;">${prevExpense ? ipcText : '—'}</td>
                     ${diffHtml}
                     <td style="padding: 0.75rem 0.5rem; text-align: center; vertical-align: middle;">${badge}</td>
                 </tr>
@@ -1825,6 +1942,23 @@ const renderExtraordinarios = () => {
     if (!rawExtraordinarios || rawExtraordinarios.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:1.5rem;">Sin registros de gastos extraordinarios.</td></tr>`;
         return;
+    }
+
+    const totLiq = rawExtraordinarios.reduce((a, x) => a + Number(x.liquidado || 0), 0);
+    const totRec = rawExtraordinarios.reduce((a, x) => a + Number(x.recaudado || 0), 0);
+    const totAbo = rawExtraordinarios.reduce((a, x) => a + Number(x.abonado || 0), 0);
+    const totSal = totRec - totAbo;
+
+    const elLiq = document.getElementById("extraLiquidado");
+    const elRec = document.getElementById("extraRecaudado");
+    const elAbo = document.getElementById("extraAbonado");
+    const elSal = document.getElementById("extraSaldo");
+    if (elLiq) elLiq.textContent = fmt(totLiq);
+    if (elRec) elRec.textContent = fmt(totRec);
+    if (elAbo) elAbo.textContent = fmt(totAbo);
+    if (elSal) {
+        elSal.textContent = totSal < 0 ? `-${fmt(Math.abs(totSal))}` : fmt(totSal);
+        elSal.style.color = totSal < 0 ? "#f43f5e" : "#10b981";
     }
 
     let html = "";
@@ -1937,8 +2071,9 @@ const renderMorosidad = (period) => {
 
 // ── INIT APP (INGESTA DE DATOS) ──────────────────────────────────
 const init = async () => {
-    // Iniciar carga de IPC en segundo plano (sin bloquear la UI)
-    fetchIPC();
+    // Iniciar carga de IPC (esperada para tablas comparativas) y Auditoría Forense
+    await fetchIPC();
+    loadForensicAudit();
 
     try {
         const response = await fetch(getRelativeDataUrl("gastos.json"));
@@ -1952,13 +2087,14 @@ const init = async () => {
         rawMorosidadPorPeriodo = data.morosidad_por_periodo || {};
         consorcioMeta = data.consorcio_meta || {};
 
-        // Calcular anomalías cuantitativas con media móvil
+        // Calcular anomalías cuantitativas con media móvil sobre huella semántica unificada
         rawExpenses.sort((a, b) => a.periodo.localeCompare(b.periodo));
         const history = {};
         rawExpenses.forEach(e => {
-            const key = e.concepto.toLowerCase().slice(0, 30);
+            const key = semanticFingerprint(e.concepto) || e.concepto.toLowerCase().slice(0, 30);
             const prev = history[key] || [];
-            const isSAC = e.concepto.toUpperCase().includes("SAC");
+            const cu = e.concepto.toUpperCase();
+            const isSAC = cu.includes("SAC") || cu.includes("FINAL") || cu.includes("DIAS NO TRABAJADOS");
             if (prev.length >= 2) {
                 const recent = prev.slice(-3);
                 const avg = recent.reduce((a, v) => a + v, 0) / recent.length;
@@ -1987,7 +2123,7 @@ const init = async () => {
         try { renderPatrimonialChart(); } catch(e) { console.warn("Error en renderPatrimonialChart:", e); }
         try { auditProviders("todos"); } catch(e) { console.warn("Error en auditProviders:", e); }
         try { renderContractsBoard(); } catch(e) { console.warn("Error en renderContractsBoard:", e); }
-        try { renderDocumentaryAuditSection(); } catch(e) { console.warn("Error en renderDocumentaryAuditSection:", e); }
+        try { renderDocumentaryAuditSection(rawExpenses); } catch(e) { console.warn("Error en renderDocumentaryAuditSection:", e); }
         try { loadServicesStatus(); } catch(e) { console.warn("Error en loadServicesStatus:", e); }
     } catch (error) {
         console.error("Error al cargar los datos de expensas:", error);
@@ -2002,56 +2138,56 @@ const renderContractsBoard = () => {
     const contracts = [
         {
             title: "📋 Administración de Consorcios",
-            provider: "Fernández - Villasenin (Matr. 862)",
-            type: "Administración Legal y Contable (Ley 14701)",
+            provider: "Fernández - Villasenin (RPAC Matr. 862)",
+            type: "Administración Legal y Contable (Ley 14.701 PBA)",
             dueDate: "2027-08-01",
-            cost: "$ 850.000 /mes",
+            cost: "$ 830.000 /mes",
+            status: "Vigente"
+        },
+        {
+            title: "👮 Seguridad Privada 24 hs",
+            provider: "Bastida S.A. Seguridad Privada Integral",
+            type: "Vigilancia Física Diurna y Nocturna (Sarmiento 356-360)",
+            dueDate: "2027-03-31",
+            cost: "$ 4.948.100 /mes",
             status: "Vigente"
         },
         {
             title: "💻 Plataforma de Gestión Digital",
-            provider: "ConsorcioAbierto S.A.S.",
-            type: "Portal de Propietarios y Expensa Digital",
+            provider: "Consorcio Abierto S.R.L.",
+            type: "Portal de Propietarios y Liquidación Online (70 UFs)",
             dueDate: "2027-08-01",
-            cost: "$ 132.898 /mes",
+            cost: "$ 66.193 /mes",
             status: "Vigente"
         },
         {
-            title: "🛡️ Seguro Integral de Consorcio",
-            provider: "Holando / Allianz",
-            type: "Póliza Incendio y RC (Póliza 1184913)",
-            dueDate: "2026-12-15",
-            cost: "$ 224.225 /mes",
+            title: "🛡️ Seguro Integral + Accidentes Personales",
+            provider: "La Holando Sudamericana + Allianz",
+            type: "Póliza Integral N° 2000004.5 + Póliza AP",
+            dueDate: "2027-06-30",
+            cost: "$ 357.462 /mes",
             status: "Vigente"
         },
         {
-            title: "🛗 Abono de Ascensores",
-            provider: "Guillemi S.A.",
-            type: "Mantenimiento Preventivo (3 Torres)",
+            title: "🛗 Abono Conservación de Ascensores",
+            provider: "Ascensores Guillemi Interior S.A.",
+            type: "Mantenimiento Preventivo (Torres 356, 358 y 360)",
             dueDate: "2026-12-01",
             cost: "$ 146.400 /mes",
             status: "Vigente"
         },
         {
-            title: "🐛 Fumigación y Desinsectación",
-            provider: "Eco Plagas Saneamiento",
-            type: "Control Mensual de Plagas",
-            dueDate: "2026-11-25",
-            cost: "$ 29.832 /mes",
+            title: "🐛 Desinfección y Control de Plagas",
+            provider: "FB Saneamiento Ambiental",
+            type: "Servicio de Desinsectación en Partes Comunes",
+            dueDate: "2026-12-15",
+            cost: "$ 130.000 /mes",
             status: "Vigente"
         },
         {
-            title: "🧯 Carga de Matafuegos",
-            provider: "Ordenanza Municipal Lomas",
-            type: "Re-inspección Anual de Extintores",
-            dueDate: "2026-11-10",
-            cost: "Verificar Presupuesto",
-            status: "Vigente"
-        },
-        {
-            title: "🎨 Pintura de Fachada",
-            provider: "Rafael Morel / Luis Pavón",
-            type: "Obra Extraordinaria Finalizada",
+            title: "🎨 Reparación y Pintura Contrafrente",
+            provider: "Luis de la Paz Pavón Riveros",
+            type: "Obra Extraordinaria Fondo de Reserva (Fc. C 0005-00136)",
             dueDate: "2026-08-31",
             cost: "$ 2.000.000 (Cierre Ago-26)",
             status: "Finalizada"
@@ -2128,26 +2264,430 @@ const exportMorosidadToExcel = () => {
         alert("La librería XLSX no está disponible.");
         return;
     }
-    if (!rawMorosidad || rawMorosidad.length === 0) {
+    const selPeriod = document.getElementById("periodFilter")?.value;
+    const availPeriods = Object.keys(rawMorosidadPorPeriodo || {}).sort();
+    const activePeriod = (selPeriod && selPeriod !== "todos" && rawMorosidadPorPeriodo[selPeriod])
+        ? selPeriod
+        : (availPeriods.length > 0 ? availPeriods[availPeriods.length - 1] : "2026-09");
+    const sourceList = (rawMorosidadPorPeriodo && rawMorosidadPorPeriodo[activePeriod])
+        ? rawMorosidadPorPeriodo[activePeriod]
+        : (rawMorosidad || []);
+
+    if (!sourceList || sourceList.length === 0) {
         alert("No hay datos de morosidad para exportar.");
         return;
     }
 
-    const exportData = rawMorosidad.map(m => ({
+    const exportData = sourceList.map(m => ({
         "U.F. #": m.uf,
-        "Ubicación": m.depto ? m.depto.replace(/\s+-[0-9\s]+[A-Za-zÁÉÍÓÚñÑ].*$/g, '').trim() : `UF ${m.uf}`,
+        "Ubicación": formatDpto(m.depto, m.uf),
         "Propietario": `Propietario U.F. ${m.uf}`,
         "Deuda Acumulada ($ ARS)": m.deuda,
-        "Período": m.periodo || '2026-07'
+        "Período": m.periodo || activePeriod
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Estado Morosidad");
-    XLSX.writeFile(wb, "Sarmiento360_Estado_Morosidad.xlsx");
+    XLSX.writeFile(wb, `Sarmiento360_Estado_Morosidad_${activePeriod}.xlsx`);
 };
 
 document.addEventListener("DOMContentLoaded", init);
 
 
 
+
+
+// =========================================================================
+// MÓDULO FORENSE Y GENERADOR INTERACTIVO DE RECLAMOS (SARMIENTO 360)
+// =========================================================================
+let forensicAuditData = null;
+
+const loadForensicAudit = async () => {
+    try {
+        const r = await fetch(getRelativeDataUrl("forensic_audit.json"));
+        if (r.ok) {
+            forensicAuditData = await r.json();
+            const fUnits = forensicAuditData?.auditoria_seguridad_70_ufs?.unidades || [];
+            fUnits.forEach(u => {
+                if (u.uf && u.dpto) canonicalUfDptoMap[Number(u.uf)] = u.dpto;
+            });
+            renderForensicAuditTables();
+            initReclamoGenerator();
+            if (rawMorosidad && (rawMorosidad.length > 0 || Object.keys(rawMorosidadPorPeriodo || {}).length > 0)) {
+                renderMorosidad(document.getElementById("periodFilter")?.value);
+            }
+        }
+    } catch (e) {
+        console.error("Error al cargar forensic_audit.json:", e);
+    }
+};
+
+const renderForensicAuditTables = () => {
+    if (!forensicAuditData) return;
+
+    // 1. Tabla de Conciliación Bancaria (Caja vs. Banco Galicia)
+    const concilBody = document.getElementById("conciliacionTableBody");
+    if (concilBody && forensicAuditData.conciliacion_bancaria) {
+        const res = forensicAuditData.conciliacion_bancaria.resumen || {};
+        const elProrr = document.getElementById("concilKpiProrr");
+        const elBanco = document.getElementById("concilKpiBanco");
+        const elBrecha = document.getElementById("concilKpiBrecha");
+        const elBadge = document.getElementById("concilBadgeHeader");
+        if (elProrr && res.total_recaudado_prorrateo) elProrr.textContent = `$${formatMoney(res.total_recaudado_prorrateo)}`;
+        if (elBanco && res.total_ingresos_banco) elBanco.textContent = `$${formatMoney(res.total_ingresos_banco)}`;
+        if (elBrecha && typeof res.brecha_positiva_gestion_anterior === "number") elBrecha.textContent = `+$${formatMoney(res.brecha_positiva_gestion_anterior)}`;
+        if (elBadge && typeof res.brecha_positiva_gestion_anterior === "number") elBadge.textContent = `Brecha Meses Deficitarios D&F: +$${formatMoney(res.brecha_positiva_gestion_anterior)}`;
+
+        const rows = forensicAuditData.conciliacion_bancaria.periodos || [];
+        concilBody.innerHTML = rows.map(r => {
+            const isAlert = r.periodo <= "2026-07" && r.diferencia_caja > 500000;
+            const diffColor = isAlert ? "#f43f5e" : (r.diferencia_caja < -1000 ? "#34d399" : "var(--text-1)");
+            const badgeClass = isAlert ? "badge-danger" : (r.diferencia_caja < -1000 ? "badge-success" : "badge-info");
+            return `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <td style="padding: 8px 10px; font-weight: 700; color: var(--text-1);">${r.periodo}</td>
+                    <td style="padding: 8px 10px; text-align: right; color: #38bdf8; font-variant-numeric: tabular-nums;">$ ${formatMoney(r.recaudado_prorrateo)}</td>
+                    <td style="padding: 8px 10px; text-align: right; color: #34d399; font-variant-numeric: tabular-nums;">$ ${formatMoney(r.ingresos_banco)}</td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${diffColor}; font-variant-numeric: tabular-nums;">$ ${formatMoney(r.diferencia_caja)}</td>
+                    <td style="padding: 8px 10px;">
+                        <span class="badge ${badgeClass}" style="font-size: 0.7rem;">${r.observacion}</span>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    // 2. Tabla de Integridad de Porcentuales
+    const integrBody = document.getElementById("integridadTableBody");
+    if (integrBody && forensicAuditData.integridad_porcentuales) {
+        const rows = forensicAuditData.integridad_porcentuales.periodos || [];
+        integrBody.innerHTML = rows.map(r => {
+            const hasGap = Math.abs(r.desvio_legal_pct) > 0.02;
+            const gapColor = hasGap ? "#f43f5e" : "#34d399";
+            return `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <td style="padding: 8px 10px; font-weight: 700; color: var(--text-1);">${r.periodo}</td>
+                    <td style="padding: 8px 10px; text-align: center; color: var(--text-2);">${r.total_unidades} UFs</td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 600; color: var(--text-1); font-variant-numeric: tabular-nums;">${r.sum_porcentual_legal.toFixed(4)}%</td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${gapColor}; font-variant-numeric: tabular-nums;">${r.desvio_legal_pct !== 0 ? `-${r.desvio_legal_pct.toFixed(4)}%` : "0,0000%"}</td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 600; color: #fb7185; font-variant-numeric: tabular-nums;">${r.sum_gb_seguridad_pct.toFixed(4)}%</td>
+                    <td style="padding: 8px 10px;">
+                        ${hasGap ? 
+                            '<span class="badge badge-danger" style="font-size: 0.68rem;">Faltante Coef. (0,21%) + Cobro Plano 1/70 Ilegal</span>' : 
+                            '<span class="badge badge-warning" style="font-size: 0.68rem;">Coeficiente Regularizado (~100%) · Seguridad Plana 1/70</span>'
+                        }
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    // 3. Tabla de Proveedores vs. Inflación INDEC
+    const provIpcBody = document.getElementById("proveedoresIpcTableBody");
+    if (provIpcBody && forensicAuditData.auditoria_proveedores_vs_ipc) {
+        const rows = forensicAuditData.auditoria_proveedores_vs_ipc.proveedores || [];
+        provIpcBody.innerHTML = rows.map(r => {
+            const isOver = r.desvio_vs_ipc_pct > 15;
+            const desvioColor = isOver ? "#f43f5e" : (r.desvio_vs_ipc_pct < -15 ? "#34d399" : "#fbbf24");
+            const badgeClass = isOver ? "badge-danger" : (r.desvio_vs_ipc_pct < -15 ? "badge-success" : "badge-warning");
+            return `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <td style="padding: 8px 10px; font-weight: 700; color: var(--text-1);">${r.proveedor} <span style="font-size:0.7rem;color:var(--text-3);font-weight:500;">(${r.periodo_inicio} → ${r.periodo_fin})</span></td>
+                    <td style="padding: 8px 10px; text-align: right; color: var(--text-3); font-variant-numeric: tabular-nums;">$ ${formatMoney(r.monto_inicial)}</td>
+                    <td style="padding: 8px 10px; text-align: right; color: var(--text-1); font-weight: 600; font-variant-numeric: tabular-nums;">$ ${formatMoney(r.monto_final)}</td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums;">+${r.aumento_acumulado_pct.toFixed(1)}%</td>
+                    <td style="padding: 8px 10px; text-align: right; color: #a78bfa; font-variant-numeric: tabular-nums;">+${r.inflacion_ipc_pct.toFixed(1)}%</td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 800; color: ${desvioColor}; font-variant-numeric: tabular-nums;">${r.desvio_vs_ipc_pct > 0 ? `+${r.desvio_vs_ipc_pct.toFixed(1)}%` : `${r.desvio_vs_ipc_pct.toFixed(1)}%`}</td>
+                    <td style="padding: 8px 10px;">
+                        <span class="badge ${badgeClass}" style="font-size: 0.7rem;">${r.evaluacion}</span>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+};
+
+// =========================================================================
+// GENERADOR INTERACTIVO DE RECLAMOS (#reclamo)
+// =========================================================================
+const initReclamoGenerator = () => {
+    if (!forensicAuditData) return;
+
+    const ufSelect = document.getElementById("reclamoUfSelect");
+    if (!ufSelect) return;
+
+    const units = forensicAuditData.auditoria_seguridad_70_ufs.unidades || [];
+
+    // Población del selector de 70 UFs
+    let optionsHtml = `
+        <option value="both_55_59">★ U.F. 55 y 59 — Alexis y Andrés Martyniuk (Piso 10°A, 11°A y Cochera BN) · Saldo a favor: $ 487.749,34</option>
+    `;
+
+    units.forEach(u => {
+        const saldoTxt = u.saldo_a_favor > 0 ? 
+            `A favor: $ ${formatMoney(u.saldo_a_favor)}` : 
+            (u.saldo_a_favor < 0 ? `Subsidio recibido: -$ ${formatMoney(Math.abs(u.saldo_a_favor))}` : 'Neutro: $ 0');
+        let tit = u.titular || `Propietario U.F. ${u.uf}`;
+        if (u.uf === 55) tit = "Alexis Martyniuk";
+        else if (u.uf === 59) tit = "Andrés Martyniuk (Rep. por Alexis Martyniuk)";
+        optionsHtml += `<option value="${u.uf}">U.F. ${u.uf} — ${u.dpto} (${tit}) · ${saldoTxt}</option>`;
+    });
+
+    ufSelect.innerHTML = optionsHtml;
+    const ufUrlParam = new URLSearchParams(window.location.search).get("uf");
+    if (ufUrlParam === "both_55_59" || (Number(ufUrlParam) >= 1 && Number(ufUrlParam) <= 70)) {
+        ufSelect.value = String(ufUrlParam);
+    } else {
+        ufSelect.value = "55"; // Default a UF 55
+    }
+
+    // Eventos
+    ufSelect.addEventListener("change", () => onReclamoUfChange());
+    
+    ["reclamoNombreInput", "reclamoDniInput", "reclamoEmailInput"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", () => updateReclamoLetter());
+    });
+
+    ["chkReclamoImpugnacion", "chkReclamoSeguridad", "chkReclamoMorel", "chkReclamoObras", "chkReclamoRendicion"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", () => updateReclamoLetter());
+    });
+
+    onReclamoUfChange();
+};
+
+const onReclamoUfChange = () => {
+    if (!forensicAuditData) return;
+    const ufSelect = document.getElementById("reclamoUfSelect");
+    const val = ufSelect ? ufSelect.value : "55";
+
+    const nombreInput = document.getElementById("reclamoNombreInput");
+    const dniInput    = document.getElementById("reclamoDniInput");
+    const legalPctEl  = document.getElementById("reclamoLegalPct");
+    const cobradoEl   = document.getElementById("reclamoCobradoPct");
+    const saldoEl     = document.getElementById("reclamoSaldoFavor");
+
+    const units = forensicAuditData.auditoria_seguridad_70_ufs.unidades || [];
+
+    if (val === "both_55_59") {
+        if (nombreInput) nombreInput.value = "Alexis Martyniuk (por sí y apoderado de Andrés Martyniuk)";
+        if (dniInput) dniInput.value = "33.857.298 (Alexis) / 31.727.239 (Andrés)";
+        if (legalPctEl) legalPctEl.textContent = "2,0300% (1,010% + 1,020% s/ Escrituras)";
+        if (cobradoEl) cobradoEl.textContent = "2,8572% (1/70 x 2)";
+        if (saldoEl) {
+            saldoEl.textContent = "$ 487.749,34";
+            saldoEl.style.color = "#34d399";
+        }
+    } else {
+        const ufNum = parseInt(val, 10);
+        const u = units.find(item => item.uf === ufNum);
+        if (u) {
+            if (ufNum === 55) {
+                if (nombreInput) nombreInput.value = "Alexis Martyniuk";
+                if (dniInput) dniInput.value = "33.857.298";
+            } else if (ufNum === 59) {
+                if (nombreInput) nombreInput.value = "Andrés Martyniuk (Rep. por Alexis Martyniuk)";
+                if (dniInput) dniInput.value = "31.727.239 (Apoderado DNI 33.857.298)";
+            } else {
+                if (nombreInput) nombreInput.value = u.titular || `Propietario U.F. ${ufNum}`;
+                if (dniInput) dniInput.value = "[DNI Propietario]";
+            }
+
+            if (legalPctEl) legalPctEl.textContent = `${u.porcentual_legal.toFixed(4)}%`;
+            if (cobradoEl) cobradoEl.textContent = `${u.porcentual_aplicado.toFixed(4)}% (1/70)`;
+            if (saldoEl) {
+                if (u.saldo_a_favor > 0) {
+                    saldoEl.textContent = `$ ${formatMoney(u.saldo_a_favor)}`;
+                    saldoEl.style.color = "#34d399";
+                } else if (u.saldo_a_favor < 0) {
+                    saldoEl.textContent = `-$ ${formatMoney(Math.abs(u.saldo_a_favor))} (Deuda c/ Fondo)`;
+                    saldoEl.style.color = "#f43f5e";
+                } else {
+                    saldoEl.textContent = "$ 0,00";
+                    saldoEl.style.color = "var(--text-1)";
+                }
+            }
+        }
+    }
+
+    updateReclamoLetter();
+};
+
+window.selectUfQuick = (val) => {
+    const ufSelect = document.getElementById("reclamoUfSelect");
+    if (ufSelect) {
+        ufSelect.value = String(val);
+        onReclamoUfChange();
+    }
+};
+
+const compileReclamoText = () => {
+    const ufSelect = document.getElementById("reclamoUfSelect");
+    const val = ufSelect ? ufSelect.value : "55";
+    const nombre = (document.getElementById("reclamoNombreInput")?.value || "Propietario").trim();
+    const dni    = (document.getElementById("reclamoDniInput")?.value || "").trim();
+    const email  = (document.getElementById("reclamoEmailInput")?.value || "").trim();
+
+    const chkImpugnacion = document.getElementById("chkReclamoImpugnacion")?.checked;
+    const chkSeguridad   = document.getElementById("chkReclamoSeguridad")?.checked;
+    const chkMorel       = document.getElementById("chkReclamoMorel")?.checked;
+    const chkObras       = document.getElementById("chkReclamoObras")?.checked;
+    const chkRendicion   = document.getElementById("chkReclamoRendicion")?.checked;
+
+    let ufText = "";
+    let saldoText = "";
+    if (val === "both_55_59") {
+        ufText = "Unidades Funcionales N° 55 (Piso 10° 'A' - Torre Sarmiento 360, Polígono 10-03) y N° 59 (Piso 11° 'A' - Torre Sarmiento 360, Polígono 11-03) conjuntamente con la Unidad Complementaria Cochera 'BN' en Planta Baja (Polígono 00-07)";
+        saldoText = "$ 487.749,34 (Pesos Cuatrocientos Ochenta y Siete Mil Setecientos Cuarenta y Nueve con 34/100)";
+    } else {
+        const ufNum = parseInt(val, 10);
+        const units = forensicAuditData?.auditoria_seguridad_70_ufs?.unidades || [];
+        const u = units.find(item => item.uf === ufNum);
+        if (ufNum === 55) {
+            ufText = "Unidad Funcional N° 55 (Piso 10° 'A' - Torre Sarmiento 360, Polígono 10-03)";
+        } else if (ufNum === 59) {
+            ufText = "Unidad Funcional N° 59 (Piso 11° 'A' - Torre Sarmiento 360, Polígono 11-03) y Cochera UC BN en PB";
+        } else {
+            ufText = `Unidad Funcional N° ${ufNum} (${u?.dpto || ''})`;
+        }
+        if (u && u.saldo_a_favor > 0) {
+            saldoText = `$ ${formatMoney(u.saldo_a_favor)}`;
+        } else {
+            saldoText = "$ 0,00";
+        }
+    }
+
+    let fechaHoy = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    let text = `Lomas de Zamora, Provincia de Buenos Aires, ${fechaHoy}.
+
+A la Administradora del Consorcio Sarmiento 356/358/360,
+Dra. Agostina Daniela Fernández (Fernández - Villasenin Administradores de Consorcios)
+Matrícula RPAC PBA N° 862 · Legajo DPPJ 279455
+Correo Oficial: aconsorcios.f.v@gmail.com
+C/C al Consejo de Propietarios
+
+REF.: OPOSICIÓN FORMAL E IMPUGNACIÓN ASAMBLEA 02/11/2026 (ART. 2060 CCyCN) - INTIMACIÓN DE REINTEGRO POR PRORRATEO INDEBIDO (ART. 8 RCP / ART. 2049 CCyCN) - RECHAZO DE DEUDA FICTICIA MOREL.
+
+De mi mayor consideración:
+
+Por medio de la presente, quien suscribe, ${nombre}, DNI N° ${dni}, en mi carácter de titular de dominio de la ${ufText} del Consorcio de Propietarios de calle Sarmiento 356/358/360 (CUIT 30-71412062-6), fijando domicilio a todos los efectos legales en dicha unidad y constituyendo domicilio electrónico en ${email}, me dirijo a Ud. a fin de notificar formalmente lo siguiente:
+`;
+
+    let puntoIdx = 1;
+
+    if (chkImpugnacion) {
+        text += `
+${puntoIdx}. OPOSICIÓN E IMPUGNACIÓN FORMAL DE ASAMBLEA (ART. 2060 CCyCN):
+Encontrándome dentro del plazo de caducidad perentorio de treinta (30) días corridos contados desde la celebración de la Asamblea de Propietarios del 02 de Noviembre de 2026, formulo EXPRESA OPOSICIÓN e IMPUGNACIÓN respecto a las deliberaciones y liquidaciones allí informadas, rechazando la aprobación ficta de cuentas que contengan erogaciones no documentadas o prorrateos contrarios al Reglamento de Copropiedad y a la ley civil.
+`;
+        puntoIdx++;
+    }
+
+    if (chkSeguridad) {
+        let detallePericial = "";
+        if (val === "both_55_59") {
+            detallePericial = " ($ 418.216,02 por cobro plano de Seguridad al 1/70 más $ 69.533,32 por desvío de coeficiente ordinario frente al 1,010% y 1,020% de las Escrituras N° 268 y N° 269)";
+        } else if (val === "55") {
+            detallePericial = " ($ 211.636,09 por cobro plano de Seguridad al 1/70 más $ 34.632,96 por desvío de coeficiente ordinario frente al 1,010% de la Escritura N° 268)";
+        } else if (val === "59") {
+            detallePericial = " ($ 206.579,93 por cobro plano de Seguridad al 1/70 más $ 34.900,36 por desvío de coeficiente ordinario frente al 1,020% consolidado de la Escritura N° 269)";
+        }
+        text += `
+${puntoIdx}. SOBREFACTURACIÓN INDEBIDA DE SEGURIDAD PRIVADA Y REINTEGRO (${saldoText}):
+Conforme al Informe Técnico Pericial suscripto por el Contador Público Dr. Pablo Américo Parodi (T° 178 F° 152 · Legajo 46351/5 C.P.C.E.P.B.A.) sobre los 26 períodos liquidados entre Agosto 2024 y Septiembre 2026, intimo a la Administración al inmediato reconocimiento y reintegro en cuenta corriente de expensas del saldo a favor certificado de ${saldoText}${detallePericial}, originado en la liquidación ilegal del servicio de Vigilancia y Seguridad Privada bajo una alícuota uniforme del 1/70 (1,4286%).
+Dicha división plana constituye una transgresión directa al Artículo 8 del Reglamento de Copropiedad y Administración (Matrícula 90.414) y al Artículo 2049 del Código Civil y Comercial de la Nación, habiendo transferido ilícitamente $ 6.765.131,67 desde las 42 unidades de menor metraje hacia los semipisos y dúplex superiores.
+`;
+        puntoIdx++;
+    }
+
+    if (chkMorel) {
+        text += `
+${puntoIdx}. RECHAZO EXPRESO A LA SUPUESTA DEUDA DE RAFAEL MOREL ($6.023.238):
+Reitero el RECHAZO TOTAL resuelto por los propietarios en la Asamblea del 02/11/2026 respecto a la pretendida deuda adicional por $ 6.023.238,00 reclamada por el Sr. Rafael Morel. La auditoría bancaria constató 9 transferencias por $ 20.110.000,00 ($ 6.910.000,00 de sobrecosto sobre los $ 13.200.000,00 presupuestados), integradas por 5 pagos sin comprobante fiscal por $ 9.510.000,00 y 4 pagos por $ 10.600.000,00 facturados por un tercero monotributista ajeno a la obra (Ignacio Villalba Giménez). Queda expresamente prohibido imputar suma alguna por dicho concepto al Consorcio.
+`;
+        puntoIdx++;
+    }
+
+    if (chkObras) {
+        text += `
+${puntoIdx}. CESE DE OBRAS CLANDESTINAS EN TERRAZA / SECTORES COMUNES (ART. 13 INC. B RCP):
+Intimo al cese inmediato y a la no convalidación de ninguna obra privada, cerramiento o ampliación no autorizada sobre sectores comunes de azotea, terraza superior o quincho en los últimos pisos del edificio, exigiendo el estricto cumplimiento del Artículo 13 inc. b) del Reglamento de Copropiedad y del Art. 2052 del CCyCN, los cuales exigen unanimidad expresa para cualquier innovación o aprovechamiento exclusivo sobre partes comunes.
+`;
+        puntoIdx++;
+    }
+
+    if (chkRendicion) {
+        text += `
+${puntoIdx}. SOLICITUD DE CONCILIACIÓN BANCARIA Y LIBROS RUBRICADOS (LEY 14.701 PBA):
+En cumplimiento de los incisos b), d) y e) del Artículo 2067 del CCyCN y de la Ley Provincial 14.701 (RPAC), solicito el envío en formato digital del extracto bancario oficial completo de la Cuenta Corriente del Banco Galicia N° 0070044320000009108891 de los últimos doce períodos y el estado del Libro de Administración foliado y rubricado ante la DPPJ, a fin de auditar la retención de cobranzas en caja fuera de la cuenta bancaria del Consorcio.
+`;
+        puntoIdx++;
+    }
+
+    text += `
+PLAZO E INTIMACIÓN LEGAL:
+Fijo el plazo perentorio de DIEZ (10) DÍAS HÁBILES administrativos para que se acredite el saldo a favor reclamado en la cuenta corriente de expensas de la unidad y se dé respuesta circunstanciada a los puntos precedentes, bajo apercibimiento en caso de silencio, negativa o mora de iniciar las acciones judiciales pertinentes por Repetición de Pago Indebido, Daños y Perjuicios, y radicar la correspondiente denuncia formal ante el Registro Público de Administradores de Consorcios de la Provincia de Buenos Aires (RPAC - Ley 14.701 / Ministerio de Justicia PBA).
+
+Sin otro particular, a la espera de una pronta y favorable resolución, saludo a Ud. atentamente.
+
+
+________________________________________
+Firma del Titular: ${nombre}
+DNI: ${dni}
+Propietario ${ufText}
+Consorcio Sarmiento 356/358/360, Lomas de Zamora`;
+
+    return text;
+};
+
+const updateReclamoLetter = () => {
+    const previewEl = document.getElementById("reclamoCartaPreviewText");
+    if (!previewEl) return;
+    const text = compileReclamoText();
+    previewEl.textContent = text;
+
+    // Actualizar datos de firma
+    const nombre = (document.getElementById("reclamoNombreInput")?.value || "Alexis Martyniuk").trim();
+    const dni    = (document.getElementById("reclamoDniInput")?.value || "33.857.298").trim();
+    const ufVal  = document.getElementById("reclamoUfSelect")?.value || "55";
+
+    const firmaNombre = document.getElementById("cartaFirmaNombre");
+    const firmaDni    = document.getElementById("cartaFirmaDni");
+    const firmaUf     = document.getElementById("cartaFirmaUf");
+
+    const cartaFechaEl = document.getElementById("cartaFechaDoc");
+    if (cartaFechaEl) {
+        cartaFechaEl.textContent = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    if (firmaNombre) firmaNombre.textContent = nombre;
+    if (firmaDni) firmaDni.textContent = dni;
+    if (firmaUf) firmaUf.textContent = ufVal === "both_55_59" ? "55 y 59" : ufVal;
+
+    // Actualizar mailto link
+    const mailtoLink = document.getElementById("reclamoMailtoLink");
+    if (mailtoLink) {
+        const subject = encodeURIComponent(`NOTIFICACIÓN FORMAL CONSORCIO SARMIENTO 360 - OPOSICIÓN ASAMBLEA Y REINTEGRO UF ${ufVal}`);
+        const body    = encodeURIComponent(text);
+        mailtoLink.href = `mailto:aconsorcios.f.v@gmail.com?subject=${subject}&body=${body}`;
+    }
+};
+
+window.copyReclamoText = () => {
+    const text = compileReclamoText();
+    navigator.clipboard.writeText(text).then(() => {
+        const alertBox = document.getElementById("copyFeedbackAlert");
+        if (alertBox) {
+            alertBox.style.display = "block";
+            setTimeout(() => { alertBox.style.display = "none"; }, 4000);
+        }
+    }).catch(err => {
+        alert("Seleccioná y copiá el texto manualmente.");
+    });
+};
+
+window.printReclamoLetter = () => {
+    window.print();
+};

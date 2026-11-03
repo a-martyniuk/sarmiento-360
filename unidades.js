@@ -13,6 +13,8 @@ const getRelativeDataUrl = (file) => {
 let rawProrrateo = [];
 let rawGastos = [];
 let filteredProrrateo = [];
+let forensicUnitsMap = {};
+let ufToDptoMap = {};
 
 // Chart instances
 let chartMorosity = null;
@@ -37,23 +39,39 @@ const fmtFull = (n) => {
 };
 
 const formatDpto = (strVal, ufNum) => {
-    if (!strVal) return `U.F. ${ufNum}`;
-    let s = String(strVal).trim();
-    const matchTower = s.match(/(356|360|358)/);
-    let tower = matchTower ? matchTower[1] : (ufNum % 2 !== 0 ? '356' : '360');
-    const matchBase = s.match(/^(\d{1,2}\s*[°°]?\s*[A-Za-z0-9]+)/);
-    let base = matchBase ? matchBase[1].trim() : s.split(' ')[0];
-    return `${base} (Sarmiento ${tower})`;
+    const canon = ufToDptoMap[Number(ufNum)] || "";
+    const raw = (strVal && String(strVal).trim()) ? String(strVal).trim() : canon;
+    if (!raw) return `U.F. ${ufNum}`;
+    const matchTower = raw.match(/(356|358|360)/) || canon.match(/(356|358|360)/);
+    const tower = matchTower ? matchTower[1] : "";
+    let base = raw
+        .replace(/\s*\((?:Torre\s*)?(?:Sarmiento\s*)?(?:356|358|360)\).*$/i, "")
+        .replace(/\s*[-–]+\s*(?:Torre\s*)?(?:Sarmiento\s*)?(?:356|358|360).*$/i, "")
+        .replace(/\s+(?:Torre\s*)?(?:Sarmiento\s*)?(?:356|358|360)$/i, "")
+        .trim();
+    if (!base) base = `U.F. ${ufNum}`;
+    return tower ? `${base} (Sarmiento ${tower})` : base;
 };
 
 // ── BOOTSTRAP ──────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     Promise.all([
         fetch(getRelativeDataUrl("prorrateo.json")).then(r => r.json()).catch(() => ({ prorrateo: [] })),
-        fetch(getRelativeDataUrl("gastos.json")).then(r => r.json()).catch(() => ({ gastos: [] }))
-    ]).then(([prorrateoData, gastosData]) => {
+        fetch(getRelativeDataUrl("gastos.json")).then(r => r.json()).catch(() => ({ gastos: [] })),
+        fetch(getRelativeDataUrl("forensic_audit.json")).then(r => r.json()).catch(() => null)
+    ]).then(([prorrateoData, gastosData, forensicData]) => {
         rawGastos = gastosData.gastos || [];
+        const fUnits = forensicData?.auditoria_seguridad_70_ufs?.unidades || [];
+        fUnits.forEach(u => {
+            forensicUnitsMap[Number(u.uf)] = u;
+            if (u.dpto) ufToDptoMap[Number(u.uf)] = u.dpto;
+        });
         const allProrrateo = prorrateoData.prorrateo || [];
+        allProrrateo.forEach(item => {
+            if (!ufToDptoMap[Number(item.uf)] && item.dpto && /(356|358|360)/.test(item.dpto)) {
+                ufToDptoMap[Number(item.uf)] = item.dpto;
+            }
+        });
             if (allProrrateo.length > 0) {
                 rawProrrateo = allProrrateo.map(item => {
                     const saldoAnt = Number(item.saldo_anterior || 0);
@@ -85,6 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
             setupEventListeners();
             applyFilter();
             loadServicesStatus();
+            const ufParam = Number(new URLSearchParams(window.location.search).get("uf"));
+            if (ufParam >= 1 && ufParam <= 70) {
+                openModal(ufParam);
+            }
         })
         .catch(err => {
             console.error("Error loading prorrateo.json:", err);
@@ -182,15 +204,13 @@ const auditCoeficients = (period) => {
     const sumGA = periodData.reduce((sum, item) => sum + (item.porcentual || item.ga_pct || 0), 0);
 
     let messages = [];
-    let alertClass = "success-alert";
-    let icon = "📊";
+    let alertClass = "warning-alert";
+    let icon = "⚠️";
 
-    if (sumGA > 0 && Math.abs(sumGA - 100) > 0.01) {
-        alertClass = "warning-alert";
-        icon = "ℹ️";
-        messages.push(`<strong>Prorrateo de Expensas Comunes (GA):</strong> Suma de coeficientes en esta liquidación: <strong>${sumGA.toFixed(3)}%</strong> (Descalce teórico del 0.210% debido a unidades/locales exentos de determinados rubros comunes).`);
+    if (sumGA > 0 && sumGA < 99.95) {
+        messages.push(`<strong>Auditoría de Coeficientes (${period} · Gestión D&amp;F):</strong> Suma de porcentuales ordinarios (Gastos A): <strong>${sumGA.toFixed(3)}%</strong> — faltante no asignado de <strong>${(100 - sumGA).toFixed(3)}%</strong> respecto al 100% reglamentario. Además, <strong>Gastos B (Seguridad Privada)</strong> se liquidó ilegalmente en 70 partes iguales (<strong>1,4286%</strong> por UF) en violación al Art. 8 del RCP y Art. 2049 CCyCN.`);
     } else {
-        messages.push(`<strong>Auditoría de Coeficientes:</strong> La suma de los coeficientes de copropiedad del edificio cierra correctamente al 100%.`);
+        messages.push(`<strong>Auditoría de Coeficientes (${period} · ConsorcioAbierto):</strong> El coeficiente ordinario (Gastos A) cierra en <strong>${sumGA.toFixed(3)}%</strong> (con leves desvíos individuales vs. escritura, ej. UF 55 <code>1,022% vs. 1,010%</code> y UF 59 <code>1,032% vs. 1,020%</code>). <strong>Observación vigente:</strong> el rubro <strong>Gastos B / D (Seguridad Privada)</strong> continúa prorrateándose de forma plana en 70 partes iguales (<strong>1,4286%</strong>), violando el Art. 8 del RCP.`);
     }
 
     const ufDeviations = [];
@@ -243,21 +263,19 @@ const auditCoeficients = (period) => {
 const renderKPIs = (period) => {
     const periodData = rawProrrateo.filter(item => item.periodo === period);
 
-    // 1. Facturado Período: total devengado en gastos.json para este período (o suma de componentes positivos)
-    let totalFacturado = 0;
-    if (typeof rawGastos !== 'undefined' && rawGastos.length > 0) {
+    // 1. Facturado Período: suma real de expensas emitidas a las 70 UFs en el prorrateo del período
+    let totalFacturado = periodData.reduce((sum, item) => {
+        const ga = Math.abs(Number(item.ga_monto || item.gastos_comunes || 0));
+        const gb = Math.abs(Number(item.gb_monto || item.servicio_seguridad || 0));
+        const fo = Math.abs(Number(item.fondo_operativo_monto || item.fondo_reserva || 0));
+        const ge = Math.abs(Number(item.gastos_extra || item.gastos_extraordinarios || 0));
+        const ev = Math.abs(Number(item.red_ajustes || item.eventual || 0));
+        const tMes = Number(item.total_mes || 0);
+        return sum + (tMes > 0 ? tMes : (ga + gb + fo + ge + ev));
+    }, 0);
+
+    if (totalFacturado === 0 && typeof rawGastos !== 'undefined' && rawGastos.length > 0) {
         totalFacturado = rawGastos.filter(g => g.periodo === period).reduce((sum, g) => sum + Number(g.monto || 0), 0);
-    }
-    
-    if (totalFacturado === 0) {
-        totalFacturado = periodData.reduce((sum, item) => {
-            const ga = Math.abs(Number(item.ga_monto || item.gastos_comunes || 0));
-            const gb = Math.abs(Number(item.gb_monto || item.servicio_seguridad || 0));
-            const fo = Math.abs(Number(item.fondo_operativo_monto || item.fondo_reserva || 0));
-            const ge = Math.abs(Number(item.gastos_extra || item.gastos_extraordinarios || 0));
-            const ev = Math.abs(Number(item.red_ajustes || item.eventual || 0));
-            return sum + (ga + gb + fo + ge + ev);
-        }, 0);
     }
 
     // 2. Recaudado: suma de cobros recibidos
@@ -281,7 +299,11 @@ const renderKPIs = (period) => {
     if (elRec) elRec.textContent = fmt(totalRecaudado);
 
     const elPct = document.getElementById("kpiRecaudadoPct");
-    if (elPct) elPct.textContent = `${recPct.toFixed(1)}% cobrado en término`;
+    if (elPct) {
+        elPct.textContent = recPct > 100
+            ? `${recPct.toFixed(1)}% s/ emitido (incluye recupero de mora)`
+            : `${recPct.toFixed(1)}% relación cobro / emitido del mes`;
+    }
 
     const elDeuda = document.getElementById("kpiDeuda");
     if (elDeuda) elDeuda.textContent = fmt(totalDeuda);
@@ -518,6 +540,119 @@ const openModal = (ufNum) => {
         auditDiv.style.display = "none";
     }
 
+    // Auditoría Pericial de Seguridad por Unidad Funcional (Dr. Pablo Américo Parodi - 26 Meses)
+    const secAuditDiv = document.getElementById("modalSecurityAudit");
+    if (secAuditDiv) {
+        const fu = forensicUnitsMap[Number(ufNum)];
+        let secHtml = "";
+        if (ufNum === 55) {
+            secHtml = `
+                <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.25); border-left: 3px solid var(--accent); border-radius: 8px; padding: 0.85rem 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:var(--accent); font-size:0.85rem;">⚖️ Auditoría Pericial Certificada (Dr. Pablo Américo Parodi · T° 178 F° 152)</strong>
+                        <span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:0.7rem;">CRÉDITO RECLAMADO</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
+                        Saldo a Favor Certificado: <strong style="color:#34d399; font-size:1.05rem;">$ 246.269,05</strong> <span style="font-size:0.72rem; color:var(--text-3);">($ 211.636,09 Seguridad + $ 34.632,96 desvío ordinarias)</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
+                        Alícuota debida por Escritura N° 268: <strong>1,010%</strong> (liquidada en CA al 1,022%) vs. Seguridad cobrada al <strong>1,4286% (1/70)</strong> durante 26 meses (Ago-24 a Sep-26). Reclamo pericial presentado en Asamblea 02/11/2026.
+                    </div>
+                    <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(6,182,212,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none;">📄 Ver Reclamo Firmado (PDF)</a>
+                        <a href="index.html?uf=55#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;">📝 Generar Nota Formal</a>
+                    </div>
+                </div>
+            `;
+        } else if (ufNum === 59) {
+            secHtml = `
+                <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.25); border-left: 3px solid var(--accent); border-radius: 8px; padding: 0.85rem 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:var(--accent); font-size:0.85rem;">⚖️ Auditoría Pericial Certificada (Dr. Pablo Américo Parodi · T° 178 F° 152)</strong>
+                        <span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:0.7rem;">CRÉDITO RECLAMADO</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
+                        Saldo a Favor Certificado: <strong style="color:#34d399; font-size:1.05rem;">$ 241.480,29</strong> <span style="font-size:0.72rem; color:var(--text-3);">($ 206.579,93 Seguridad + $ 34.900,36 desvío ordinarias)</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
+                        Alícuota debida por Escritura N° 269: <strong>1,020%</strong> (UF 59 1,010% + Cochera UC BN 0,010%; liquidada en CA al 1,032%) vs. Seguridad cobrada al <strong>1,4286% (1/70)</strong> durante 26 meses.
+                    </div>
+                    <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(6,182,212,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none;">📄 Ver Reclamo Firmado (PDF)</a>
+                        <a href="index.html?uf=59#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;">📝 Generar Nota Formal</a>
+                    </div>
+                </div>
+            `;
+        } else if (ufNum === 69) {
+            secHtml = `
+                <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-left: 3px solid var(--red); border-radius: 8px; padding: 0.85rem 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:var(--red); font-size:0.85rem;">⚖️ Auditoría Pericial de Seguridad (Piso 14°A · Torre 356 · Celina Velayos)</strong>
+                        <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--red); border:1px solid rgba(244,63,94,0.3); font-size:0.7rem;">SUBSIDIO RECIBIDO</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
+                        Monto Pagado de Menos en 26 Meses: <strong style="color:var(--red); font-size:1.05rem;">-$ 1.370.433,94</strong>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
+                        Alícuota reglamentaria por dominio: <strong>4,139%</strong> vs. Alícuota plana abonada en Seguridad: <strong>1,4286% (1/70)</strong>. Nota de asamblea 02/11/2026: la compra en Pinturerías Rex (FC B 7001-00005828 por $ 415.621,11) correspondió a filtración estructural de azotea sobre esta unidad del último piso.
+                    </div>
+                </div>
+            `;
+        } else if (ufNum === 70) {
+            secHtml = `
+                <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-left: 3px solid var(--red); border-radius: 8px; padding: 0.85rem 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:var(--red); font-size:0.85rem;">⚖️ Auditoría Pericial de Seguridad (Piso 14°A · Torre 360 · Ex Consejero Putz)</strong>
+                        <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--red); border:1px solid rgba(244,63,94,0.3); font-size:0.7rem;">SUBSIDIO RECIBIDO</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
+                        Monto Pagado de Menos en 26 Meses: <strong style="color:var(--red); font-size:1.05rem;">-$ 1.370.433,94</strong>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
+                        Alícuota reglamentaria por dominio: <strong>4,139%</strong> vs. Alícuota reducida abonada en Seguridad: <strong>1,4286% (1/70)</strong> durante 26 meses a costa de las 42 unidades de menor metraje.
+                    </div>
+                </div>
+            `;
+        } else if (fu) {
+            const pctLegal = Number(fu.porcentual_legal || latest.porcentual || latest.ga_pct || 1.4286);
+            const saldo = Number(fu.saldo_a_favor || 0);
+            const isCreditor = saldo > 0;
+            secHtml = `
+                <div style="background: ${isCreditor ? 'rgba(16,185,129,0.05)' : 'rgba(245,158,11,0.05)'}; border: 1px solid ${isCreditor ? 'rgba(16,185,129,0.25)' : 'rgba(245,158,11,0.25)'}; border-left: 3px solid ${isCreditor ? 'var(--green)' : 'var(--amber)'}; border-radius: 8px; padding: 0.85rem 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:var(--text-1); font-size:0.85rem;">⚖️ Pericia Contable Seguridad 26 Meses (Dr. Pablo Américo Parodi)</strong>
+                        <span class="badge" style="background:${isCreditor ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; color:${isCreditor ? '#34d399' : '#fbbf24'}; border:1px solid ${isCreditor ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}; font-size:0.7rem;">${isCreditor ? 'CRÉDITO A FAVOR CERTIFICADO' : 'SUBSIDIO ABSORBIDO'}</span>
+                    </div>
+                    <div style="font-size:0.82rem; color:var(--text-1); margin:4px 0;">
+                        ${isCreditor ? 'Saldo a Favor Auditado:' : 'Diferencia Pagada de Menos:'}
+                        <strong style="color:${isCreditor ? '#34d399' : '#fbbf24'}; font-size:1.02rem;">${isCreditor ? fmtFull(saldo) : '-' + fmtFull(Math.abs(saldo))}</strong>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
+                        Alícuota reglamentaria Art. 8 RCP: <strong>${pctLegal.toFixed(3)}%</strong> vs. Alícuota liquidada en 70 partes iguales: <strong>1,4286%</strong> ($ 722.307,46 cobrados vs. ${fmtFull(fu.debido_26m)} según coeficiente).
+                    </div>
+                    ${isCreditor ? `<div style="margin-top:6px;"><a href="index.html?uf=${ufNum}#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;">📝 Personalizar Nota de Reclamo para U.F. ${ufNum}</a></div>` : ''}
+                </div>
+            `;
+        } else {
+            const pct = latest.porcentual || latest.ga_pct || 1.4286;
+            const isSmall = pct < 1.4286;
+            const diffPct = Math.abs(pct - 1.4286);
+            secHtml = `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-left: 3px solid ${isSmall ? 'var(--green)' : 'var(--amber)'}; border-radius: 8px; padding: 0.85rem 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <strong style="color:var(--text-1); font-size:0.85rem;">⚖️ Impacto de Coeficiente en Seguridad (26 Meses)</strong>
+                        <span class="badge" style="background:${isSmall ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; color:${isSmall ? '#34d399' : '#fbbf24'}; border:1px solid ${isSmall ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}; font-size:0.7rem;">${isSmall ? 'SALDO A FAVOR' : 'SUBSIDIO ABSORBIDO'}</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
+                        Alícuota debida por Reglamento: <strong>${pct.toFixed(3)}%</strong> vs. Alícuota liquidada en 70 partes: <strong>1,4286%</strong> (Diferencia de ${diffPct.toFixed(3)}%).
+                    </div>
+                </div>
+            `;
+        }
+        secAuditDiv.innerHTML = secHtml;
+        secAuditDiv.style.display = "block";
+    }
+
     // Historial
     const historyList = document.getElementById("ufHistoryList");
     historyList.innerHTML = [...ufRecords].reverse().map(e => `
@@ -606,24 +741,32 @@ const closeModal = () => {
 // ── EXPORT CSV ──────────────────────────────────────────────────
 const exportCSV = () => {
     const headers = ["Período", "UF", "Ubicación / Depto", "Propietario", "Porcentual (%)", "Saldo Anterior", "Pagos", "Saldo Mes", "Gastos Comunes", "Seguridad", "Fondo Reserva", "Gastos Extra", "Eventual", "Total Mes", "Int Mora", "Total a Pagar"];
-    const rows = filteredProrrateo.map(e => [
-        e.periodo,
-        e.uf,
-        `"${(e.dpto || '').replace(/"/g, '""')}"`,
-        `"${(e.propietario || '').replace(/"/g, '""')}"`,
-        (e.porcentual || e.ga_pct || 0).toFixed(3),
-        (e.saldo_anterior || 0).toFixed(2),
-        (e.pagos || 0).toFixed(2),
-        (e.saldo_mes || 0).toFixed(2),
-        (e.gastos_comunes || e.ga_monto || 0).toFixed(2),
-        (e.servicio_seguridad || e.gb_monto || 0).toFixed(2),
-        (e.fondo_reserva || e.fondo_operativo_monto || 0).toFixed(2),
-        (e.gastos_extraordinarios || 0).toFixed(2),
-        (e.eventual || 0).toFixed(2),
-        (e.total_mes || 0).toFixed(2),
-        (e.interes_mora || e.interes || 0).toFixed(2),
-        (e.total_a_pagar || e.total || 0).toFixed(2)
-    ]);
+    const rows = filteredProrrateo.map(e => {
+        const ga = Number(e.gastos_comunes || e.ga_monto || 0);
+        const gb = Number(e.servicio_seguridad || e.gb_monto || 0);
+        const fo = Number(e.fondo_reserva || e.fondo_operativo_monto || 0);
+        const ge = Number(e.gastos_extraordinarios ?? e.gastos_extra ?? 0);
+        const ev = Number(e.eventual ?? e.red_ajustes ?? 0);
+        const totMes = Number(e.total_mes || (ga + gb + fo + ge + ev));
+        return [
+            e.periodo,
+            e.uf,
+            `"${(e.dpto || '').replace(/"/g, '""')}"`,
+            `"${(e.propietario || '').replace(/"/g, '""')}"`,
+            (e.porcentual || e.ga_pct || 0).toFixed(3),
+            (e.saldo_anterior || 0).toFixed(2),
+            (e.pagos || 0).toFixed(2),
+            (e.saldo_mes || 0).toFixed(2),
+            ga.toFixed(2),
+            gb.toFixed(2),
+            fo.toFixed(2),
+            ge.toFixed(2),
+            ev.toFixed(2),
+            totMes.toFixed(2),
+            (e.interes_mora || e.interes || 0).toFixed(2),
+            (e.total_a_pagar || e.total || totMes).toFixed(2)
+        ];
+    });
 
     const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -644,24 +787,32 @@ const exportXLSX = () => {
 
     const sorted = [...filteredProrrateo].sort((a, b) => a.uf - b.uf);
 
-    const dataToExport = sorted.map(item => ({
-        "Período": item.periodo,
-        "U.F.": item.uf,
-        "Ubicación / Depto": item.dpto,
-        "Propietario / Consorcista": item.propietario,
-        "Porcentual (%)": item.porcentual || item.ga_pct || 0,
-        "Saldo Anterior ($)": item.saldo_anterior,
-        "Pagos ($)": item.pagos,
-        "Saldo Mes ($)": item.saldo_mes,
-        "Gastos Comunes ($)": item.gastos_comunes || item.ga_monto || 0,
-        "Seguridad ($)": item.servicio_seguridad || item.gb_monto || 0,
-        "Fondo Reserva ($)": item.fondo_reserva || item.fondo_operativo_monto || 0,
-        "Gastos Extra. ($)": item.gastos_extraordinarios || 0,
-        "Eventual ($)": item.eventual || 0,
-        "Total Mes ($)": item.total_mes || 0,
-        "Int. Mora ($)": item.interes_mora || item.interes || 0,
-        "Total a Pagar ($)": item.total_a_pagar || item.total || 0
-    }));
+    const dataToExport = sorted.map(item => {
+        const ga = Number(item.gastos_comunes || item.ga_monto || 0);
+        const gb = Number(item.servicio_seguridad || item.gb_monto || 0);
+        const fo = Number(item.fondo_reserva || item.fondo_operativo_monto || 0);
+        const ge = Number(item.gastos_extraordinarios ?? item.gastos_extra ?? 0);
+        const ev = Number(item.eventual ?? item.red_ajustes ?? 0);
+        const totMes = Number(item.total_mes || (ga + gb + fo + ge + ev));
+        return {
+            "Período": item.periodo,
+            "U.F.": item.uf,
+            "Ubicación / Depto": item.dpto,
+            "Propietario / Consorcista": item.propietario,
+            "Porcentual (%)": item.porcentual || item.ga_pct || 0,
+            "Saldo Anterior ($)": item.saldo_anterior,
+            "Pagos ($)": item.pagos,
+            "Saldo Mes ($)": item.saldo_mes,
+            "Gastos Comunes ($)": ga,
+            "Seguridad ($)": gb,
+            "Fondo Reserva ($)": fo,
+            "Gastos Extra. ($)": ge,
+            "Eventual ($)": ev,
+            "Total Mes ($)": totMes,
+            "Int. Mora ($)": item.interes_mora || item.interes || 0,
+            "Total a Pagar ($)": item.total_a_pagar || item.total || totMes
+        };
+    });
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
 
@@ -817,7 +968,7 @@ const generateCertificadoPDF = (ufNum) => {
             <div class="header">
                 <div>
                     <h1 class="title">Consorcio Sarmiento 356-360</h1>
-                    <div class="subtitle">Lomas de Zamora, Buenos Aires · CUIT 30-71123456-8</div>
+                    <div class="subtitle">Lomas de Zamora, Buenos Aires · CUIT 30-71412062-6</div>
                 </div>
                 <div style="text-align: right; font-size: 12px; color: #475569;">
                     <strong>Emisión:</strong> ${todayStr}<br>

@@ -7,11 +7,6 @@ on:
   workflow_dispatch:
   schedule:
     # Verificación de Servicios (Luz, Agua, Gas): Diariamente a las 06:00, 12:00, 18:00 y 21:00 Arg (UTC-3).
-    # UTC: 03:00 Arg es 06:00 UTC, etc.
-    # 06:00 Arg -> 09:00 UTC
-    # 12:00 Arg -> 15:00 UTC
-    # 18:00 Arg -> 21:00 UTC
-    # 21:00 Arg -> 00:00 UTC (del día siguiente)
     # Cron en UTC: 0 0,9,15,21 * * *
     - cron: '0 0,9,15,21 * * *'
     # Verificación de Expensas: Primeros 5 días del mes a las 18:00 Arg (21:00 UTC).
@@ -63,7 +58,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add gastos.json prorrateo.json servicios_status.json liquidaciones/ data_consorcioabierto/
+          git add gastos.json prorrateo.json servicios_status.json data_ipc_indec.json forensic_audit.json liquidaciones/ data_consorcioabierto/
           # Hacer commit solo si hay cambios en staging para evitar fallar el job
           if ! git diff --cached --quiet; then
             git commit -m "chore(auto-update): sync database and status data [skip ci]"
@@ -74,5 +69,5 @@ jobs:
           fi
 
       # Deploy: Vercel auto-despliega desde la rama main al detectar el push.
-      # Configuración del dominio en: vercel.com → sarmiento-151 → Settings → Domains
-      # Dominio personalizado: alexismartyniuk.com.ar con prefijo de ruta /sarmiento-151
+      # Configuración del dominio en: vercel.com → sarmiento-360 → Settings → Domains
+      # Dominio personalizado: alexismartyniuk.com.ar con prefijo de ruta /sarmiento-360
