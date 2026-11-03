@@ -213,10 +213,19 @@
 
         /* ── MAIN PANEL ── */
         .main {
-            flex: 1;
+            flex: 1 1 0%;
             min-width: 0;
+            max-width: calc(100vw - 230px);
+            width: calc(100vw - 230px);
             padding: 2rem 2.5rem;
             overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        .main > * {
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         /* ── PAGE HEADER ── */
@@ -355,6 +364,8 @@
             grid-template-columns: 1.8fr 1fr;
             gap: 1rem;
             margin-bottom: 1.75rem;
+            width: 100%;
+            max-width: 100%;
         }
 
         .charts-row-3 {
@@ -362,32 +373,47 @@
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-bottom: 1.75rem;
+            width: 100%;
+            max-width: 100%;
         }
 
         .charts-grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             gap: 1.25rem;
             margin-bottom: 1.75rem;
+            width: 100%;
+            max-width: 100%;
         }
 
         .charts-drilldown-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
             gap: 1.25rem;
             margin-bottom: 2rem;
+            width: 100%;
+            max-width: 100%;
         }
 
         .employee-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
             gap: 0.75rem;
             margin-bottom: 1.25rem;
+            width: 100%;
+            max-width: 100%;
         }
 
-        @media (max-width: 1100px) {
+        /* Regla de Oro de Ancho: Todo hijo directo de una grilla o tarjeta nunca desborda su contenedor */
+        .charts-row > *, .charts-row-3 > *, .charts-grid > *, 
+        .charts-drilldown-grid > *, .kpi-grid > *, .employee-grid > *, .card {
+            min-width: 0 !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        @media (max-width: 1200px) {
             .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
-            .employee-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .card {
@@ -632,16 +658,23 @@
             color: #fff;
         }
 
-        .table-wrapper {
-            overflow-x: auto;
+        .table-wrapper, .table-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
             border-radius: 10px;
             border: 1px solid var(--border);
+            scrollbar-width: thin;
+            box-sizing: border-box;
         }
 
         table {
             width: 100%;
+            max-width: 100%;
             border-collapse: collapse;
             font-size: 0.845rem;
+            box-sizing: border-box;
         }
 
         thead th {
@@ -1629,7 +1662,7 @@
     </div>
 
     <!-- TARJETAS DE CERTIFICACIÓN NORMATIVA LEY 14701 -->
-    <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); margin-bottom: 1.5rem;">
         <div class="kpi-card" style="border-top: 3px solid var(--accent); background: rgba(6,182,212,0.04); display: flex; flex-direction: column; justify-content: space-between;">
             <div>
                 <div class="kpi-title" style="color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
@@ -1689,7 +1722,7 @@
     </div>
 
     <!-- TARJETAS COMPARATIVAS DE REGLAMENTOS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
         
         <!-- CARD 1: RCP -->
         <div class="card" style="background: rgba(11, 17, 32, 0.75); border: 1px solid rgba(139,92,246,0.25); border-top: 3px solid #8b5cf6; border-radius: 12px; padding: 1.25rem;">
@@ -1775,7 +1808,7 @@
     </div>
 
     <!-- KPIS DE AUDITORÍA DOCUMENTAL -->
-    <section class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem;">
+    <section class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin-bottom: 1.5rem;">
         <div class="kpi-card red">
             <div class="kpi-title">🔴 Alta Prioridad</div>
             <div class="kpi-val" id="docAuditKpiHigh">0</div>
@@ -2216,7 +2249,7 @@
                     <p class="card-subtitle" id="finesSubtitle" style="font-size:0.8rem; color:var(--text-3);">Mostrando recargos por mora aplicados a UFs deudoras</p>
                 </div>
             </div>
-            <div class="table-wrapper" style="max-height: 280px; overflow-y: auto;">
+            <div class="table-wrapper" style="max-height: 280px; overflow-y: auto; overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--border); text-align: left; color: var(--text-3);">
@@ -2631,7 +2664,7 @@
             </div>
 
             <div style="padding: 1.25rem;">
-                <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+                <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); margin-bottom: 1.25rem;">
                     <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; text-align: center;">
                         <div style="font-size: 0.72rem; color: var(--text-3); text-transform: uppercase;">Total Cobrado en Prorrateos (14 Meses)</div>
                         <div id="concilKpiProrr" style="font-size: 1.3rem; font-weight: 800; color: #38bdf8; font-family: 'Outfit', sans-serif;">$234.090.647,76</div>
@@ -2646,7 +2679,7 @@
                     </div>
                 </div>
 
-                <div class="table-container" style="max-height: 380px; overflow-y: auto;">
+                <div class="table-container" style="max-height: 380px; overflow-y: auto; overflow-x: auto;">
                     <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); text-align: left;">
@@ -2677,7 +2710,7 @@
                 <div style="background: rgba(251,191,36,0.04); border-left: 3px solid var(--amber); padding: 0.85rem 1rem; border-radius: 4px; font-size: 0.8rem; color: var(--text-2); margin-bottom: 1.25rem; line-height: 1.5;">
                     <strong style="color: var(--amber);">Hallazgo de Integridad:</strong> En los períodos 2025-07 a 2026-07, la sumatoria de coeficientes de expensas legales sumó exactamente <code style="color:var(--text-1);">99,7900%</code>, existiendo un faltante de <code style="color:#f43f5e;">0,2100%</code> no asignado en el prorrateo durante 12 meses. Dicho cálculo fue corregido a <code style="color:var(--text-1);">99,9960%</code> recién en agosto de 2026. Al mismo tiempo, el rubro de Seguridad se liquidó durante 26 meses (Ago-24 a Sep-26) bajo una alícuota uniforme fija de <code style="color:#fb7185;">1,4286%</code> (1/70), transfiriendo un subsidio acumulado de <strong>$6.765.131,67</strong> (dictamen C.P. Dr. Pablo Américo Parodi) desde las 42 unidades chicas hacia los pisos superiores.
                 </div>
-                <div class="table-container" style="max-height: 320px; overflow-y: auto;">
+                <div class="table-container" style="max-height: 320px; overflow-y: auto; overflow-x: auto;">
                     <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); text-align: left;">
@@ -2711,7 +2744,7 @@
                 </div>
             </div>
             <div style="padding: 1.25rem;">
-                <div class="table-container" style="max-height: 360px; overflow-y: auto;">
+                <div class="table-container" style="max-height: 360px; overflow-y: auto; overflow-x: auto;">
                     <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); text-align: left;">
@@ -2750,7 +2783,7 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 1.5rem; align-items: start;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.5rem; align-items: start;">
             
             <!-- PANEL DE CONTROL Y CONFIGURACIÓN DEL RECLAMO -->
             <div class="card" style="padding: 1.25rem;">
