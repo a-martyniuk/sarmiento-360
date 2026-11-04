@@ -126,7 +126,7 @@
     ]
   },
   "integridad_porcentuales": {
-    "resumen": "La suma histórica de alícuotas ordinarias bajo D&F fue 99,7900% (brecha no asignada de 0,2100% durante 12 liquidaciones), regularizada a 99,9960% desde 08/2026 en ConsorcioAbierto (persistiendo micro-desvíos contra escrituras como UF 55: 1,022% vs 1,010% y UF 59: 1,032% vs 1,020%). En paralelo, Gastos B (Seguridad) continúa prorrateándose de forma plana al 1,4286% (1/70) en infracción al Art. 8 del RCP y Art. 2049 CCCN.",
+    "resumen": "La suma histórica de alícuotas ordinarias bajo D&F fue 99,7900% (brecha no asignada de 0,2100% durante 12 liquidaciones), regularizada a 99,9960% desde 08/2026 en ConsorcioAbierto. En paralelo, Gastos B (Seguridad) continúa prorrateándose de forma plana al 1,4286% (1/70) en infracción al Art. 8 del RCP y Art. 2049 CCCN.",
     "periodos": [
       {
         "periodo": "2025-07",

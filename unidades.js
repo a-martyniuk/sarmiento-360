@@ -210,7 +210,7 @@ const auditCoeficients = (period) => {
     if (sumGA > 0 && sumGA < 99.95) {
         messages.push(`<strong>Auditoría de Coeficientes (${period} · Gestión D&amp;F):</strong> Suma de porcentuales ordinarios (Gastos A): <strong>${sumGA.toFixed(3)}%</strong> — faltante no asignado de <strong>${(100 - sumGA).toFixed(3)}%</strong> respecto al 100% reglamentario. Además, <strong>Gastos B (Seguridad Privada)</strong> se liquidó ilegalmente en 70 partes iguales (<strong>1,4286%</strong> por UF) en violación al Art. 8 del RCP y Art. 2049 CCyCN.`);
     } else {
-        messages.push(`<strong>Auditoría de Coeficientes (${period} · ConsorcioAbierto):</strong> El coeficiente ordinario (Gastos A) cierra en <strong>${sumGA.toFixed(3)}%</strong> (con leves desvíos individuales vs. escritura, ej. UF 55 <code>1,022% vs. 1,010%</code> y UF 59 <code>1,032% vs. 1,020%</code>). <strong>Observación vigente:</strong> el rubro <strong>Gastos B / D (Seguridad Privada)</strong> continúa prorrateándose de forma plana en 70 partes iguales (<strong>1,4286%</strong>), violando el Art. 8 del RCP.`);
+        messages.push(`<strong>Auditoría de Coeficientes (${period} · ConsorcioAbierto):</strong> El coeficiente ordinario (Gastos A) cierra en <strong>${sumGA.toFixed(3)}%</strong>. <strong>Observación vigente:</strong> el rubro <strong>Gastos B / D (Seguridad Privada)</strong> continúa prorrateándose de forma plana en 70 partes iguales (<strong>1,4286%</strong>), violando el Art. 8 del RCP.`);
     }
 
     const ufDeviations = [];
