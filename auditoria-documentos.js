@@ -182,10 +182,10 @@ function renderTable() {
         const isPending = g.seccion && g.seccion !== "Pagado";
 
         const respaldoBadge = hasScan
-            ? `<span class="badge badge-success" title="Adjunto escaneado original disponible en ConsorcioAbierto">📎 PDF Escaneado</span>`
-            : `<span class="badge badge-blue">✓ Reg. Liquidación</span>`;
+            ? `<span class="badge badge-success" title="Adjunto escaneado original disponible en ConsorcioAbierto"> PDF Escaneado</span>`
+            : `<span class="badge badge-blue">Reg. Liquidación</span>`;
 
-        const actionBtn = `<button class="btn" onclick="event.stopPropagation(); openDocViewerByIndex(${idx})" style="padding:3px 9px; font-size:0.72rem; background:${hasScan ? 'rgba(16,185,129,0.15)' : 'rgba(6,182,212,0.12)'}; border-color:${hasScan ? '#10b981' : 'var(--accent)'}; color:${hasScan ? '#34d399' : 'var(--accent)'};">${hasScan ? '📎 Ver PDF Original' : '🔍 Ver Ficha'}${isPending ? ' ⚠️' : ''}</button>`;
+        const actionBtn = `<button class="btn" onclick="event.stopPropagation(); openDocViewerByIndex(${idx})" style="padding:3px 9px; font-size:0.72rem; background:${hasScan ? 'rgba(16,185,129,0.15)' : 'rgba(6,182,212,0.12)'}; border-color:${hasScan ? '#10b981' : 'var(--accent)'}; color:${hasScan ? '#34d399' : 'var(--accent)'};">${hasScan ? ' Ver PDF Original' : ' Ver Ficha'}${isPending ? ' ' : ''}</button>`;
 
         return `
             <tr style="cursor:pointer;" onclick="openDocViewerByIndex(${idx})">
@@ -259,14 +259,14 @@ function exportFullAuditXLSX() {
 
     // Hoja 1: Checklist Traspaso y Cese de Mandato D&F -> Fernández - Villasenin
     const checklistData = [
-        { "Ítem Verificación": "1. Libro de Actas de Asamblea", "Área": "Legal / Consorcio", "Estado": "✓ Auditado", "Detalle": "Acta de cese D&F y designación de Adm. Fernández - Villasenin (Matr. 862)." },
-        { "Ítem Verificación": "2. Conciliación Cuenta Banco Galicia", "Área": "Contable / Bancos", "Estado": "✓ Verificado 100%", "Detalle": "CC 0009108-8 044-9 · CBU 0070044320000009108891 · Alias SARMIENTO356.58.60." },
-        { "Ítem Verificación": "3. Pago de Deudas Devengadas en Julio 2026", "Área": "Transición Financiera", "Estado": "✓ Abonado en Ago-26", "Detalle": "$ 15.297.607,28 cancelados en agosto (ARCA $ 6.20M, Bastida $ 4.32M, Sueldos $ 3.20M, SUTERH $ 506k)." },
-        { "Ítem Verificación": "4. Clave Fiscal ARCA y Deuda Heredada", "Área": "Fiscal / Previsional", "Estado": "⚠️ En Reclamo", "Detalle": "Saldo ARCA Jul-26 impago ($ 1.571.590,83) + estimado Sep-26 ($ 1.600.000) por falta de acceso a clave fiscal ARCA." },
-        { "Ítem Verificación": "5. Pólizas de Seguro Edilicio y AP", "Área": "Seguros", "Estado": "✓ Vigentes", "Detalle": "La Holando Sudamericana ($ 341.929,35/mes) y Allianz AP ($ 15.533/mes)." },
-        { "Ítem Verificación": "6. Abono de Ascensores (Guillemi)", "Área": "Contratos / Mantenimiento", "Estado": "✓ Verificado", "Detalle": "Mantenimiento preventivo mensual Torres 356, 358 y 360 ($ 146.400/mes)." },
-        { "Ítem Verificación": "7. Contrato de Seguridad (Bastida S.A.)", "Área": "Seguridad", "Estado": "✓ Verificado", "Detalle": "Vigilancia física 24hs - Fc. B 0004-00000979 ($ 4.485.421,20 en Sep-26)." },
-        { "Ítem Verificación": "8. Plataforma ConsorcioAbierto SRL", "Área": "Sistemas / Gestión", "Estado": "✓ Activa", "Detalle": "Consorcio ID 27151 con adjuntos digitales de facturas y recibos de sueldo." }
+        { "Ítem Verificación": "1. Libro de Actas de Asamblea", "Área": "Legal / Consorcio", "Estado": "Auditado", "Detalle": "Acta de cese D&F y designación de Adm. Fernández - Villasenin (Matr. 862)." },
+        { "Ítem Verificación": "2. Conciliación Cuenta Banco Galicia", "Área": "Contable / Bancos", "Estado": "Verificado 100%", "Detalle": "CC 0009108-8 044-9 · CBU 0070044320000009108891 · Alias SARMIENTO356.58.60." },
+        { "Ítem Verificación": "3. Pago de Deudas Devengadas en Julio 2026", "Área": "Transición Financiera", "Estado": "Abonado en Ago-26", "Detalle": "$ 15.297.607,28 cancelados en agosto (ARCA $ 6.20M, Bastida $ 4.32M, Sueldos $ 3.20M, SUTERH $ 506k)." },
+        { "Ítem Verificación": "4. Clave Fiscal ARCA y Deuda Heredada", "Área": "Fiscal / Previsional", "Estado": " En Reclamo", "Detalle": "Saldo ARCA Jul-26 impago ($ 1.571.590,83) + estimado Sep-26 ($ 1.600.000) por falta de acceso a clave fiscal ARCA." },
+        { "Ítem Verificación": "5. Pólizas de Seguro Edilicio y AP", "Área": "Seguros", "Estado": "Vigentes", "Detalle": "La Holando Sudamericana ($ 341.929,35/mes) y Allianz AP ($ 15.533/mes)." },
+        { "Ítem Verificación": "6. Abono de Ascensores (Guillemi)", "Área": "Contratos / Mantenimiento", "Estado": "Verificado", "Detalle": "Mantenimiento preventivo mensual Torres 356, 358 y 360 ($ 146.400/mes)." },
+        { "Ítem Verificación": "7. Contrato de Seguridad (Bastida S.A.)", "Área": "Seguridad", "Estado": "Verificado", "Detalle": "Vigilancia física 24hs - Fc. B 0004-00000979 ($ 4.485.421,20 en Sep-26)." },
+        { "Ítem Verificación": "8. Plataforma ConsorcioAbierto SRL", "Área": "Sistemas / Gestión", "Estado": "Activa", "Detalle": "Consorcio ID 27151 con adjuntos digitales de facturas y recibos de sueldo." }
     ];
     const wsChecklist = XLSX.utils.json_to_sheet(checklistData);
     wsChecklist['!cols'] = [{ wch: 42 }, { wch: 25 }, { wch: 20 }, { wch: 75 }];
@@ -320,8 +320,8 @@ function loadServicesStatus() {
             const metrogas = data.metrogas || { status: "Normal", message: "Sin alertas" };
 
             const getBadge = (srv) => srv.status === "Alerta"
-                ? `<span class="badge badge-warning" style="white-space: nowrap;">⚠️ Alerta</span>`
-                : `<span class="badge badge-success" style="white-space: nowrap;">🟢 Normal</span>`;
+                ? `<span class="badge badge-warning" style="white-space: nowrap;"> Alerta</span>`
+                : `<span class="badge badge-success" style="white-space: nowrap;"> Normal</span>`;
 
             const getMessageHtml = (srv) => (srv.status === "Alerta" && srv.message)
                 ? `<div style="font-size: 0.65rem; color: var(--text-3); margin-top: 1px; margin-bottom: 0.4rem; padding-left: 12px; border-left: 1.5px dashed rgba(251,191,36,0.4); line-height: 1.25;">${srv.message}</div>`
@@ -330,21 +330,21 @@ function loadServicesStatus() {
             container.innerHTML = `
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">⚡ Luz (Edesur)</span>
+                        <span style="color: var(--text-2);"> Luz (Edesur)</span>
                         ${getBadge(edesur)}
                     </div>
                     ${getMessageHtml(edesur)}
                 </div>
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">💧 Agua (AySA)</span>
+                        <span style="color: var(--text-2);"> Agua (AySA)</span>
                         ${getBadge(aysa)}
                     </div>
                     ${getMessageHtml(aysa)}
                 </div>
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">🔥 Gas (Metrogas)</span>
+                        <span style="color: var(--text-2);"> Gas (Metrogas)</span>
                         ${getBadge(metrogas)}
                     </div>
                     ${getMessageHtml(metrogas)}

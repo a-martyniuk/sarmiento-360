@@ -103,19 +103,19 @@ const formatDpto = (strVal, ufNum) => {
 
 // ── Category Pill HTML ──────────────────────────────────────────// 7 Categorías EXACTAS del PDF de liquidaciones
 const CAT_CONFIG = {
-    "Sueldos y Cargas Sociales":   { cls: "pill-sueldos",   icon: "👤", dot: "#f87171" },
-    "Seguros":                     { cls: "pill-seguros",   icon: "🛡️", dot: "#fb923c" },
-    "Servicios Públicos":          { cls: "pill-servicios", icon: "⚡", dot: "#fbbf24" },
-    "Contratos y Abonos":          { cls: "pill-contratos", icon: "🛠️", dot: "#34d399" },
-    "Administración":              { cls: "pill-admin",     icon: "📋", dot: "#60a5fa" },
-    "Mantenimiento y Reparaciones":{ cls: "pill-manto",    icon: "🔧", dot: "#a78bfa" },
-    "Gastos Extraordinarios":      { cls: "pill-extra",    icon: "🎨", dot: "#ec4899" },
-    "Varios":                      { cls: "pill-varios",    icon: "📦", dot: "#9ca3af" },
+    "Sueldos y Cargas Sociales":   { cls: "pill-sueldos",   icon: "", dot: "#f87171" },
+    "Seguros":                     { cls: "pill-seguros",   icon: "", dot: "#fb923c" },
+    "Servicios Públicos":          { cls: "pill-servicios", icon: "", dot: "#fbbf24" },
+    "Contratos y Abonos":          { cls: "pill-contratos", icon: "", dot: "#34d399" },
+    "Administración":              { cls: "pill-admin",     icon: "", dot: "#60a5fa" },
+    "Mantenimiento y Reparaciones":{ cls: "pill-manto",    icon: "", dot: "#a78bfa" },
+    "Gastos Extraordinarios":      { cls: "pill-extra",    icon: "", dot: "#ec4899" },
+    "Varios":                      { cls: "pill-varios",    icon: "", dot: "#9ca3af" }
 };
 
 const getCatPill = (rubro) => {
-    const cfg = CAT_CONFIG[rubro] || { cls: "pill-varios", icon: "•", dot: "#9ca3af" };
-    return `<span class="pill ${cfg.cls}">${cfg.icon} ${rubro}</span>`;
+    const cfg = CAT_CONFIG[rubro] || { cls: "pill-varios", icon: "", dot: "#9ca3af" };
+    return `<span class="pill ${cfg.cls}"><span class="cat-dot" style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${cfg.dot}; margin-right:5px; vertical-align:middle;"></span>${rubro}</span>`;
 };
 
 // ── Previous period string ──────────────────────────────────────
@@ -360,7 +360,7 @@ const detectMissingInvoices = () => {
 
     if (missing.length === 0) {
         alertBox.innerHTML = `<div style="color:#34d399; font-size:0.8rem; padding:0.5rem; display:flex; align-items:center; gap:6px;">
-            <span style="font-size:0.95rem;">✓</span> Servicios al día en 6m
+            Servicios al día en 6m
         </div>`;
         return;
     }
@@ -368,7 +368,7 @@ const detectMissingInvoices = () => {
     alertBox.innerHTML = missing.slice(-4).map(m => `
         <div style="display:flex; flex-direction:column; gap:2px; background:rgba(251,191,36,0.04); border:1px solid rgba(251,191,36,0.12); border-radius:6px; padding:0.4rem 0.5rem; font-size:0.72rem; color:var(--text-2); width: 100%; box-sizing: border-box;">
             <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
-                <span style="color:#fbbf24; font-weight:600;">⚠️ Faltante</span>
+                <span style="color:#fbbf24; font-weight:600;">Faltante</span>
                 <span style="font-weight:600; color:var(--text-3); font-size:0.68rem;">${m.periodo}</span>
             </div>
             <div style="font-weight:500; font-size:0.7rem; color:var(--text-1); margin-top:2px; word-break: break-word;">${m.service}</div>
@@ -468,7 +468,7 @@ const renderKPIs = (period) => {
 
         const bDeltaEl = document.getElementById("kpiBalanceDelta");
         if (bDeltaEl) {
-            bDeltaEl.textContent = delta >= 0 ? "✅ Recaudación cubre los gastos" : "⚠️ Los gastos superan la recaudación";
+            bDeltaEl.textContent = delta >= 0 ? "Recaudación cubre los gastos" : "Los gastos superan la recaudación";
             bDeltaEl.className = `kpi-delta ${delta >= 0 ? "up" : "down"}`;
         }
     };
@@ -1116,7 +1116,31 @@ const createDrillChart = (selectorId, categoryName, currentInstance) => {
             fillSeriesColor: false,
             shared: false,
             intersect: true,
-            y: { formatter: v => fmtFull(v) }
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const pName = w.globals.categoryLabels ? w.globals.categoryLabels[dataPointIndex] : w.globals.labels[dataPointIndex];
+                const subcat = w.globals.seriesNames[seriesIndex];
+                const val = series[seriesIndex][dataPointIndex];
+                const color = w.globals.colors[seriesIndex];
+                if (!val || val <= 0) return '';
+                return `
+                    <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:8px 12px !important; box-shadow:0 12px 28px rgba(0,0,0,0.7) !important; min-width:240px !important; max-width:400px !important;">
+                        <div style="color:#94a3b8 !important; font-size:0.75rem !important; font-weight:700 !important; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:3px;">
+                            ${pName}
+                        </div>
+                        <div style="display:flex; align-items:flex-start; gap:8px; margin-top:4px;">
+                            <span style="width:10px; height:10px; border-radius:50%; background:${color}; flex-shrink:0; margin-top:4px;"></span>
+                            <div style="flex:1;">
+                                <div style="color:#ffffff !important; font-size:0.8rem !important; font-weight:700 !important; line-height:1.35 !important; margin-bottom:3px; word-break:normal !important;">
+                                    ${subcat}
+                                </div>
+                                <div style="color:#38bdf8 !important; font-size:0.88rem !important; font-weight:800 !important;">
+                                    ${fmtFull(val)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
     };
 
@@ -1336,14 +1360,14 @@ const renderTable = () => {
 
         let badges = [];
         if (item.anomalia) {
-            badges.push(`<span class="badge badge-anomalia" title="Desviación +${item.desviacion_pct}% del histórico">⚠ Anomalía</span>`);
+            badges.push(`<span class="badge badge-anomalia" title="Desviación +${item.desviacion_pct}% del histórico"> Anomalía</span>`);
         }
         
         // Aplica a fijos, abonos o servicios recurrentes (como Telecentro, luz, agua, etc.) que suban >25%
         const catNameLow = (item.categoria || item.rubro).toLowerCase();
         const esRecurrente = item.tipo === "Fijo" || ["servicios públicos", "contratos y abonos", "varios"].includes(catNameLow);
         if (esRecurrente && diff > 25) {
-            badges.push(`<span class="badge badge-anomalia" style="background:rgba(251,146,60,0.1); border-color:#fb923c; color:#fb923c;" title="Aumento mayor al 25% respecto al mes anterior">⚠️ Aumento >25%</span>`);
+            badges.push(`<span class="badge badge-anomalia" style="background:rgba(251,146,60,0.1); border-color:#fb923c; color:#fb923c;" title="Aumento mayor al 25% respecto al mes anterior">Aumento >25%</span>`);
         }
 
         const alertaBadge = badges.length > 0 
@@ -1367,7 +1391,7 @@ const renderTable = () => {
             <td>${estadoBadge}</td>
             <td class="concepto-cell">
                 <span class="concepto-text" onclick="openModal('${conceptSafe}')">${item.concepto}</span>
-                <button onclick="openInvoiceViewerModal('${conceptSafe}', '${item.periodo}', ${item.monto})" title="Ver comprobante respaldatorio de ${item.periodo}" style="margin-left:6px; font-size:0.72rem; cursor:pointer; color:var(--accent); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); display:inline-flex; align-items:center; gap:3px;">📄 Factura</button>
+                <button onclick="openInvoiceViewerModal('${conceptSafe}', '${item.periodo}', ${item.monto})" title="Ver comprobante respaldatorio de ${item.periodo}" style="margin-left:6px; font-size:0.72rem; cursor:pointer; color:var(--accent); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); display:inline-flex; align-items:center; gap:3px;">Factura</button>
             </td>
             <td class="amount-col amount-prev">${prevMonto > 0 ? fmt(prevMonto) : '—'}</td>
             <td style="text-align:right;white-space:nowrap;">${varHtml}</td>
@@ -1683,30 +1707,30 @@ const copyWhatsAppSummary = (periodArg) => {
     const maxMoro = moroList.length > 0 ? [...moroList].sort((a,b) => b.deuda - a.deuda)[0] : null;
 
     // Formatear mensaje WhatsApp
-    let msg = `🏢 *CONSORCIO SARMIENTO 356-360*\n`;
-    msg += `📊 *Resumen Ejecutivo de Expensas — Período: ${targetPeriod}*\n`;
+    let msg = `*CONSORCIO SARMIENTO 356-360*\n`;
+    msg += `*Resumen Ejecutivo de Expensas — Período: ${targetPeriod}*\n`;
     msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-    msg += `💰 *Recaudación Cobrada:* ${fmt(ing)}\n`;
-    msg += `📤 *Gastos Pagados en Caja:* ${fmt(egr)}\n`;
-    msg += `⚖️ *Resultado Operativo:* ${delta >= 0 ? "🟢 Superávit" : "🔴 Déficit"} de ${fmt(Math.abs(delta))}\n`;
+    msg += `• *Recaudación Cobrada:* ${fmt(ing)}\n`;
+    msg += `• *Gastos Pagados en Caja:* ${fmt(egr)}\n`;
+    msg += `• *Resultado Operativo:* ${delta >= 0 ? "Superávit" : "Déficit"} de ${fmt(Math.abs(delta))}\n`;
     if (pn !== null && pn > 0) {
-        msg += `🏦 *Saldo Banco / Patrimonio:* ${fmt(pn)}\n`;
+        msg += `• *Saldo Banco / Patrimonio:* ${fmt(pn)}\n`;
     }
-    msg += `\n🚨 *Estado de Morosidad (${targetPeriod}):*\n`;
+    msg += `\n• *Estado de Morosidad (${targetPeriod}):*\n`;
     msg += `• Unidades con Deuda: ${moroList.length} U.F. (${((moroList.length / 70) * 100).toFixed(1)}%)\n`;
     msg += `• Deuda Acumulada Total: ${fmt(moroDeuda)}\n`;
     if (maxMoro) {
         msg += `• Mayor Deuda: UF ${maxMoro.uf} (${formatDpto(maxMoro.depto, maxMoro.uf)}) — ${fmt(maxMoro.deuda)}\n`;
     }
-    msg += `\n📋 *Administración:* ${targetPeriod >= '2026-08' ? 'Fernández - Villasenin (Matr. 862)' : 'D&F Administración'}\n`;
-    msg += `💻 *Plataforma:* ${targetPeriod >= '2026-08' ? 'ConsorcioAbierto' : 'MisExpensas / Tradicional'}\n`;
-    msg += `🌐 *Panel de Transparencia & Auditoría:* https://alexismartyniuk.com.ar/sarmiento-360/\n`;
+    msg += `\n• *Administración:* ${targetPeriod >= '2026-08' ? 'Fernández - Villasenin (Matr. 862)' : 'D&F Administración'}\n`;
+    msg += `• *Plataforma:* ${targetPeriod >= '2026-08' ? 'ConsorcioAbierto' : 'MisExpensas / Tradicional'}\n`;
+    msg += `• *Panel de Transparencia & Auditoría:* https://alexismartyniuk.com.ar/sarmiento-360/\n`;
     msg += `━━━━━━━━━━━━━━━━━━━━\n`;
     msg += `_Generado automáticamente desde el Panel de Auditoría Independiente._`;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(msg).then(() => {
-            showWhatsAppToast("✅ Resumen de " + targetPeriod + " copiado al portapapeles listo para WhatsApp");
+            showWhatsAppToast("Resumen de " + targetPeriod + " copiado al portapapeles listo para WhatsApp");
         }).catch(err => {
             console.warn("Error copying to clipboard:", err);
             prompt("Copia el siguiente texto para WhatsApp:", msg);
@@ -1874,18 +1898,18 @@ const auditProviders = (period) => {
 
     // Proveedores canónicos de Sarmiento 356/358/360 sin colisiones entre rubros
     const targetProviders = [
-        { name: "👮 Seguridad Privada (MM / Bastida)", fp: "abono:seguridad_privada", rubro: "Seguridad 24hs" },
-        { name: "💼 Honorarios Administración", fp: "adm:honorarios_administracion", rubro: "Honorarios Admin" },
-        { name: "📜 Estudio Contable (Pariano)", fp: "adm:estudio_contable_pariano", rubro: "Liquidación Sueldos" },
-        { name: "🛗 Guillemi (Abono Ascensores)", fp: "abono:ascensores_guillemi", rubro: "Abono Ascensores" },
-        { name: "⚡ Edesur (Cta. 05637256)", fp: "srv:edesur_05637256", rubro: "Servicio Eléctrico" },
-        { name: "💧 AySA Cta 192499 (Torre 358)", fp: "srv:aysa_192499", rubro: "Servicio de Agua" },
-        { name: "💧 AySA Cta 192500 (Torre 360)", fp: "srv:aysa_192500", rubro: "Servicio de Agua" },
-        { name: "🛡️ La Holando (Seguro Integral)", fp: "seguro:holando_integral", rubro: "Seguro Consorcio" },
-        { name: "👷 Allianz (Seguro Personal / AP)", fp: "seguro:allianz_personal", rubro: "Seguro Personal" },
-        { name: "🌐 Conectividad (Flow / Telecentro)", fp: "abono:internet_consorcio", rubro: "Internet Consorcio" },
-        { name: "🐛 FB Saneamiento (Fumigación)", fp: "abono:fumigacion_fb", rubro: "Desinsectación" },
-        { name: "💻 Plataforma ConsorcioAbierto", fp: "adm:plataforma_consorcioabierto", rubro: "Sistema Gestión" }
+        { name: "Seguridad Privada (MM / Bastida)", fp: "abono:seguridad_privada", rubro: "Seguridad 24hs" },
+        { name: "Honorarios Administración", fp: "adm:honorarios_administracion", rubro: "Honorarios Admin" },
+        { name: "Estudio Contable (Pariano)", fp: "adm:estudio_contable_pariano", rubro: "Liquidación Sueldos" },
+        { name: "Guillemi (Abono Ascensores)", fp: "abono:ascensores_guillemi", rubro: "Abono Ascensores" },
+        { name: "Edesur (Cta. 05637256)", fp: "srv:edesur_05637256", rubro: "Servicio Eléctrico" },
+        { name: "AySA Cta 192499 (Torre 358)", fp: "srv:aysa_192499", rubro: "Servicio de Agua" },
+        { name: "AySA Cta 192500 (Torre 360)", fp: "srv:aysa_192500", rubro: "Servicio de Agua" },
+        { name: "La Holando (Seguro Integral)", fp: "seguro:holando_integral", rubro: "Seguro Consorcio" },
+        { name: "Allianz (Seguro Personal / AP)", fp: "seguro:allianz_personal", rubro: "Seguro Personal" },
+        { name: "Conectividad (Flow / Telecentro)", fp: "abono:internet_consorcio", rubro: "Internet Consorcio" },
+        { name: "FB Saneamiento (Fumigación)", fp: "abono:fumigacion_fb", rubro: "Desinsectación" },
+        { name: "Plataforma ConsorcioAbierto", fp: "adm:plataforma_consorcioabierto", rubro: "Sistema Gestión" }
     ];
 
     let rowsHtml = "";
@@ -1909,12 +1933,12 @@ const auditProviders = (period) => {
 
             const varPct = prevExpense ? ((actualExpense.monto - prevExpense.monto) / prevExpense.monto) * 100 : 0;
 
-            let badge = `<span class="badge badge-success">🟢 Estable</span>`;
+            let badge = `<span class="badge badge-success">Estable</span>`;
             if (ipcAcum !== null && prevExpense) {
                 if (varPct > ipcAcum + 25) {
-                    badge = `<span class="badge badge-danger">🔴 Excesivo (> IPC + 25%)</span>`;
+                    badge = `<span class="badge badge-danger">Excesivo (> IPC + 25%)</span>`;
                 } else if (varPct > ipcAcum + 5) {
-                    badge = `<span class="badge badge-warning">🟡 Alto (> IPC)</span>`;
+                    badge = `<span class="badge badge-warning">Alto (> IPC)</span>`;
                 }
             }
 
@@ -1970,9 +1994,9 @@ const loadServicesStatus = () => {
 
             const getBadge = (srv) => {
                 if (srv.status === "Alerta") {
-                    return `<span class="badge badge-warning" style="white-space: nowrap;">⚠️ Alerta</span>`;
+                    return `<span class="badge badge-warning" style="white-space: nowrap;">Alerta</span>`;
                 }
-                return `<span class="badge badge-success" style="white-space: nowrap;">🟢 Normal</span>`;
+                return `<span class="badge badge-success" style="white-space: nowrap;">Normal</span>`;
             };
 
             const getMessageHtml = (srv) => {
@@ -1986,7 +2010,7 @@ const loadServicesStatus = () => {
                 <!-- EDESUR -->
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">⚡ Luz (Edesur)</span>
+                        <span style="color: var(--text-2);">Luz (Edesur)</span>
                         ${getBadge(edesur)}
                     </div>
                     ${getMessageHtml(edesur)}
@@ -1995,7 +2019,7 @@ const loadServicesStatus = () => {
                 <!-- AYSA -->
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">💧 Agua (AySA)</span>
+                        <span style="color: var(--text-2);">Agua (AySA)</span>
                         ${getBadge(aysa)}
                     </div>
                     ${getMessageHtml(aysa)}
@@ -2004,7 +2028,7 @@ const loadServicesStatus = () => {
                 <!-- METROGAS -->
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">🔥 Gas (Metrogas)</span>
+                        <span style="color: var(--text-2);">Gas (Metrogas)</span>
                         ${getBadge(metrogas)}
                     </div>
                     ${getMessageHtml(metrogas)}
@@ -2086,12 +2110,12 @@ const renderMorosidad = (period) => {
 
     const badgeHeaderEl = document.getElementById("moroBadgeHeader");
     if (badgeHeaderEl) {
-        badgeHeaderEl.textContent = `🚨 ${moroList.length} U.F. en Morosidad (${activePeriod})`;
+        badgeHeaderEl.textContent = `${moroList.length} U.F. en Morosidad (${activePeriod})`;
     }
 
     const moroCardTitleEl = document.querySelector("#morosidad .card-title");
     if (moroCardTitleEl) {
-        moroCardTitleEl.textContent = `🚨 Estado de Morosidad de Propietarios — Período ${activePeriod}`;
+        moroCardTitleEl.textContent = `Estado de Morosidad de Propietarios — Período ${activePeriod}`;
     }
 
     if (moroList.length === 0) {
@@ -2130,8 +2154,8 @@ const renderMorosidad = (period) => {
     let html = "";
     moroList.forEach(item => {
         const badgeStr = item.deuda > 300000 
-            ? '<span class="badge badge-danger">🚨 Moroso Crítico</span>' 
-            : (item.deuda > 100000 ? '<span class="badge badge-warning">⚠️ Con Deuda</span>' : '<span class="badge badge-warning" style="opacity:0.8">⚠️ Saldo Menor</span>');
+            ? '<span class="badge badge-danger">Moroso Crítico</span>' 
+            : (item.deuda > 100000 ? '<span class="badge badge-warning">Con Deuda</span>' : '<span class="badge badge-warning" style="opacity:0.8">Saldo Menor</span>');
 
         const cleanDept = formatDpto(item.depto, item.uf);
         const propStr = `Propietario U.F. ${item.uf}`;
@@ -2145,7 +2169,7 @@ const renderMorosidad = (period) => {
                 <td style="text-align:center;">${badgeStr}</td>
                 <td style="text-align:center;">
                     <a href="unidades.html?uf=${item.uf}" class="btn" style="padding:0.25rem 0.6rem; font-size:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
-                        🔍 Ver U.F.
+                        Ver U.F.
                     </a>
                 </td>
             </tr>
@@ -2208,7 +2232,6 @@ const init = async () => {
         try { renderPatrimonialChart(); } catch(e) { console.warn("Error en renderPatrimonialChart:", e); }
         try { auditProviders("todos"); } catch(e) { console.warn("Error en auditProviders:", e); }
         try { renderContractsBoard(); } catch(e) { console.warn("Error en renderContractsBoard:", e); }
-        try { renderDocumentaryAuditSection(rawExpenses); } catch(e) { console.warn("Error en renderDocumentaryAuditSection:", e); }
         try { loadServicesStatus(); } catch(e) { console.warn("Error en loadServicesStatus:", e); }
     } catch (error) {
         console.error("Error al cargar los datos de expensas:", error);
@@ -2222,7 +2245,7 @@ const renderContractsBoard = () => {
 
     const contracts = [
         {
-            title: "📋 Administración de Consorcios",
+            title: "Administración de Consorcios",
             provider: "Fernández - Villasenin (RPAC Matr. 862)",
             type: "Administración Legal y Contable (Ley 14.701 PBA)",
             dueDate: "2027-08-01",
@@ -2230,7 +2253,7 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "👮 Seguridad Privada 24 hs",
+            title: "Seguridad Privada 24 hs",
             provider: "Bastida S.A. Seguridad Privada Integral",
             type: "Vigilancia Física Diurna y Nocturna (Sarmiento 356-360)",
             dueDate: "2027-03-31",
@@ -2238,7 +2261,7 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "💻 Plataforma de Gestión Digital",
+            title: "Plataforma de Gestión Digital",
             provider: "Consorcio Abierto S.R.L.",
             type: "Portal de Propietarios y Liquidación Online (70 UFs)",
             dueDate: "2027-08-01",
@@ -2246,7 +2269,7 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "🛡️ Seguro Integral + Accidentes Personales",
+            title: "Seguro Integral + Accidentes Personales",
             provider: "La Holando Sudamericana + Allianz",
             type: "Póliza Integral N° 2000004.5 + Póliza AP",
             dueDate: "2027-06-30",
@@ -2254,7 +2277,7 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "🛗 Abono Conservación de Ascensores",
+            title: "Abono Conservación de Ascensores",
             provider: "Ascensores Guillemi Interior S.A.",
             type: "Mantenimiento Preventivo (Torres 356, 358 y 360)",
             dueDate: "2026-12-01",
@@ -2262,7 +2285,7 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "🐛 Desinfección y Control de Plagas",
+            title: "Desinfección y Control de Plagas",
             provider: "FB Saneamiento Ambiental",
             type: "Servicio de Desinsectación en Partes Comunes",
             dueDate: "2026-12-15",
@@ -2270,7 +2293,7 @@ const renderContractsBoard = () => {
             status: "Vigente"
         },
         {
-            title: "🎨 Reparación y Pintura Contrafrente",
+            title: "Reparación y Pintura Contrafrente",
             provider: "Luis de la Paz Pavón Riveros",
             type: "Obra Extraordinaria Fondo de Reserva (Fc. C 0005-00136)",
             dueDate: "2026-08-31",
@@ -2288,13 +2311,13 @@ const renderContractsBoard = () => {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         let badgeClass = "badge-success";
-        let badgeText = `🟢 ${diffDays} días restantes`;
+        let badgeText = `${diffDays} días restantes`;
         if (diffDays <= 15) {
             badgeClass = "badge-danger";
-            badgeText = `🔴 Vence en ${diffDays} días`;
+            badgeText = `Vence en ${diffDays} días`;
         } else if (diffDays <= 45) {
             badgeClass = "badge-warning";
-            badgeText = `🟡 Vence en ${diffDays} días`;
+            badgeText = `Vence en ${diffDays} días`;
         }
 
         return `
@@ -2506,7 +2529,7 @@ const initReclamoGenerator = () => {
 
     // Población del selector de 70 UFs
     let optionsHtml = `
-        <option value="both_55_59">★ U.F. 55 y 59 — Alexis y Andrés Martyniuk (Piso 10°A, 11°A y Cochera BN) · Saldo a favor: $ 487.749,34</option>
+        <option value="both_55_59">U.F. 55 y 59 — Alexis y Andrés Martyniuk (Piso 10°A, 11°A y Cochera BN) · Saldo a favor: $ 487.749,34</option>
     `;
 
     units.forEach(u => {
@@ -2974,3 +2997,64 @@ if (document.readyState === 'loading') {
 } else {
     initModularNavigation();
 }
+
+
+// ── NAVEGACIÓN Y FILTRO DE ASAMBLEAS ─────────────────────────────
+window.filterAssemblyView = function(targetId) {
+    const cards = ['asamblea-2026-11-02', 'asamblea-2013-09-16', 'asamblea-2012-09-05', 'novedades'];
+    cards.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (targetId === 'all') {
+                el.style.display = '';
+            } else if (id === targetId) {
+                el.style.display = '';
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                el.style.display = 'none';
+            }
+        }
+    });
+
+    const btnAll = document.getElementById('btnFilterAssemblyAll');
+    const btn2026 = document.getElementById('btnFilterAssembly2026');
+    const btn2013 = document.getElementById('btnFilterAssembly2013');
+    const btn2012 = document.getElementById('btnFilterAssembly2012');
+    const btnNov = document.getElementById('btnFilterAssemblyNovedades');
+
+    const resetBtn = (btn) => {
+        if (!btn) return;
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = 'var(--text-2)';
+        btn.style.borderColor = 'var(--border)';
+    };
+    [btnAll, btn2026, btn2013, btn2012, btnNov].forEach(resetBtn);
+
+    const activeBtn = targetId === 'all' ? btnAll :
+                      targetId === 'asamblea-2026-11-02' ? btn2026 :
+                      targetId === 'asamblea-2013-09-16' ? btn2013 :
+                      targetId === 'asamblea-2012-09-05' ? btn2012 : btnNov;
+    if (activeBtn) {
+        activeBtn.style.background = 'var(--accent)';
+        activeBtn.style.color = '#fff';
+        activeBtn.style.borderColor = 'transparent';
+    }
+};
+
+window.navigateToAssembly = function(assemblyId) {
+    navigateToModule('view-events');
+    window.filterAssemblyView('all');
+    setTimeout(() => {
+        const el = document.getElementById(assemblyId);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+            el.style.borderColor = 'rgba(56, 189, 248, 0.8)';
+            el.style.boxShadow = '0 0 20px rgba(56, 189, 248, 0.3)';
+            setTimeout(() => {
+                el.style.borderColor = '';
+                el.style.boxShadow = '';
+            }, 2500);
+        }
+    }, 150);
+};

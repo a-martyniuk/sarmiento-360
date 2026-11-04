@@ -39,7 +39,7 @@
     <meta property="twitter:image" content="https://alexismartyniuk.com.ar/sarmiento-360/favicon.png">
 
     <!-- Favicon de Respaldo (Emoji) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -954,7 +954,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
             <div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <span class="badge" style="background: rgba(6,182,212,0.18); color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); font-size: 0.72rem; padding: 2px 8px; font-weight: 700;">⚖️ AUDITORÍA PERICIAL DE SEGURIDAD</span>
+                    <span class="badge" style="background: rgba(6,182,212,0.18); color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); font-size: 0.72rem; padding: 2px 8px; font-weight: 700;"> AUDITORÍA PERICIAL DE SEGURIDAD</span>
                     <span style="font-size: 0.75rem; color: var(--text-3);">Cotejo de 26 Meses Auditados (Agosto 2024 a Septiembre 2026)</span>
                 </div>
                 <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--text-1); margin: 0;">Liquidación por Coeficiente vs. Partes Iguales</h2>
@@ -964,10 +964,10 @@
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="background: rgba(6,182,212,0.12); border-color: rgba(6,182,212,0.35); color: #22d3ee; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                    📄 Dictamen Pericial Firmado (PDF)
+                     Dictamen Pericial Firmado (PDF)
                 </a>
                 <a href="docs_auditoria/TABLA_SALDOS_70_DEPTOS_SEGURIDAD.pdf" target="_blank" class="btn" style="background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.35); color: #c084fc; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                    📊 Tabla Saldos 70 UFs (PDF)
+                     Tabla Saldos 70 UFs (PDF)
                 </a>
             </div>
         </div>
@@ -1027,13 +1027,13 @@
     <section class="charts-row">
         <div class="card">
             <div class="card-header">
-                <div class="card-title">⚠️ Top 7 Propietarios con Mayor Deuda Acumulada</div>
+                <div class="card-title"> Top 7 Propietarios con Mayor Deuda Acumulada</div>
             </div>
             <div id="morosityChart"></div>
         </div>
         <div class="card">
             <div class="card-header">
-                <div class="card-title">💰 Estado de Caja</div>
+                <div class="card-title"> Estado de Caja</div>
             </div>
             <div id="cajaChart"></div>
         </div>
@@ -1043,11 +1043,11 @@
     <section class="table-section">
         <div class="table-toolbar">
             <div>
-                <div class="card-title">📋 Prorrateo y Liquidación Detallada</div>
+                <div class="card-title"> Prorrateo y Liquidación Detallada</div>
             </div>
             <div class="table-actions">
                 <button class="btn" onclick="exportCSV()">⬇ Exportar CSV</button>
-                <button class="btn" onclick="exportXLSX()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: #fff; margin-left: 0.5rem; font-weight: 600;">📊 Exportar Excel (.xlsx)</button>
+                <button class="btn" onclick="exportXLSX()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: #fff; margin-left: 0.5rem; font-weight: 600;"> Exportar Excel (.xlsx)</button>
                 <button class="btn" onclick="exportPDF()" style="background:var(--purple); border-color:var(--purple); color:#fff; margin-left:0.5rem;">⬇ Exportar PDF</button>
             </div>
         </div>
@@ -1090,8 +1090,8 @@
 <!-- MODAL DETALLE DE U.F. -->
 <div class="modal" id="ufModal">
     <div class="modal-content">
-        <button class="close-btn" onclick="closeModal()">✕ Cerrar</button>
-        <button class="btn" id="modalCertBtn" style="float: right; margin-right: 0.5rem; background: linear-gradient(135deg, #06b6d4, #0284c7); color: #fff; font-weight: 600; padding: 0.35rem 0.8rem; font-size: 0.8rem; border-radius: 6px; border: none; cursor: pointer;">📄 Certificado PDF</button>
+        <button class="close-btn" onclick="closeModal()">Cerrar</button>
+        <button class="btn" id="modalCertBtn" style="float: right; margin-right: 0.5rem; background: linear-gradient(135deg, #06b6d4, #0284c7); color: #fff; font-weight: 600; padding: 0.35rem 0.8rem; font-size: 0.8rem; border-radius: 6px; border: none; cursor: pointer;"> Certificado PDF</button>
         <h2 style="font-family:'Outfit',sans-serif;margin-bottom:0.25rem;" id="modalTitle">Detalle de U.F.</h2>
         <p style="color:var(--text-3);font-size:0.88rem;margin-bottom:1.5rem;" id="modalSubtitle">Historial y Coeficientes</p>
 
@@ -1116,13 +1116,13 @@
         <div id="modalSecurityAudit" style="margin-bottom: 1.5rem; display: none;"></div>
         <div class="modal-grid">
             <div>
-                <h3 style="font-size:0.95rem;margin-bottom:0.75rem;">📊 Historial Reciente (Expensas vs Pagos)</h3>
+                <h3 style="font-size:0.95rem;margin-bottom:0.75rem;"> Historial Reciente (Expensas vs Pagos)</h3>
                 <div id="ufHistoryList" style="display:flex; flex-direction:column; gap:0.5rem; max-height:250px; overflow-y:auto;">
                     <!-- Se poblará dinámicamente -->
                 </div>
             </div>
             <div>
-                <h3 style="font-size:0.95rem;margin-bottom:0.75rem;">📈 Evolución de Facturado Histórico</h3>
+                <h3 style="font-size:0.95rem;margin-bottom:0.75rem;"> Evolución de Facturado Histórico</h3>
                 <div id="ufHistoryChart"></div>
             </div>
         </div>
@@ -1132,8 +1132,8 @@
 <!-- MODAL CONTACTO -->
 <div class="modal" id="contactModal">
     <div class="modal-content" style="max-width: 480px; width: 92%; padding: 1.75rem;">
-        <button class="close-btn" onclick="closeContactModal()">✕ Cerrar</button>
-        <h3 style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text-1); margin-bottom:0.25rem;">✉️ Contactar al Desarrollador</h3>
+        <button class="close-btn" onclick="closeContactModal()">Cerrar</button>
+        <h3 style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text-1); margin-bottom:0.25rem;"> Contactar al Desarrollador</h3>
         <div style="font-size:0.82rem; color:var(--text-3);">Proyecto Sarmiento 360 — Alexis Martyniuk</div>
 
         <div style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1146,20 +1146,20 @@
                rel="noopener noreferrer"
                class="btn" 
                style="display:flex; align-items:center; justify-content:center; gap:8px; padding:0.75rem; background:linear-gradient(135deg, rgba(6,182,212,0.2), rgba(139,92,246,0.2)); border:1px solid var(--accent); color:var(--text-1); font-weight:600; text-decoration:none;">
-                🌐 Abrir en Gmail (Navegador Web)
+                 Abrir en Gmail (Navegador Web)
             </a>
 
             <a href="mailto:alexis.martyniuk@gmail.com?subject=%5BSarmiento%20360%5D%20Consulta%20sobre%20el%20proyecto" 
                class="btn" 
                style="display:flex; align-items:center; justify-content:center; gap:8px; padding:0.75rem; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-1); text-decoration:none;">
-                💻 Abrir App de Correo (Mailto)
+                 Abrir App de Correo (Mailto)
             </a>
 
             <button type="button" onclick="copyContactEmail()" class="btn" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:0.75rem; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-1); cursor:pointer;">
-                📋 Copiar Email: alexis.martyniuk@gmail.com
+                 Copiar Email: alexis.martyniuk@gmail.com
             </button>
             <div id="copyEmailFeedback" style="font-size: 0.78rem; color: var(--green); text-align: center; display: none; font-weight: 500;">
-                ✓ ¡Dirección copiada al portapapeles!
+                ¡Dirección copiada al portapapeles!
             </div>
         </div>
     </div>

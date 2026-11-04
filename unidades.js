@@ -205,7 +205,7 @@ const auditCoeficients = (period) => {
 
     let messages = [];
     let alertClass = "warning-alert";
-    let icon = "⚠️";
+    let icon = "";
 
     if (sumGA > 0 && sumGA < 99.95) {
         messages.push(`<strong>Auditoría de Coeficientes (${period} · Gestión D&amp;F):</strong> Suma de porcentuales ordinarios (Gastos A): <strong>${sumGA.toFixed(3)}%</strong> — faltante no asignado de <strong>${(100 - sumGA).toFixed(3)}%</strong> respecto al 100% reglamentario. Además, <strong>Gastos B (Seguridad Privada)</strong> se liquidó ilegalmente en 70 partes iguales (<strong>1,4286%</strong> por UF) en violación al Art. 8 del RCP y Art. 2049 CCyCN.`);
@@ -245,7 +245,7 @@ const auditCoeficients = (period) => {
         messages.push(`
             <details style="margin-top: 0.5rem;">
                 <summary style="cursor: pointer; font-weight: 700; color: #fbbf24;">
-                    🔍 Ver desplegable con las ${ufDeviations.length} U.F. con ajustes de alícuota...
+                     Ver desplegable con las ${ufDeviations.length} U.F. con ajustes de alícuota...
                 </summary>
                 <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0; max-height: 180px; overflow-y: auto; font-size: 0.8rem; color: var(--text-2);">
                     ${ufDeviations.map(d => `<li>${d}</li>`).join("")}
@@ -516,7 +516,7 @@ const openModal = (ufNum) => {
         auditDiv.style.display = "block";
         auditDiv.innerHTML = `
             <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:10px; padding:0.8rem 1rem;">
-                <h4 style="font-size:0.85rem; color:var(--red); margin:0 0 0.4rem 0; display:flex; align-items:center; gap:6px;">⚠️ Cargo Excesivo de Intereses Detectado</h4>
+                <h4 style="font-size:0.85rem; color:var(--red); margin:0 0 0.4rem 0; display:flex; align-items:center; gap:6px;"> Cargo Excesivo de Intereses Detectado</h4>
                 <div style="font-size:0.75rem; color:var(--text-2); line-height:1.45;">
                     Se detectaron meses con recargos por mora que exceden el límite del 3.0% mensual establecido:
                     <ul style="margin:6px 0 0 16px; padding:0; display:flex; flex-direction:column; gap:4px;">
@@ -531,7 +531,7 @@ const openModal = (ufNum) => {
         auditDiv.style.display = "block";
         auditDiv.innerHTML = `
             <div style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:10px; padding:0.8rem 1rem;">
-                <h4 style="font-size:0.85rem; color:var(--green); margin:0 0 0.4rem 0; display:flex; align-items:center; gap:6px;">✅ Intereses Auditados Correctamente</h4>
+                <h4 style="font-size:0.85rem; color:var(--green); margin:0 0 0.4rem 0; display:flex; align-items:center; gap:6px;"> Intereses Auditados Correctamente</h4>
                 <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
                     Los recargos por mora cobrados a esta unidad se ajustan al límite reglamentario (tasa promedio aplicada: <strong>${(normalChecks.reduce((a,b) => a + b.tasa, 0) / normalChecks.length).toFixed(2)}%</strong> mensual).
                 </div>
@@ -550,7 +550,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.25); border-left: 3px solid var(--accent); border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--accent); font-size:0.85rem;">⚖️ Auditoría Pericial Certificada (Dr. Pablo Américo Parodi · T° 178 F° 152)</strong>
+                        <strong style="color:var(--accent); font-size:0.85rem;"> Auditoría Pericial Certificada (Dr. Pablo Américo Parodi · T° 178 F° 152)</strong>
                         <span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:0.7rem;">CRÉDITO RECLAMADO</span>
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
@@ -560,8 +560,8 @@ const openModal = (ufNum) => {
                         Alícuota debida por Escritura N° 268: <strong>1,010%</strong> (liquidada en CA al 1,022%) vs. Seguridad cobrada al <strong>1,4286% (1/70)</strong> durante 26 meses (Ago-24 a Sep-26). Reclamo pericial presentado en Asamblea 02/11/2026.
                     </div>
                     <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
-                        <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(6,182,212,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none;">📄 Ver Reclamo Firmado (PDF)</a>
-                        <a href="index.html?uf=55#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;">📝 Generar Nota Formal</a>
+                        <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(6,182,212,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none;"> Ver Reclamo Firmado (PDF)</a>
+                        <a href="index.html?uf=55#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;"> Generar Nota Formal</a>
                     </div>
                 </div>
             `;
@@ -569,7 +569,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.25); border-left: 3px solid var(--accent); border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--accent); font-size:0.85rem;">⚖️ Auditoría Pericial Certificada (Dr. Pablo Américo Parodi · T° 178 F° 152)</strong>
+                        <strong style="color:var(--accent); font-size:0.85rem;"> Auditoría Pericial Certificada (Dr. Pablo Américo Parodi · T° 178 F° 152)</strong>
                         <span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:0.7rem;">CRÉDITO RECLAMADO</span>
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
@@ -579,8 +579,8 @@ const openModal = (ufNum) => {
                         Alícuota debida por Escritura N° 269: <strong>1,020%</strong> (UF 59 1,010% + Cochera UC BN 0,010%; liquidada en CA al 1,032%) vs. Seguridad cobrada al <strong>1,4286% (1/70)</strong> durante 26 meses.
                     </div>
                     <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
-                        <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(6,182,212,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none;">📄 Ver Reclamo Firmado (PDF)</a>
-                        <a href="index.html?uf=59#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;">📝 Generar Nota Formal</a>
+                        <a href="docs_auditoria/Informe_reclamo_UF55_UF59_firmado.pdf" target="_blank" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(6,182,212,0.15); border:1px solid var(--accent); color:var(--accent); text-decoration:none;"> Ver Reclamo Firmado (PDF)</a>
+                        <a href="index.html?uf=59#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;"> Generar Nota Formal</a>
                     </div>
                 </div>
             `;
@@ -588,7 +588,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-left: 3px solid var(--red); border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--red); font-size:0.85rem;">⚖️ Auditoría Pericial de Seguridad (Piso 14°A · Torre 356 · Celina Velayos)</strong>
+                        <strong style="color:var(--red); font-size:0.85rem;"> Auditoría Pericial de Seguridad (Piso 14°A · Torre 356 · Celina Velayos)</strong>
                         <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--red); border:1px solid rgba(244,63,94,0.3); font-size:0.7rem;">SUBSIDIO RECIBIDO</span>
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
@@ -603,7 +603,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-left: 3px solid var(--red); border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--red); font-size:0.85rem;">⚖️ Auditoría Pericial de Seguridad (Piso 14°A · Torre 360 · Ex Consejero Putz)</strong>
+                        <strong style="color:var(--red); font-size:0.85rem;"> Auditoría Pericial de Seguridad (Piso 14°A · Torre 360 · Ex Consejero Putz)</strong>
                         <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--red); border:1px solid rgba(244,63,94,0.3); font-size:0.7rem;">SUBSIDIO RECIBIDO</span>
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
@@ -621,7 +621,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: ${isCreditor ? 'rgba(16,185,129,0.05)' : 'rgba(245,158,11,0.05)'}; border: 1px solid ${isCreditor ? 'rgba(16,185,129,0.25)' : 'rgba(245,158,11,0.25)'}; border-left: 3px solid ${isCreditor ? 'var(--green)' : 'var(--amber)'}; border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--text-1); font-size:0.85rem;">⚖️ Pericia Contable Seguridad 26 Meses (Dr. Pablo Américo Parodi)</strong>
+                        <strong style="color:var(--text-1); font-size:0.85rem;"> Pericia Contable Seguridad 26 Meses (Dr. Pablo Américo Parodi)</strong>
                         <span class="badge" style="background:${isCreditor ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; color:${isCreditor ? '#34d399' : '#fbbf24'}; border:1px solid ${isCreditor ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}; font-size:0.7rem;">${isCreditor ? 'CRÉDITO A FAVOR CERTIFICADO' : 'SUBSIDIO ABSORBIDO'}</span>
                     </div>
                     <div style="font-size:0.82rem; color:var(--text-1); margin:4px 0;">
@@ -631,7 +631,7 @@ const openModal = (ufNum) => {
                     <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
                         Alícuota reglamentaria Art. 8 RCP: <strong>${pctLegal.toFixed(3)}%</strong> vs. Alícuota liquidada en 70 partes iguales: <strong>1,4286%</strong> ($ 722.307,46 cobrados vs. ${fmtFull(fu.debido_26m)} según coeficiente).
                     </div>
-                    ${isCreditor ? `<div style="margin-top:6px;"><a href="index.html?uf=${ufNum}#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;">📝 Personalizar Nota de Reclamo para U.F. ${ufNum}</a></div>` : ''}
+                    ${isCreditor ? `<div style="margin-top:6px;"><a href="index.html?uf=${ufNum}#reclamo" class="btn" style="padding:2px 8px; font-size:0.72rem; background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#34d399; text-decoration:none;"> Personalizar Nota de Reclamo para U.F. ${ufNum}</a></div>` : ''}
                 </div>
             `;
         } else {
@@ -641,7 +641,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-left: 3px solid ${isSmall ? 'var(--green)' : 'var(--amber)'}; border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--text-1); font-size:0.85rem;">⚖️ Impacto de Coeficiente en Seguridad (26 Meses)</strong>
+                        <strong style="color:var(--text-1); font-size:0.85rem;"> Impacto de Coeficiente en Seguridad (26 Meses)</strong>
                         <span class="badge" style="background:${isSmall ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; color:${isSmall ? '#34d399' : '#fbbf24'}; border:1px solid ${isSmall ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}; font-size:0.7rem;">${isSmall ? 'SALDO A FAVOR' : 'SUBSIDIO ABSORBIDO'}</span>
                     </div>
                     <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
@@ -865,9 +865,9 @@ const loadServicesStatus = () => {
 
             const getBadge = (srv) => {
                 if (srv.status === "Alerta") {
-                    return `<span class="badge badge-warning" style="white-space: nowrap;">⚠️ Alerta</span>`;
+                    return `<span class="badge badge-warning" style="white-space: nowrap;"> Alerta</span>`;
                 }
-                return `<span class="badge badge-success" style="white-space: nowrap;">🟢 Normal</span>`;
+                return `<span class="badge badge-success" style="white-space: nowrap;"> Normal</span>`;
             };
 
             const getMessageHtml = (srv) => {
@@ -881,7 +881,7 @@ const loadServicesStatus = () => {
                 <!-- EDESUR -->
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">⚡ Luz (Edesur)</span>
+                        <span style="color: var(--text-2);"> Luz (Edesur)</span>
                         ${getBadge(edesur)}
                     </div>
                     ${getMessageHtml(edesur)}
@@ -890,7 +890,7 @@ const loadServicesStatus = () => {
                 <!-- AYSA -->
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">💧 Agua (AySA)</span>
+                        <span style="color: var(--text-2);"> Agua (AySA)</span>
                         ${getBadge(aysa)}
                     </div>
                     ${getMessageHtml(aysa)}
@@ -899,7 +899,7 @@ const loadServicesStatus = () => {
                 <!-- METROGAS -->
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);">🔥 Gas (Metrogas)</span>
+                        <span style="color: var(--text-2);"> Gas (Metrogas)</span>
                         ${getBadge(metrogas)}
                     </div>
                     ${getMessageHtml(metrogas)}
@@ -964,7 +964,7 @@ const generateCertificadoPDF = (ufNum) => {
         </head>
         <body>
             <div class="no-print" style="margin-bottom: 20px; text-align: right;">
-                <button onclick="window.print()" style="background: #06b6d4; color: #fff; border: none; padding: 10px 20px; font-weight: 700; border-radius: 6px; cursor: pointer;">🖨️ Imprimir / Guardar en PDF</button>
+                <button onclick="window.print()" style="background: #06b6d4; color: #fff; border: none; padding: 10px 20px; font-weight: 700; border-radius: 6px; cursor: pointer;"> Imprimir / Guardar en PDF</button>
             </div>
             <div class="header">
                 <div>
