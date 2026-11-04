@@ -1368,35 +1368,35 @@ const renderEmployeeKPIs = (period) => {
         return src.reduce((a, e) => a + e.monto, 0);
     };
 
-    const ibTotal  = sumEmp('Encargado Permanente');
-    const loTotal  = sumEmp('Ayudante / Suplente');
-    const crTotal  = sumEmp('Cargas Sociales / Sindicato');
-    const vnTotal  = sumEmp('Vigilancia Nocturna');
+    const titularTotal  = sumEmp('Encargado Permanente');
+    const ayudanteTotal = sumEmp('Ayudante / Suplente');
+    const cargasTotal   = sumEmp('Cargas Sociales / Sindicato');
+    const nocturnoTotal = sumEmp('Vigilancia Nocturna');
 
-    const ibHist = rawExpenses.filter(e => e.empleado === 'Encargado Permanente').reduce((a,e) => a+e.monto, 0);
-    const loHist = rawExpenses.filter(e => e.empleado === 'Ayudante / Suplente').reduce((a,e) => a+e.monto, 0);
-    const crHist = rawExpenses.filter(e => e.empleado === 'Cargas Sociales / Sindicato').reduce((a,e) => a+e.monto, 0);
-    const vnHist = rawExpenses.filter(e => e.empleado === 'Vigilancia Nocturna').reduce((a,e) => a+e.monto, 0);
+    const titularHist  = rawExpenses.filter(e => e.empleado === 'Encargado Permanente').reduce((a,e) => a+e.monto, 0);
+    const ayudanteHist = rawExpenses.filter(e => e.empleado === 'Ayudante / Suplente').reduce((a,e) => a+e.monto, 0);
+    const cargasHist   = rawExpenses.filter(e => e.empleado === 'Cargas Sociales / Sindicato').reduce((a,e) => a+e.monto, 0);
+    const nocturnoHist = rawExpenses.filter(e => e.empleado === 'Vigilancia Nocturna').reduce((a,e) => a+e.monto, 0);
 
-    const elEncargado = document.getElementById('empIbrahimMonto');
-    const elAyudante  = document.getElementById('empLourdesMonto');
+    const elEncargado = document.getElementById('empTitularMonto');
+    const elAyudante  = document.getElementById('empAyudanteMonto');
     const elCargas    = document.getElementById('empCargasMonto');
-    const elVig       = document.getElementById('empYamilRepMonto');
+    const elVig       = document.getElementById('empNocturnoMonto');
 
-    if (elEncargado) elEncargado.textContent = ibTotal > 0 ? fmt(ibTotal) : 'Sin gasto';
-    if (elAyudante)  elAyudante.textContent  = loTotal > 0 ? fmt(loTotal) : 'Sin gasto';
-    if (elCargas)    elCargas.textContent    = crTotal > 0 ? fmt(crTotal) : 'Sin gasto';
-    if (elVig)       elVig.textContent       = vnTotal > 0 ? fmt(vnTotal) : 'Sin gasto';
+    if (elEncargado) elEncargado.textContent = titularTotal > 0 ? fmt(titularTotal) : 'Sin gasto';
+    if (elAyudante)  elAyudante.textContent  = ayudanteTotal > 0 ? fmt(ayudanteTotal) : 'Sin gasto';
+    if (elCargas)    elCargas.textContent    = cargasTotal > 0 ? fmt(cargasTotal) : 'Sin gasto';
+    if (elVig)       elVig.textContent       = nocturnoTotal > 0 ? fmt(nocturnoTotal) : 'Sin gasto';
 
-    const elEncHist = document.getElementById('empIbrahimHist');
-    const elAyuHist = document.getElementById('empLourdesHist');
+    const elEncHist = document.getElementById('empTitularHist');
+    const elAyuHist = document.getElementById('empAyudanteHist');
     const elCarHist = document.getElementById('empCargasHist');
     const elVigHist = document.getElementById('empVigilanciaHist');
 
-    if (elEncHist) elEncHist.textContent = 'Acum. histórico: ' + fmt(ibHist);
-    if (elAyuHist) elAyuHist.textContent = 'Acum. histórico: ' + fmt(loHist);
-    if (elCarHist) elCarHist.textContent = 'Acum. histórico: ' + fmt(crHist);
-    if (elVigHist) elVigHist.textContent = 'Acum. histórico: ' + fmt(vnHist) + ' (Rel. Dep. — Liq. Final Sep-26)';
+    if (elEncHist) elEncHist.textContent = 'Acum. histórico: ' + fmt(titularHist);
+    if (elAyuHist) elAyuHist.textContent = 'Acum. histórico: ' + fmt(ayudanteHist);
+    if (elCarHist) elCarHist.textContent = 'Acum. histórico: ' + fmt(cargasHist);
+    if (elVigHist) elVigHist.textContent = 'Acum. histórico: ' + fmt(nocturnoHist) + ' (Rel. Dep. — Liq. Final Sep-26)';
 };
 
 // ── TABLE ────────────────────────────────────────────────────────
