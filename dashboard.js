@@ -624,6 +624,7 @@ const renderHistoricalChart = () => {
             theme: 'dark',
             fillSeriesColor: false,
             shared: true,
+            intersect: false,
             custom: function({ series, seriesIndex, dataPointIndex, w }) {
                 const currentPeriod = periods[dataPointIndex] || (w.globals.categoryLabels ? w.globals.categoryLabels[dataPointIndex] : "");
                 let ipcBadge = "";
@@ -751,16 +752,16 @@ const renderCategoryChart = () => {
                         },
                         value: { 
                             show: true, 
-                            fontSize: '1.15rem', 
+                            fontSize: '1.05rem', 
                             fontFamily: 'Inter, sans-serif', 
                             fontWeight: 800, 
                             color: '#38bdf8',
                             offsetY: 6,
-                            formatter: (val) => fmtFull(Number(val))
+                            formatter: (val) => fmt(Number(val))
                         },
                         total: { 
                             show: true, 
-                            showAlways: true, 
+                            showAlways: false, 
                             label: 'Total Gastos', 
                             fontSize: '0.75rem', 
                             fontFamily: 'Inter, sans-serif', 
@@ -768,7 +769,7 @@ const renderCategoryChart = () => {
                             color: '#94a3b8', 
                             formatter: (w) => {
                                 const t = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                return fmtFull(t);
+                                return fmt(t);
                             }
                         }
                     }
@@ -1011,7 +1012,54 @@ const renderComparisonChart = () => {
         legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '11px' },
         fill: { opacity: 0.9 },
         dataLabels: { enabled: false },
-        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: v => fmtFull(v) } }
+        tooltip: {
+            theme: 'dark',
+            fillSeriesColor: false,
+            shared: true,
+            intersect: false,
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                try {
+                    const currentPeriod = allPeriods[dataPointIndex] || (w.globals.labels ? w.globals.labels[dataPointIndex] : "");
+                    const periodTotal = series.reduce((acc, s) => acc + (s[dataPointIndex] || 0), 0);
+                    let rowsHtml = "";
+                    series.forEach((s, idx) => {
+                        const val = s[dataPointIndex] || 0;
+                        if (val <= 0) return;
+                        const sName = w.globals.seriesNames[idx];
+                        const color = w.globals.colors[idx];
+                        rowsHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:2px 0;">
+                                <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+                                    <span style="width:7px; height:7px; border-radius:50%; background:${color}; flex-shrink:0;"></span>
+                                    <span style="color:#e2e8f0; font-size:0.74rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${sName}</span>
+                                </div>
+                                <span style="color:#38bdf8; font-size:0.78rem; font-weight:800; font-variant-numeric:tabular-nums; flex-shrink:0;">${fmt(val)}</span>
+                            </div>
+                        `;
+                    });
+
+                    return `
+                        <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:8px 12px !important; box-shadow:0 14px 30px rgba(0,0,0,0.85) !important; min-width:250px !important; max-width:320px !important; box-sizing:border-box !important;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:4px;">
+                                <span style="color:#ffffff; font-size:0.8rem; font-weight:800;">Período ${currentPeriod}</span>
+                                <span style="color:#94a3b8; font-size:0.7rem; font-weight:700;">Desglose</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:2px;">
+                                ${rowsHtml}
+                            </div>
+                            ${periodTotal > 0 ? `
+                                <div style="margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="color:#94a3b8; font-size:0.72rem; font-weight:700; text-transform:uppercase;">Total Período</span>
+                                    <span style="color:#ffffff; font-size:0.82rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmtFull(periodTotal)}</span>
+                                </div>
+                            ` : ""}
+                        </div>
+                    `;
+                } catch(e) {
+                    return '';
+                }
+            }
+        }
     };
 
     if (chartComparison) chartComparison.destroy();
@@ -1159,29 +1207,39 @@ const createDrillChart = (selectorId, categoryName, currentInstance) => {
             shared: false,
             intersect: true,
             custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                const pName = w.globals.categoryLabels ? w.globals.categoryLabels[dataPointIndex] : w.globals.labels[dataPointIndex];
-                const subcat = w.globals.seriesNames[seriesIndex];
-                const val = series[seriesIndex][dataPointIndex];
-                const color = w.globals.colors[seriesIndex];
-                if (!val || val <= 0) return '';
-                return `
-                    <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:8px 12px !important; box-shadow:0 12px 28px rgba(0,0,0,0.7) !important; min-width:240px !important; max-width:400px !important;">
-                        <div style="color:#94a3b8 !important; font-size:0.75rem !important; font-weight:700 !important; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:3px;">
-                            ${pName}
-                        </div>
-                        <div style="display:flex; align-items:flex-start; gap:8px; margin-top:4px;">
-                            <span style="width:10px; height:10px; border-radius:50%; background:${color}; flex-shrink:0; margin-top:4px;"></span>
-                            <div style="flex:1;">
-                                <div style="color:#ffffff !important; font-size:0.8rem !important; font-weight:700 !important; line-height:1.35 !important; margin-bottom:3px; word-break:normal !important;">
-                                    ${subcat}
-                                </div>
-                                <div style="color:#38bdf8 !important; font-size:0.88rem !important; font-weight:800 !important;">
-                                    ${fmtFull(val)}
+                try {
+                    const pName = (w.globals.categoryLabels && w.globals.categoryLabels[dataPointIndex]) 
+                                  || (w.globals.labels && w.globals.labels[dataPointIndex]) 
+                                  || allPeriods[dataPointIndex] 
+                                  || "";
+                    const subcat = (w.globals.seriesNames && w.globals.seriesNames[seriesIndex]) || subcats[seriesIndex] || "";
+                    const val = (series[seriesIndex] && typeof series[seriesIndex][dataPointIndex] !== 'undefined') 
+                                ? series[seriesIndex][dataPointIndex] 
+                                : 0;
+                    const color = (w.globals.colors && w.globals.colors[seriesIndex]) || '#38bdf8';
+                    if (!val || val <= 0) return '';
+
+                    return `
+                        <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:8px 12px !important; box-shadow:0 12px 28px rgba(0,0,0,0.85) !important; min-width:200px !important; max-width:280px !important; box-sizing:border-box !important;">
+                            <div style="color:#94a3b8 !important; font-size:0.72rem !important; font-weight:700 !important; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:3px; letter-spacing:0.5px;">
+                                ${pName}
+                            </div>
+                            <div style="display:flex; align-items:flex-start; gap:8px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:${color}; flex-shrink:0; margin-top:4px;"></span>
+                                <div style="flex:1; min-width:0;">
+                                    <div style="color:#ffffff !important; font-size:0.76rem !important; font-weight:600 !important; line-height:1.35 !important; margin-bottom:3px; word-break:break-word !important; white-space:normal !important;">
+                                        ${subcat}
+                                    </div>
+                                    <div style="color:#38bdf8 !important; font-size:0.85rem !important; font-weight:800 !important; font-variant-numeric:tabular-nums !important;">
+                                        ${fmtFull(val)}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } catch(err) {
+                    return '';
+                }
             }
         }
     };
@@ -2394,19 +2452,31 @@ const renderForensicAuditTables = () => {
     function clampTooltips() {
         ticking = false;
         const activeTooltips = document.querySelectorAll('.apexcharts-tooltip.apexcharts-active');
-        if (!activeTooltips.length) return;
+        
+        if (!activeTooltips.length) {
+            document.querySelectorAll('.card.has-active-tooltip').forEach(c => c.classList.remove('has-active-tooltip'));
+            return;
+        }
 
         activeTooltips.forEach(tt => {
-            const card = tt.closest('.card') || tt.closest('.kpi-card') || tt.closest('.chart-card') || tt.closest('.apexcharts-canvas');
-            if (!card) return;
+            const card = tt.closest('.card') || tt.closest('.kpi-card') || tt.closest('.chart-card');
+            if (card) {
+                document.querySelectorAll('.card.has-active-tooltip').forEach(c => {
+                    if (c !== card) c.classList.remove('has-active-tooltip');
+                });
+                card.classList.add('has-active-tooltip');
+            }
 
-            const cardRect = card.getBoundingClientRect();
+            const boundaryEl = card || tt.closest('.apexcharts-canvas');
+            if (!boundaryEl) return;
+
+            const bRect = boundaryEl.getBoundingClientRect();
             const ttRect = tt.getBoundingClientRect();
             if (ttRect.width === 0 || ttRect.height === 0) return;
 
             // 1. Evitar solapamiento vertical con el encabezado de la tarjeta (.card-header)
-            const header = card.querySelector('.card-header');
-            const minAllowedTop = header ? header.getBoundingClientRect().bottom + 6 : cardRect.top + 10;
+            const header = card ? card.querySelector('.card-header') : null;
+            const minAllowedTop = header ? (header.getBoundingClientRect().bottom + 4) : (bRect.top + 8);
             if (ttRect.top < minAllowedTop) {
                 const diff = minAllowedTop - ttRect.top;
                 const currentTop = parseFloat(tt.style.top) || 0;
@@ -2414,15 +2484,15 @@ const renderForensicAuditTables = () => {
             }
 
             // 2. Evitar desborde horizontal hacia la tarjeta contigua derecha
-            const maxAllowedRight = cardRect.right - 14;
+            const maxAllowedRight = bRect.right - 10;
             if (ttRect.right > maxAllowedRight) {
                 const diff = ttRect.right - maxAllowedRight;
                 const currentLeft = parseFloat(tt.style.left) || 0;
-                tt.style.left = Math.max(8, currentLeft - diff) + 'px';
+                tt.style.left = (currentLeft - diff) + 'px';
             }
 
             // 3. Evitar recorte en el margen izquierdo
-            const minAllowedLeft = cardRect.left + 14;
+            const minAllowedLeft = bRect.left + 10;
             if (ttRect.left < minAllowedLeft) {
                 const diff = minAllowedLeft - ttRect.left;
                 const currentLeft = parseFloat(tt.style.left) || 0;
