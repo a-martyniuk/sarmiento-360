@@ -588,7 +588,7 @@ const renderHistoricalChart = () => {
     const opts = {
         chart: {
             type: 'line',
-            height: 320,
+            height: 360,
             toolbar: { show: true },
             zoom: { enabled: true },
             animations: { enabled: true }
@@ -597,8 +597,28 @@ const renderHistoricalChart = () => {
         colors,
         stroke: { curve: 'smooth', width: 2 },
         xaxis: {
+            type: 'category',
+            tickPlacement: 'on',
             categories: periods,
-            labels: { style: { colors: 'var(--text-3)' } }
+            labels: {
+                rotate: -35,
+                rotateAlways: false,
+                hideOverlappingLabels: true,
+                trim: false,
+                style: { colors: 'var(--text-3)', fontSize: '10px', fontFamily: 'Inter, sans-serif' },
+                formatter: (val) => {
+                    if (!val || typeof val !== 'string') return val;
+                    const parts = val.split('-');
+                    if (parts.length === 2) {
+                        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                        const mIdx = parseInt(parts[1], 10) - 1;
+                        if (mIdx >= 0 && mIdx < 12) return `${months[mIdx]}-${parts[0].slice(2)}`;
+                    }
+                    return val;
+                }
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
         },
         yaxis: {
             labels: {
@@ -618,7 +638,16 @@ const renderHistoricalChart = () => {
                 }
             }]
         },
-        legend: { labels: { colors: 'var(--text-1)' } },
+        legend: {
+            position: 'bottom',
+            horizontalAlign: 'center',
+            fontSize: '11px',
+            fontFamily: 'Inter, sans-serif',
+            offsetY: 4,
+            labels: { colors: 'var(--text-2)' },
+            markers: { radius: 12, width: 8, height: 8 },
+            itemMargin: { horizontal: 8, vertical: 3 }
+        },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
         tooltip: {
             theme: 'dark',
@@ -631,16 +660,24 @@ const renderHistoricalChart = () => {
                 if (ipcData[currentPeriod] && typeof ipcData[currentPeriod].inflacion === "number") {
                     const infl = ipcData[currentPeriod].inflacion;
                     const sign = infl >= 0 ? "+" : "";
-                    ipcBadge = `<span style="font-size:0.7rem; background:rgba(56,189,248,0.15); color:#38bdf8; padding:2px 7px; border-radius:4px; font-weight:700; border:1px solid rgba(56,189,248,0.3); white-space:nowrap;">IPC INDEC: ${sign}${infl.toFixed(1)}%</span>`;
+                    ipcBadge = `<span style="font-size:0.68rem; background:rgba(56,189,248,0.15); color:#38bdf8; padding:2px 6px; border-radius:4px; font-weight:700; border:1px solid rgba(56,189,248,0.3); white-space:nowrap;">IPC INDEC: ${sign}${infl.toFixed(1)}%</span>`;
                 }
 
                 const periodTotal = series.reduce((acc, s) => acc + (s[dataPointIndex] || 0), 0);
+                const isMultiCategory = chartType === "todos" && series.length > 2;
+
+                const nameAliases = {
+                    "Sueldos y Cargas Sociales": "Sueldos y Cargas",
+                    "Mantenimiento y Reparaciones": "Mantenimiento y Rep.",
+                    "Gastos Extraordinarios": "Extraordinarios"
+                };
 
                 let rowsHtml = "";
                 series.forEach((s, idx) => {
                     const val = s[dataPointIndex] || 0;
                     if (val <= 0 && chartType === "todos") return;
-                    const sName = w.globals.seriesNames[idx];
+                    const rawName = w.globals.seriesNames[idx];
+                    const sName = (isMultiCategory && nameAliases[rawName]) ? nameAliases[rawName] : rawName;
                     const color = w.globals.colors[idx];
                     let diffHtml = "";
                     if (dataPointIndex > 0) {
@@ -649,37 +686,44 @@ const renderHistoricalChart = () => {
                             const diff = ((val - prevVal) / prevVal) * 100;
                             const sign = diff >= 0 ? "+" : "";
                             const diffColor = diff > 0 ? "#fb7185" : (diff < 0 ? "#34d399" : "#94a3b8");
-                            diffHtml = `<span style="color:${diffColor}; font-size:0.72rem; font-weight:700; margin-left:6px; white-space:nowrap;">(${sign}${diff.toFixed(1)}%)</span>`;
+                            diffHtml = `<span style="color:${diffColor}; font-size:0.7rem; font-weight:700; margin-left:4px; white-space:nowrap;">(${sign}${diff.toFixed(1)}%)</span>`;
                         }
                     }
 
                     rowsHtml += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-                                <span style="width:8px; height:8px; border-radius:50%; background:${color}; flex-shrink:0;"></span>
-                                <span style="color:#e2e8f0; font-size:0.76rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${sName}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:3px 6px; background:rgba(255,255,255,0.02); border-radius:4px; min-width:0;">
+                            <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+                                <span style="width:7px; height:7px; border-radius:50%; background:${color}; flex-shrink:0;"></span>
+                                <span style="color:#e2e8f0; font-size:0.72rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${sName}</span>
                             </div>
                             <div style="display:flex; align-items:baseline; justify-content:flex-end; white-space:nowrap; flex-shrink:0;">
-                                <span style="color:#38bdf8; font-size:0.8rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmt(val)}</span>
+                                <span style="color:#38bdf8; font-size:0.76rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmt(val)}</span>
                                 ${diffHtml}
                             </div>
                         </div>
                     `;
                 });
 
+                const gridStyle = isMultiCategory 
+                    ? 'display:grid; grid-template-columns: repeat(2, minmax(170px, 1fr)); gap: 4px 8px;'
+                    : 'display:flex; flex-direction:column; gap:3px;';
+
+                const maxWidth = isMultiCategory ? '520px' : '320px';
+                const minWidth = isMultiCategory ? '460px' : '240px';
+
                 return `
-                    <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:10px 14px !important; box-shadow:0 14px 30px rgba(0,0,0,0.85) !important; min-width:320px !important; max-width:440px !important; width:max-content !important; box-sizing:border-box !important;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:6px;">
-                            <span style="color:#ffffff; font-size:0.82rem; font-weight:800;">Período ${currentPeriod}</span>
+                    <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:8px 12px !important; box-shadow:0 14px 30px rgba(0,0,0,0.85) !important; min-width:${minWidth} !important; max-width:${maxWidth} !important; width:max-content !important; box-sizing:border-box !important;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:4px;">
+                            <span style="color:#ffffff; font-size:0.78rem; font-weight:800;">Período ${currentPeriod}</span>
                             ${ipcBadge}
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:2px;">
+                        <div style="${gridStyle}">
                             ${rowsHtml}
                         </div>
                         ${chartType === "todos" && periodTotal > 0 ? `
-                            <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center;">
-                                <span style="color:#94a3b8; font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Total Período</span>
-                                <span style="color:#ffffff; font-size:0.85rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmtFull(periodTotal)}</span>
+                            <div style="margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#94a3b8; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Total Período</span>
+                                <span style="color:#ffffff; font-size:0.8rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmtFull(periodTotal)}</span>
                             </div>
                         ` : ""}
                     </div>
@@ -2483,7 +2527,15 @@ const renderForensicAuditTables = () => {
                 tt.style.top = (currentTop + diff) + 'px';
             }
 
-            // 2. Evitar desborde horizontal hacia la tarjeta contigua derecha
+            // 2. Evitar que el tooltip sobresalga del recuadro hacia abajo (anti-desborde inferior)
+            const maxAllowedBottom = bRect.bottom - 10;
+            if (ttRect.bottom > maxAllowedBottom) {
+                const diff = ttRect.bottom - maxAllowedBottom;
+                const currentTop = parseFloat(tt.style.top) || 0;
+                tt.style.top = Math.max(minAllowedTop - bRect.top, currentTop - diff) + 'px';
+            }
+
+            // 3. Evitar desborde horizontal hacia la tarjeta contigua derecha
             const maxAllowedRight = bRect.right - 10;
             if (ttRect.right > maxAllowedRight) {
                 const diff = ttRect.right - maxAllowedRight;
@@ -2491,7 +2543,7 @@ const renderForensicAuditTables = () => {
                 tt.style.left = (currentLeft - diff) + 'px';
             }
 
-            // 3. Evitar recorte en el margen izquierdo
+            // 4. Evitar recorte en el margen izquierdo
             const minAllowedLeft = bRect.left + 10;
             if (ttRect.left < minAllowedLeft) {
                 const diff = minAllowedLeft - ttRect.left;
