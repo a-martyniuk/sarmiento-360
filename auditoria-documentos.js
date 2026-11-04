@@ -319,9 +319,11 @@ function loadServicesStatus() {
             const aysa = data.aysa || { status: "Normal", message: "Sin alertas" };
             const metrogas = data.metrogas || { status: "Normal", message: "Sin alertas" };
 
-            const getBadge = (srv) => srv.status === "Alerta"
-                ? `<span class="badge badge-warning" style="white-space: nowrap;"> Alerta</span>`
-                : `<span class="badge badge-success" style="white-space: nowrap;"> Normal</span>`;
+            const getBadge = (srv) => {
+                if (srv.status === "Alerta") return `<span class="badge badge-warning" style="white-space: nowrap;">Alerta</span>`;
+                if (srv.status === "Desconocido") return `<span class="badge" style="background: rgba(148,163,184,0.12); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); white-space: nowrap;">Sin datos</span>`;
+                return `<span class="badge badge-success" style="white-space: nowrap;">Normal</span>`;
+            };
 
             const getMessageHtml = (srv) => (srv.status === "Alerta" && srv.message)
                 ? `<div style="font-size: 0.65rem; color: var(--text-3); margin-top: 1px; margin-bottom: 0.4rem; padding-left: 12px; border-left: 1.5px dashed rgba(251,191,36,0.4); line-height: 1.25;">${srv.message}</div>`
@@ -330,21 +332,21 @@ function loadServicesStatus() {
             container.innerHTML = `
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);"> Luz (Edesur)</span>
+                        <span style="color: var(--text-2);">Luz (Edesur)</span>
                         ${getBadge(edesur)}
                     </div>
                     ${getMessageHtml(edesur)}
                 </div>
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);"> Agua (AySA)</span>
+                        <span style="color: var(--text-2);">Agua (AySA)</span>
                         ${getBadge(aysa)}
                     </div>
                     ${getMessageHtml(aysa)}
                 </div>
                 <div style="margin-bottom: 0.35rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
-                        <span style="color: var(--text-2);"> Gas (Metrogas)</span>
+                        <span style="color: var(--text-2);">Gas (Metrogas)</span>
                         ${getBadge(metrogas)}
                     </div>
                     ${getMessageHtml(metrogas)}

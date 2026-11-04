@@ -1727,77 +1727,6 @@ const exportPDF = () => {
     }, 250);
 };
 
-// ── GENERADOR DE RESUMEN EJECUTIVO PARA WHATSAPP ────────────────
-const copyWhatsAppSummary = (periodArg) => {
-    const selPeriod = periodArg || document.getElementById("periodFilter")?.value || "2026-09";
-    const allPeriods = [...new Set(rawExpenses.map(e => e.periodo))].sort();
-    const targetPeriod = (selPeriod === "todos" || !selPeriod) ? allPeriods[allPeriods.length - 1] : selPeriod;
-
-    const bal = rawBalances.find(b => b.periodo === targetPeriod);
-    const pExpenses = rawExpenses.filter(e => e.periodo === targetPeriod);
-    const egr = (bal && bal.egresos > 0) ? bal.egresos : pExpenses.reduce((a, e) => a + e.monto, 0);
-    const ing = (bal && bal.ingresos > 0) ? bal.ingresos : egr * 0.96;
-    const delta = ing - egr;
-    const pn = bal ? bal.patrimonio_neto : null;
-
-    // Morosidad del período
-    const moroList = (rawMorosidadPorPeriodo && rawMorosidadPorPeriodo[targetPeriod])
-        ? rawMorosidadPorPeriodo[targetPeriod]
-        : (rawMorosidad || []);
-    const moroDeuda = moroList.reduce((acc, m) => acc + (m.deuda || 0), 0);
-    const maxMoro = moroList.length > 0 ? [...moroList].sort((a,b) => b.deuda - a.deuda)[0] : null;
-
-    // Formatear mensaje WhatsApp
-    let msg = `*CONSORCIO SARMIENTO 356-360*\n`;
-    msg += `*Resumen Ejecutivo de Expensas — Período: ${targetPeriod}*\n`;
-    msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-    msg += `• *Recaudación Cobrada:* ${fmt(ing)}\n`;
-    msg += `• *Gastos Pagados en Caja:* ${fmt(egr)}\n`;
-    msg += `• *Resultado Operativo:* ${delta >= 0 ? "Superávit" : "Déficit"} de ${fmt(Math.abs(delta))}\n`;
-    if (pn !== null && pn > 0) {
-        msg += `• *Saldo Banco / Patrimonio:* ${fmt(pn)}\n`;
-    }
-    msg += `\n• *Estado de Morosidad (${targetPeriod}):*\n`;
-    msg += `• Unidades con Deuda: ${moroList.length} U.F. (${((moroList.length / 70) * 100).toFixed(1)}%)\n`;
-    msg += `• Deuda Acumulada Total: ${fmt(moroDeuda)}\n`;
-    if (maxMoro) {
-        msg += `• Mayor Deuda: UF ${maxMoro.uf} (${formatDpto(maxMoro.depto, maxMoro.uf)}) — ${fmt(maxMoro.deuda)}\n`;
-    }
-    msg += `\n• *Administración:* ${targetPeriod >= '2026-08' ? 'Fernández - Villasenin (Matr. 862)' : 'D&F Administración'}\n`;
-    msg += `• *Plataforma:* ${targetPeriod >= '2026-08' ? 'ConsorcioAbierto' : 'MisExpensas / Tradicional'}\n`;
-    msg += `• *Panel de Transparencia & Auditoría:* https://alexismartyniuk.com.ar/sarmiento-360/\n`;
-    msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-    msg += `_Generado automáticamente desde el Panel de Auditoría Independiente._`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(msg).then(() => {
-            showWhatsAppToast("Resumen de " + targetPeriod + " copiado al portapapeles listo para WhatsApp");
-        }).catch(err => {
-            console.warn("Error copying to clipboard:", err);
-            prompt("Copia el siguiente texto para WhatsApp:", msg);
-        });
-    } else {
-        prompt("Copia el siguiente texto para WhatsApp:", msg);
-    }
-};
-
-const showWhatsAppToast = (text) => {
-    let toast = document.getElementById("waToastNotification");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "waToastNotification";
-        toast.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:99999;background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.85rem;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.5);display:flex;align-items:center;gap:8px;transition:opacity 0.3s ease, transform 0.3s ease;opacity:0;transform:translateY(10px);pointer-events:none;";
-        document.body.appendChild(toast);
-    }
-    toast.textContent = text;
-    toast.style.opacity = "1";
-    toast.style.transform = "translateY(0)";
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(10px)";
-    }, 3000);
-};
-
 // ── MORA E INTERESES RENDERER ───────────────────────────────────
 const renderFines = async (period) => {
     const tbody = document.getElementById("finesTableBody");
@@ -2037,6 +1966,9 @@ const loadServicesStatus = () => {
                 if (srv.status === "Alerta") {
                     return `<span class="badge badge-warning" style="white-space: nowrap;">Alerta</span>`;
                 }
+                if (srv.status === "Desconocido") {
+                    return `<span class="badge" style="background: rgba(148,163,184,0.12); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); white-space: nowrap;">Sin datos</span>`;
+                }
                 return `<span class="badge badge-success" style="white-space: nowrap;">Normal</span>`;
             };
 
@@ -2272,113 +2204,10 @@ const init = async () => {
         try { renderFines("todos"); } catch(e) { console.warn("Error en renderFines:", e); }
         try { renderPatrimonialChart(); } catch(e) { console.warn("Error en renderPatrimonialChart:", e); }
         try { auditProviders("todos"); } catch(e) { console.warn("Error en auditProviders:", e); }
-        try { renderContractsBoard(); } catch(e) { console.warn("Error en renderContractsBoard:", e); }
         try { loadServicesStatus(); } catch(e) { console.warn("Error en loadServicesStatus:", e); }
     } catch (error) {
         console.error("Error al cargar los datos de expensas:", error);
     }
-};
-
-// ── TABLERO DE CONTRATOS E INSPECCIONES ────────────────────────────
-const renderContractsBoard = () => {
-    const container = document.getElementById("contractsBoardContainer");
-    if (!container) return;
-
-    const contracts = [
-        {
-            title: "Administración de Consorcios",
-            provider: "Fernández - Villasenin (RPAC Matr. 862)",
-            type: "Administración Legal y Contable (Ley 14.701 PBA)",
-            dueDate: "2027-08-01",
-            cost: "$ 830.000 /mes",
-            status: "Vigente"
-        },
-        {
-            title: "Seguridad Privada 24 hs",
-            provider: "Bastida S.A. Seguridad Privada Integral",
-            type: "Vigilancia Física Diurna y Nocturna (Sarmiento 356-360)",
-            dueDate: "2027-03-31",
-            cost: "$ 4.948.100 /mes",
-            status: "Vigente"
-        },
-        {
-            title: "Plataforma de Gestión Digital",
-            provider: "Consorcio Abierto S.R.L.",
-            type: "Portal de Propietarios y Liquidación Online (70 UFs)",
-            dueDate: "2027-08-01",
-            cost: "$ 66.193 /mes",
-            status: "Vigente"
-        },
-        {
-            title: "Seguro Integral + Accidentes Personales",
-            provider: "La Holando Sudamericana + Allianz",
-            type: "Póliza Integral N° 2000004.5 + Póliza AP",
-            dueDate: "2027-06-30",
-            cost: "$ 357.462 /mes",
-            status: "Vigente"
-        },
-        {
-            title: "Abono Conservación de Ascensores",
-            provider: "Ascensores Guillemi Interior S.A.",
-            type: "Mantenimiento Preventivo (Torres 356, 358 y 360)",
-            dueDate: "2026-12-01",
-            cost: "$ 146.400 /mes",
-            status: "Vigente"
-        },
-        {
-            title: "Desinfección y Control de Plagas",
-            provider: "FB Saneamiento Ambiental",
-            type: "Servicio de Desinsectación en Partes Comunes",
-            dueDate: "2026-12-15",
-            cost: "$ 130.000 /mes",
-            status: "Vigente"
-        },
-        {
-            title: "Reparación y Pintura Contrafrente",
-            provider: "Luis de la Paz Pavón Riveros",
-            type: "Obra Extraordinaria Fondo de Reserva (Fc. C 0005-00136)",
-            dueDate: "2026-08-31",
-            cost: "$ 2.000.000 (Cierre Ago-26)",
-            status: "Finalizada"
-        }
-    ];
-
-    const today = new Date();
-
-    const html = contracts.map(c => {
-        const parts = c.dueDate.split("-");
-        const due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-        const diffTime = due - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        let badgeClass = "badge-success";
-        let badgeText = `${diffDays} días restantes`;
-        if (diffDays <= 15) {
-            badgeClass = "badge-danger";
-            badgeText = `Vence en ${diffDays} días`;
-        } else if (diffDays <= 45) {
-            badgeClass = "badge-warning";
-            badgeText = `Vence en ${diffDays} días`;
-        }
-
-        return `
-            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1rem; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <div style="font-weight:700; font-size:0.95rem; color:var(--text-1);">${c.title}</div>
-                        <div style="font-size:0.8rem; color:var(--accent); font-weight:600;">${c.provider}</div>
-                    </div>
-                    <span class="badge ${badgeClass}" style="font-size:0.7rem;">${badgeText}</span>
-                </div>
-                <div style="font-size:0.78rem; color:var(--text-3); display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.05); padding-top:8px;">
-                    <span>${c.type}</span>
-                    <strong style="color:var(--text-1);">${c.cost}</strong>
-                </div>
-            </div>
-        `;
-    }).join("");
-
-    container.innerHTML = html;
 };
 
 // ── EXPORTADORES A EXCEL (XLSX) ──────────────────────────────────
