@@ -472,9 +472,10 @@
         .apexcharts-tooltip,
         .apexcharts-tooltip.apexcharts-theme-dark,
         .apexcharts-tooltip.apexcharts-theme-light {
-            max-width: 440px !important;
+            max-width: 480px !important;
             min-width: 220px !important;
-            width: auto !important;
+            width: max-content !important;
+            box-sizing: border-box !important;
             white-space: normal !important;
             word-break: normal !important;
             background: #0f172a !important;
@@ -563,7 +564,8 @@
             font-size: 0.8rem !important;
             font-weight: 800 !important;
             color: #38bdf8 !important;
-            white-space: nowrap !important;
+            white-space: normal !important;
+            word-break: break-word !important;
         }
 
         /* ── ANOMALY SECTION ── */
@@ -1718,7 +1720,7 @@
     <!-- CHARTS ROW 1: Historical + Donut -->
     <div style="margin-top: 2rem; margin-bottom: 1.25rem;">
         <div style="font-size: 0.65rem; font-weight: 800; color: #a78bfa; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="background: rgba(167,139,250,0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(167,139,250,0.3);">CAPÍTULO 02</span> TENDENCIAS Y EVOLUCIÓN DE GASTOS</div>
-        <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-1); margin: 0;"> Tendencias e Histórico por Categoría</h2>
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-1); margin: 0;">Tendencias e Histórico por Categoría</h2>
     </div>
     <div id="graficos" class="charts-row">
         <div class="card">

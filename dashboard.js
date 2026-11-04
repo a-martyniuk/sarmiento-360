@@ -623,24 +623,66 @@ const renderHistoricalChart = () => {
         tooltip: {
             theme: 'dark',
             fillSeriesColor: false,
-            y: {
-                formatter: (val, { seriesIndex, dataPointIndex, w }) => {
-                    const baseStr = fmt(val);
-                    const currentPeriod = periods[dataPointIndex];
-                    let ipcStr = "";
-                    if (ipcData[currentPeriod] && ipcData[currentPeriod].inflacion !== null) {
-                        ipcStr = ` | IPC: +${ipcData[currentPeriod].inflacion.toFixed(1)}%`;
-                    }
+            shared: true,
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const currentPeriod = periods[dataPointIndex] || (w.globals.categoryLabels ? w.globals.categoryLabels[dataPointIndex] : "");
+                let ipcBadge = "";
+                if (ipcData[currentPeriod] && typeof ipcData[currentPeriod].inflacion === "number") {
+                    const infl = ipcData[currentPeriod].inflacion;
+                    const sign = infl >= 0 ? "+" : "";
+                    ipcBadge = `<span style="font-size:0.7rem; background:rgba(56,189,248,0.15); color:#38bdf8; padding:2px 7px; border-radius:4px; font-weight:700; border:1px solid rgba(56,189,248,0.3); white-space:nowrap;">IPC INDEC: ${sign}${infl.toFixed(1)}%</span>`;
+                }
+
+                const periodTotal = series.reduce((acc, s) => acc + (s[dataPointIndex] || 0), 0);
+
+                let rowsHtml = "";
+                series.forEach((s, idx) => {
+                    const val = s[dataPointIndex] || 0;
+                    if (val <= 0 && chartType === "todos") return;
+                    const sName = w.globals.seriesNames[idx];
+                    const color = w.globals.colors[idx];
+                    let diffHtml = "";
                     if (dataPointIndex > 0) {
-                        const prevVal = w.globals.series[seriesIndex][dataPointIndex - 1];
+                        const prevVal = s[dataPointIndex - 1];
                         if (prevVal > 0) {
                             const diff = ((val - prevVal) / prevVal) * 100;
-                            const sign = diff >= 0 ? '+' : '';
-                            return `${baseStr} (${sign}${diff.toFixed(1)}% vs mes anterior${ipcStr})`;
+                            const sign = diff >= 0 ? "+" : "";
+                            const diffColor = diff > 0 ? "#fb7185" : (diff < 0 ? "#34d399" : "#94a3b8");
+                            diffHtml = `<span style="color:${diffColor}; font-size:0.72rem; font-weight:700; margin-left:6px; white-space:nowrap;">(${sign}${diff.toFixed(1)}%)</span>`;
                         }
                     }
-                    return baseStr + (ipcStr ? ` (${ipcStr.slice(3)})` : "");
-                }
+
+                    rowsHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                            <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:${color}; flex-shrink:0;"></span>
+                                <span style="color:#e2e8f0; font-size:0.76rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${sName}</span>
+                            </div>
+                            <div style="display:flex; align-items:baseline; justify-content:flex-end; white-space:nowrap; flex-shrink:0;">
+                                <span style="color:#38bdf8; font-size:0.8rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmt(val)}</span>
+                                ${diffHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                return `
+                    <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:10px 14px !important; box-shadow:0 14px 30px rgba(0,0,0,0.85) !important; min-width:320px !important; max-width:440px !important; width:max-content !important; box-sizing:border-box !important;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:6px;">
+                            <span style="color:#ffffff; font-size:0.82rem; font-weight:800;">Período ${currentPeriod}</span>
+                            ${ipcBadge}
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            ${rowsHtml}
+                        </div>
+                        ${chartType === "todos" && periodTotal > 0 ? `
+                            <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#94a3b8; font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Total Período</span>
+                                <span style="color:#ffffff; font-size:0.85rem; font-weight:800; font-variant-numeric:tabular-nums;">${fmtFull(periodTotal)}</span>
+                            </div>
+                        ` : ""}
+                    </div>
+                `;
             }
         },
         markers: { size: 3, hover: { size: 5 } }
