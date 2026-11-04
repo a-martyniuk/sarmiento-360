@@ -2000,11 +2000,11 @@
                 <div class="table-info" id="tableInfo">Cargando...</div>
             </div>
             <div class="table-actions">
-                <select id="pageSizeSelect" style="font-size:0.8rem;">
-                    <option value="20">20 por página</option>
-                    <option value="50">50 por página</option>
+                <select id="pageSizeSelect" style="font-size:0.8rem; background:var(--bg-surface); border:1px solid var(--border); color:var(--text-1); border-radius:6px; padding:4px 8px;">
+                    <option value="50" selected>50 por página (Recomendado)</option>
                     <option value="100">100 por página</option>
-                    <option value="9999">Todos</option>
+                    <option value="20">20 por página</option>
+                    <option value="9999">Todos los registros</option>
                 </select>
                 <button class="btn" onclick="exportCSV()">⬇ Exportar CSV</button>
                 <button class="btn" onclick="exportXLSX()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: #fff; margin-left: 0.5rem; font-weight: 600;"> Exportar Excel (.xlsx)</button>
@@ -2014,22 +2014,19 @@
         </div>
 
         <div class="table-wrapper">
-            <table id="expensesTable">
+            <table id="expensesTable" class="expenses-table-optimized">
                 <thead>
                     <tr>
-                        <th>Período</th>
-                        <th>Categoría</th>
-                        <th>Tipo</th>
-                        <th>Alerta</th>
-                        <th>Estado</th>
-                        <th>Concepto / Proveedor</th>
-                        <th style="text-align:right">Mes Anterior</th>
-                        <th style="text-align:right">Var. %</th>
-                        <th style="text-align:right">Monto Actual</th>
+                        <th style="width: 85px; white-space: nowrap;">Período</th>
+                        <th style="width: 175px;">Categoría / Tipo</th>
+                        <th style="min-width: 320px;">Concepto, Proveedor y Detalle</th>
+                        <th style="text-align: right; width: 125px; white-space: nowrap;">Mes Anterior</th>
+                        <th style="text-align: right; width: 110px; white-space: nowrap;">Var. %</th>
+                        <th style="text-align: right; width: 135px; white-space: nowrap;">Monto Actual</th>
                     </tr>
                 </thead>
                 <tbody id="expensesTableBody">
-                    <tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:2rem;">Cargando registros...</td></tr>
+                    <tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:2rem;">Cargando registros...</td></tr>
                 </tbody>
             </table>
         </div>

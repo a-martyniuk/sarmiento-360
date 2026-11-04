@@ -16,7 +16,7 @@ let rawMorosidadPorPeriodo = {};
 let consorcioMeta = {};
 let filteredExpenses = [];
 let currentPage  = 1;
-let pageSize     = 20;
+let pageSize     = 50;
 let ipcData      = {}; // Indexa la inflación del IPC por mes
 
 // Fetch inflación oficial del INDEC (Datos Abiertos) - No bloqueante
@@ -1312,7 +1312,7 @@ const renderTable = () => {
     document.getElementById("tableInfo").textContent =
         `${total.toLocaleString('es-AR')} registros encontrados`;
     document.getElementById("paginationInfo").textContent =
-        `Mostrando ${start + 1}–${end} de ${total.toLocaleString('es-AR')}`;
+        `Mostrando ${total > 0 ? start + 1 : 0}–${end} de ${total.toLocaleString('es-AR')}`;
 
     // Sort: period desc, amount desc
     const sorted = [...filteredExpenses].sort((a, b) => {
@@ -1323,10 +1323,11 @@ const renderTable = () => {
     const pageItems = sorted.slice(start, end);
 
     if (pageItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:2rem;">No se encontraron registros.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:2rem;">No se encontraron registros.</td></tr>`;
         renderPagination(pages);
         return;
     }
+
     tbody.innerHTML = pageItems.map(item => {
         const isSAC = item.concepto.toLowerCase().includes("sac") || item.concepto.toLowerCase().includes("aguinaldo");
         const pp = prevPeriod(item.periodo);
@@ -1354,48 +1355,46 @@ const renderTable = () => {
             else                  varHtml = `<span class="var-null"${lbTitle}>≈ 0%${lbTag}</span>`;
         }
 
-        const tipoBadge     = item.tipo === "Fijo"
-            ? `<span class="badge badge-fijo">Fijo</span>`
-            : `<span class="badge badge-variable">Variable</span>`;
-
         let badges = [];
         if (item.anomalia) {
-            badges.push(`<span class="badge badge-anomalia" title="Desviación +${item.desviacion_pct}% del histórico"> Anomalía</span>`);
+            badges.push(`<span class="badge badge-anomalia" title="Desviación +${item.desviacion_pct}% del histórico">Anomalía</span>`);
         }
         
-        // Aplica a fijos, abonos o servicios recurrentes (como Telecentro, luz, agua, etc.) que suban >25%
+        // Aplica a fijos, abonos o servicios recurrentes que suban >25%
         const catNameLow = (item.categoria || item.rubro).toLowerCase();
         const esRecurrente = item.tipo === "Fijo" || ["servicios públicos", "contratos y abonos", "varios"].includes(catNameLow);
         if (esRecurrente && diff > 25) {
             badges.push(`<span class="badge badge-anomalia" style="background:rgba(251,146,60,0.1); border-color:#fb923c; color:#fb923c;" title="Aumento mayor al 25% respecto al mes anterior">Aumento >25%</span>`);
         }
 
-        const alertaBadge = badges.length > 0 
-            ? `<div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">${badges.join('')}</div>` 
-            : `<span class="badge-normal">Normal</span>`;
-
-        const estadoBadge = item.seccion === "Pago Parcial"
-            ? `<span class="badge badge-pendiente" title="Pago parcial — Saldo impago: ${fmtFull(item.saldo_pendiente || 0)}">Pago Parcial</span>`
-            : (item.estado === "Pendiente"
-                ? `<span class="badge badge-pendiente" title="Devengado pendiente de pago">Pendiente</span>`
-                : `<span class="badge badge-pagado">Pagado</span>`);
-
-        const conceptSafe = item.concepto.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        const conceptSafe = item.concepto.replace(/'/g, "\'").replace(/"/g, "&quot;");
+        const subcat = getSubcategoria(item);
+        const showSubcat = subcat && subcat !== item.concepto && subcat !== (item.categoria || item.rubro);
 
         return `
         <tr>
-            <td style="white-space:nowrap;font-weight:500;">${item.periodo}</td>
-            <td>${getCatPill(item.categoria || item.rubro)}</td>
-            <td>${tipoBadge}</td>
-            <td>${alertaBadge}</td>
-            <td>${estadoBadge}</td>
-            <td class="concepto-cell">
-                <span class="concepto-text" onclick="openModal('${conceptSafe}')">${item.concepto}</span>
-                <button onclick="openInvoiceViewerModal('${conceptSafe}', '${item.periodo}', ${item.monto})" title="Ver comprobante respaldatorio de ${item.periodo}" style="margin-left:6px; font-size:0.72rem; cursor:pointer; color:var(--accent); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); display:inline-flex; align-items:center; gap:3px;">Factura</button>
+            <td style="white-space:nowrap; font-weight:600; color:var(--text-2); font-size:0.8rem;">${item.periodo}</td>
+            <td>
+                <div>${getCatPill(item.categoria || item.rubro)}</div>
+                <div style="margin-top:3px; font-size:0.68rem; color:var(--text-3); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">${item.tipo || 'Variable'}</div>
             </td>
-            <td class="amount-col amount-prev">${prevMonto > 0 ? fmt(prevMonto) : '—'}</td>
-            <td style="text-align:right;white-space:nowrap;">${varHtml}</td>
-            <td class="amount-col amount-current">${fmt(item.monto)}</td>
+            <td class="concepto-cell">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div style="flex:1;">
+                        <span class="concepto-title" onclick="openModal('${conceptSafe}')" title="Clic para ver historial completo del concepto">${item.concepto}</span>
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                            ${showSubcat ? `<span style="font-size:0.73rem; color:var(--text-3); font-weight:500;">${subcat}</span>` : ''}
+                            ${item.estado === "Pendiente" ? `<span class="badge badge-pendiente" title="Devengado pendiente de pago">Pendiente</span>` : ''}
+                            ${item.seccion === "Pago Parcial" ? `<span class="badge badge-pendiente" title="Pago parcial — Saldo impago: ${fmtFull(item.saldo_pendiente || 0)}">Pago Parcial</span>` : ''}
+                            ${badges.join(' ')}
+                        </div>
+                    </div>
+                    <button type="button" onclick="openInvoiceViewerModal('${conceptSafe}', '${item.periodo}', ${item.monto})" title="Ver comprobante respaldatorio de ${item.periodo}" class="btn-factura-cell">Factura</button>
+                </div>
+            </td>
+            <td class="amount-col amount-prev" style="text-align:right; font-variant-numeric:tabular-nums;">${prevMonto > 0 ? fmt(prevMonto) : '—'}</td>
+            <td style="text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;">${varHtml}</td>
+            <td class="amount-col amount-current" style="text-align:right; font-variant-numeric:tabular-nums; font-weight:800; color:#38bdf8;">${fmt(item.monto)}</td>
         </tr>`;
     }).join('');
 
@@ -1786,8 +1785,8 @@ const renderFines = async (period) => {
 
     if (filteredMora.length === 0) {
         const msg = period === "todos"
-            ? "ℹ️ No se registraron recargos por mora en la base de datos histórica."
-            : `ℹ️ En el período ${period} el consorcio no liquidó intereses por mora a ninguna unidad.`;
+            ? "No se registraron recargos por mora en la base de datos histórica."
+            : `En el período ${period} el consorcio no liquidó intereses por mora a ninguna unidad.`;
         tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-3);padding:1.5rem;">${msg}</td></tr>`;
         return;
     }

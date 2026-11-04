@@ -226,27 +226,27 @@ const runDocumentaryAudit = (rawExpenses) => {
 
             // Clasificación y Estado Probabilístico
             let tipoAlerta = "Posible gasto omitido";
-            let prioridad = "🟡 Sugerencia";
+            let prioridad = "Sugerencia";
             let estadoProbabilistico = "Sugerido";
 
             if (isAccumulated) {
                 tipoAlerta = "Posible acumulación de deuda (salto de monto posterior)";
-                prioridad = "🔴 Alta";
+                prioridad = "Alta";
                 estadoProbabilistico = "Probable";
             } else if (isLabor && (hasBefore || hasAfter)) {
                 tipoAlerta = "Obligación laboral / previsional no documentada";
-                prioridad = "🔴 Alta";
+                prioridad = "Alta";
                 estadoProbabilistico = "Probable";
             } else if (hasBefore && hasAfter) {
                 tipoAlerta = "Omisión documental retrospectiva (ausencia con reaparición)";
-                prioridad = recurrenceRate >= 0.75 ? "🔴 Alta" : "🟠 Revisar";
+                prioridad = recurrenceRate >= 0.75 ? "Alta" : "Revisar";
                 estadoProbabilistico = recurrenceRate >= 0.75 ? "Confirmado" : "Probable";
             } else if (recurrenceRate >= 0.70) {
                 tipoAlerta = "Gasto recurrente ausente en el período";
-                prioridad = "🟠 Revisar";
+                prioridad = "Revisar";
                 estadoProbabilistico = "Probable";
             } else {
-                prioridad = "🟡 Sugerencia";
+                prioridad = "Sugerencia";
                 estadoProbabilistico = "Sin evidencia suficiente";
             }
 
@@ -296,7 +296,7 @@ const runDocumentaryAudit = (rawExpenses) => {
     });
 
     // Ordenar hallazgos: 1. Prioridad (Alta > Revisar > Sugerencia), 2. Confianza, 3. Período
-    const prioOrder = { "🔴 Alta": 1, "🟠 Revisar": 2, "🟡 Sugerencia": 3 };
+    const prioOrder = { "Alta": 1, "Revisar": 2, "Sugerencia": 3 };
     return auditFindings.sort((a, b) => {
         if (prioOrder[a.prioridad] !== prioOrder[b.prioridad]) {
             return prioOrder[a.prioridad] - prioOrder[b.prioridad];
@@ -374,8 +374,8 @@ const renderDocumentaryAuditSection = (expenses) => {
     // Contadores para KPIs
     let high = 0, medium = 0, low = 0;
     currentAuditFindings.forEach(f => {
-        if (f.prioridad === "🔴 Alta") high++;
-        else if (f.prioridad === "🟠 Revisar") medium++;
+        if (f.prioridad === "Alta") high++;
+        else if (f.prioridad === "Revisar") medium++;
         else low++;
     });
     
@@ -421,7 +421,7 @@ const renderLey14701Section = () => {
                 <span class="badge ${b.badgeClass}" style="font-size: 0.72rem;">${b.estado}</span>
             </div>
             <div style="font-size: 0.78rem; color: var(--text-2); margin-bottom: 6px;">
-                🏛️ <strong>Rubricación:</strong> ${b.rubricacion}
+                <strong>Rubricación:</strong> ${b.rubricacion}
             </div>
             <div style="font-size: 0.76rem; color: var(--text-3); line-height: 1.4;">
                 ${b.observacion}
@@ -460,12 +460,12 @@ const renderDocumentaryAuditTable = () => {
         const status = saved.status || "PENDIENTE";
         
         let statusBadgeClass = "badge-warning";
-        let statusLabel = "⏳ PENDIENTE";
-        if (status === "REVISADO") { statusBadgeClass = "badge-info"; statusLabel = "👁️ REVISADO"; }
-        else if (status === "CONFIRMADO") { statusBadgeClass = "badge-danger"; statusLabel = "🔴 CONFIRMADO"; }
-        else if (status === "DESCARTADO") { statusBadgeClass = "badge-success"; statusLabel = "🟢 DESCARTADO"; }
+        let statusLabel = "PENDIENTE";
+        if (status === "REVISADO") { statusBadgeClass = "badge-info"; statusLabel = "REVISADO"; }
+        else if (status === "CONFIRMADO") { statusBadgeClass = "badge-danger"; statusLabel = "CONFIRMADO"; }
+        else if (status === "DESCARTADO") { statusBadgeClass = "badge-success"; statusLabel = "DESCARTADO"; }
         
-        const prioStyle = f.prioridad === "🔴 Alta" ? "color:var(--red); font-weight:700;" : (f.prioridad === "🟠 Revisar" ? "color:#fb923c; font-weight:600;" : "color:var(--text-3);");
+        const prioStyle = f.prioridad === "Alta" ? "color:var(--red); font-weight:700;" : (f.prioridad === "Revisar" ? "color:#fb923c; font-weight:600;" : "color:var(--text-3);");
         const fmtVal = typeof fmt === 'function' ? fmt(f.montoEstimado) : `$ ${f.montoEstimado.toLocaleString('es-AR')}`;
         
         return `
@@ -486,7 +486,7 @@ const renderDocumentaryAuditTable = () => {
                     <span class="badge ${statusBadgeClass}" style="font-size:0.7rem;">${statusLabel}</span>
                 </td>
                 <td style="text-align:right;">
-                    <button class="btn" onclick="openDocAuditModal('${f.id}')" style="background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:var(--accent); font-size:0.75rem; padding:0.25rem 0.6rem;">🔍 Ver Evidencia</button>
+                    <button class="btn" onclick="openDocAuditModal('${f.id}')" style="background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:var(--accent); font-size:0.75rem; padding:0.25rem 0.6rem;">Ver Evidencia</button>
                 </td>
             </tr>
         `;
@@ -509,16 +509,16 @@ const openDocAuditModal = (findingId) => {
     const rationaleBox = document.getElementById("docAuditRationaleBox");
     rationaleBox.innerHTML = `
         <h4 style="margin:0 0 0.5rem 0; font-size:0.9rem; color:var(--accent); display:flex; align-items:center; gap:6px;">
-            💡 Rationale de Auditoría Documental (${finding.estadoProbabilistico})
+            Fundamento de Auditoría Documental (${finding.estadoProbabilistico})
         </h4>
         <div style="font-size:0.82rem; color:var(--text-1); line-height:1.5;">
             ${finding.explicacion}
         </div>
         <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px dashed rgba(6,182,212,0.2); font-size:0.75rem; color:var(--text-3); display:flex; flex-wrap:wrap; gap:12px;">
-            <span>📌 <strong>Categoría:</strong> ${finding.categoria}</span>
-            <span>⏱️ <strong>Frecuencia Inferida:</strong> ${finding.frecuencia}</span>
-            <span>📊 <strong>Presencia Histórica:</strong> ${finding.aparicionesHistoricas}</span>
-            <span>💰 <strong>Promedio Histórico:</strong> ${fmtVal}</span>
+            <span><strong>Categoría:</strong> ${finding.categoria}</span>
+            <span><strong>Frecuencia Inferida:</strong> ${finding.frecuencia}</span>
+            <span><strong>Presencia Histórica:</strong> ${finding.aparicionesHistoricas}</span>
+            <span><strong>Promedio Histórico:</strong> ${fmtVal}</span>
         </div>
     `;
     
@@ -609,7 +609,7 @@ const renderDocAuditConceptChart = (finding) => {
                 formatter: (val, { dataPointIndex }) => {
                     const p = allPeriods[dataPointIndex];
                     if (p === finding.periodo) {
-                        return `⚠️ Ausente en liquidación (Est. $ ${val.toLocaleString('es-AR')})`;
+                        return `Ausente en liquidación (Est. $ ${val.toLocaleString('es-AR')})`;
                     }
                     return val > 0 ? `$ ${val.toLocaleString('es-AR')}` : 'Sin registro ($ 0)';
                 }
@@ -826,8 +826,8 @@ const openInvoiceViewerModal = (itemOrConcept, periodo, monto) => {
         const fmtMonto = typeof fmt === 'function' ? fmt(meta.monto) : `$ ${meta.monto.toLocaleString('es-AR')}`;
         const statusColor = meta.estadoPago === "Pagado" ? "#10b981" : "#f59e0b";
         const statusLabel = meta.estadoPago === "Pagado"
-            ? "✓ Pagado y Conciliado"
-            : `⚠️ ${meta.estadoPago} (Pasivo Devengado)`;
+            ? "Pagado y Conciliado"
+            : `${meta.estadoPago} (Pasivo Devengado)`;
         const hasOriginalScan = Boolean(meta.comprobanteUrl);
 
         const docHtml = `
@@ -893,8 +893,8 @@ const openInvoiceViewerModal = (itemOrConcept, periodo, monto) => {
                         <div class="total-val">${fmtMonto}</div>
                     </div>
                     <div class="scan-actions">
-                        ${hasOriginalScan ? `<a class="btn-scan" href="${meta.comprobanteUrl}" target="_blank" rel="noopener">📎 Abrir Factura / Recibo Escaneado Original (ConsorcioAbierto)</a>` : ''}
-                        <a class="btn-liq" href="${meta.settlementPdfUrl}" target="_blank" rel="noopener">📄 Abrir Liquidación Oficial ${meta.periodo} (PDF)</a>
+                        ${hasOriginalScan ? `<a class="btn-scan" href="${meta.comprobanteUrl}" target="_blank" rel="noopener">Abrir Factura / Recibo Escaneado Original (ConsorcioAbierto)</a>` : ''}
+                        <a class="btn-liq" href="${meta.settlementPdfUrl}" target="_blank" rel="noopener">Abrir Liquidación Oficial ${meta.periodo} (PDF)</a>
                     </div>
                     <div class="stamp">
                         <span>Documento Auditado — Sarmiento 360 (${hasOriginalScan ? 'Con adjunto digitalizado oficial' : 'Registrado en liquidación mensual'})</span>
@@ -910,14 +910,14 @@ const openInvoiceViewerModal = (itemOrConcept, periodo, monto) => {
     // Configurar botones de acción del pie del modal
     const downloadBtn = document.getElementById("invoiceDownloadBtn");
     if (downloadBtn) {
-        downloadBtn.textContent = meta.comprobanteUrl ? "📎 Descargar Comprobante Original" : "⬇ Descargar Liquidación PDF";
+        downloadBtn.textContent = meta.comprobanteUrl ? "Descargar Comprobante Original" : "Descargar Liquidación PDF";
         downloadBtn.onclick = () => {
             window.open(meta.pdfUrl, '_blank');
         };
     }
     const openTabBtn = document.getElementById("invoiceOpenTabBtn");
     if (openTabBtn) {
-        openTabBtn.textContent = "↗ Ver Liquidación Completa";
+        openTabBtn.textContent = "Ver Liquidación Completa";
         openTabBtn.onclick = () => {
             window.open(meta.settlementPdfUrl, '_blank');
         };
