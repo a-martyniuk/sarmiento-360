@@ -622,6 +622,7 @@ const renderHistoricalChart = () => {
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
         tooltip: {
             theme: 'dark',
+            fillSeriesColor: false,
             y: {
                 formatter: (val, { seriesIndex, dataPointIndex, w }) => {
                     const baseStr = fmt(val);
@@ -682,21 +683,85 @@ const renderCategoryChart = () => {
     const opts = {
         series,
         labels: cats,
-        chart: { type: 'donut', height: 220, background: 'transparent', fontFamily: 'Inter, sans-serif' },
+        chart: { 
+            type: 'donut', 
+            height: 230, 
+            background: 'transparent', 
+            fontFamily: 'Inter, sans-serif' 
+        },
         colors,
         stroke: { show: false },
         legend: { show: false },
         dataLabels: { enabled: false },
-        plotOptions: { pie: { donut: { size: '65%', labels: {
-            show: true,
-            name: { show: true, color: '#94a3b8' },
-            value: { show: true, color: '#f1f5f9', fontSize: '1rem', fontWeight: '700' },
-            total: { show: true, label: 'Total', color: '#94a3b8', formatter: (w) => {
-                const t = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                return fmt(t);
-            }}
-        }}}},
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        plotOptions: { 
+            pie: { 
+                donut: { 
+                    size: '72%', 
+                    labels: {
+                        show: true,
+                        name: { 
+                            show: true, 
+                            fontSize: '0.85rem', 
+                            fontFamily: 'Inter, sans-serif', 
+                            fontWeight: 700, 
+                            color: '#f8fafc',
+                            offsetY: -6
+                        },
+                        value: { 
+                            show: true, 
+                            fontSize: '1.15rem', 
+                            fontFamily: 'Inter, sans-serif', 
+                            fontWeight: 800, 
+                            color: '#38bdf8',
+                            offsetY: 6,
+                            formatter: (val) => fmtFull(Number(val))
+                        },
+                        total: { 
+                            show: true, 
+                            showAlways: true, 
+                            label: 'Total Gastos', 
+                            fontSize: '0.75rem', 
+                            fontFamily: 'Inter, sans-serif', 
+                            fontWeight: 600, 
+                            color: '#94a3b8', 
+                            formatter: (w) => {
+                                const t = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                return fmtFull(t);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        tooltip: { 
+            theme: 'dark', 
+            fillSeriesColor: false,
+            shared: false,
+            intersect: true,
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const catName = w.globals.labels[seriesIndex];
+                const val = series[seriesIndex];
+                const total = series.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+                const color = w.globals.colors[seriesIndex];
+                return `
+                    <div style="background:#0f172a !important; border:1px solid rgba(255,255,255,0.18) !important; border-radius:8px !important; padding:8px 12px !important; box-shadow:0 14px 30px rgba(0,0,0,0.85) !important; min-width:210px !important;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px;">
+                            <span style="width:10px; height:10px; border-radius:50%; background:${color}; flex-shrink:0;"></span>
+                            <span style="color:#ffffff !important; font-size:0.8rem !important; font-weight:700 !important;">${catName}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:3px;">
+                            <span style="color:#cbd5e1 !important; font-size:0.75rem !important; font-weight:500;">Monto período:</span>
+                            <span style="color:#38bdf8 !important; font-size:0.85rem !important; font-weight:800;">${fmtFull(val)}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px;">
+                            <span style="color:#cbd5e1 !important; font-size:0.75rem !important; font-weight:500;">Participación:</span>
+                            <span style="color:#34d399 !important; font-size:0.82rem !important; font-weight:800;">${pct}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
     };
 
     if (chartCategory) chartCategory.destroy();
@@ -904,7 +969,7 @@ const renderComparisonChart = () => {
         legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '11px' },
         fill: { opacity: 0.9 },
         dataLabels: { enabled: false },
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: v => fmtFull(v) } }
     };
 
     if (chartComparison) chartComparison.destroy();
@@ -1048,6 +1113,7 @@ const createDrillChart = (selectorId, categoryName, currentInstance) => {
         dataLabels: { enabled: false },
         tooltip: {
             theme: 'dark',
+            fillSeriesColor: false,
             shared: false,
             intersect: true,
             y: { formatter: v => fmtFull(v) }
@@ -1148,7 +1214,7 @@ const renderEmployeeChart = () => {
         legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '11px' },
         fill: { opacity: 0.9 },
         dataLabels: { enabled: false },
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: v => fmtFull(v) } }
     };
 
     if (chartEmployee) chartEmployee.destroy();
@@ -1780,7 +1846,7 @@ const renderPatrimonialChart = async () => {
         },
         yaxis: { labels: { formatter: v => fmt(v) } },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: v => fmtFull(v) } }
     };
 
     if (chartPatrimonial) chartPatrimonial.destroy();

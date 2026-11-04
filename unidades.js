@@ -344,6 +344,7 @@ const renderMorosityChart = (period) => {
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
         tooltip: {
             theme: 'dark',
+            fillSeriesColor: false,
             y: { formatter: v => fmtFull(v) }
         }
     };
@@ -382,7 +383,7 @@ const renderCajaChart = (period) => {
                 return fmt(t);
             }}
         }}}},
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: v => fmtFull(v) } }
     };
 
     if (chartCaja) chartCaja.destroy();
@@ -718,7 +719,7 @@ const openModal = (ufNum) => {
         },
         yaxis: { labels: { formatter: v => fmt(v) } },
         grid: { borderColor: 'rgba(255,255,255,0.05)' },
-        tooltip: { theme: 'dark', y: { formatter: v => fmtFull(v) } }
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: v => fmtFull(v) } }
     };
 
     if (typeof ApexCharts !== 'undefined') {
