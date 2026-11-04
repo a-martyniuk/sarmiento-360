@@ -811,59 +811,76 @@
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar">
-    <div>
-        <a href="index.html" style="text-decoration:none; color:inherit;"><div class="brand">Sarmiento 360</div></a>
-        <div style="font-size:0.62rem; color:var(--text-3); display:flex; align-items:center; gap:4px; margin-top:4px; cursor:help; border-bottom: 1px dotted rgba(255,255,255,0.2); padding-bottom: 2px; width: max-content; margin-left: 1rem;" data-tooltip-down="Este panel es un desarrollo independiente de un copropietario. Los datos se extraen de las liquidaciones de expensas oficiales provistas por la administración.">
-            ℹ️ Monitoreo de Copropietario
+<aside class="sidebar" id="appSidebar">
+    <div style="padding: 0 1rem 1rem 1rem; border-bottom: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <a href="index.html#overview" style="text-decoration:none; color:inherit;">
+                <div class="brand" style="margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em;">Sarmiento 360</div>
+            </a>
+            <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" title="Colapsar / Expandir menú lateral" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-2); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+        </div>
+        <div style="font-size:0.62rem; color:var(--text-3); display:flex; align-items:center; gap:4px; margin-top:2px; cursor:help; border-bottom: 1px dotted rgba(255,255,255,0.2); padding-bottom: 1px; width: max-content;" data-tooltip-down="Plataforma de auditoría contable y jurídica independiente desarrollada por copropietarios de Sarmiento 360.">
+            Monitoreo Consorcial
         </div>
     </div>
 
-    <nav class="nav">
-        <a class="nav-link" href="index.html">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-            Dashboard de Gastos
-        </a>
-        <a class="nav-link active" href="unidades.html">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Expensas por U.F.
-        </a>
-        <a class="nav-link" href="auditoria-documentos.html">
-            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            📁 Auditoría Documental
-        </a>
-        <a class="nav-link" href="index.html#auditoria">
-            <span style="font-size:0.65rem; font-weight:800; color:#38bdf8; background:rgba(56,189,248,0.12); padding:2px 6px; border-radius:4px;">FOR</span>
-            ⚖️ Auditoría Forense
-        </a>
-        <a class="nav-link" href="index.html#reclamo">
-            <span style="font-size:0.65rem; font-weight:800; color:#34d399; background:rgba(52,211,153,0.12); padding:2px 6px; border-radius:4px;">REC</span>
-            📝 Generador Reclamos
+    <nav class="nav sidebar-nav" style="padding: 0.75rem 0;">
+        <!-- MÓDULOS PRINCIPALES DE PLATAFORMA -->
+        <div class="nav-section-title" style="font-size: 0.62rem; text-transform: uppercase; color: var(--text-3); letter-spacing: 1.5px; font-weight: 800; padding: 0.2rem 1rem; margin-bottom: 0.35rem;">
+            MÓDULOS DE PLATAFORMA
+        </div>
+
+        <a class="nav-link" href="index.html#overview" style="width: 100%; text-decoration: none;">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span class="nav-text">Overview Ejecutivo</span>
         </a>
 
-                <!-- CATEGORÍA: ASAMBLEAS POR FECHA -->
-        <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
-            <div style="font-size: 0.65rem; text-transform: uppercase; color: #a78bfa; letter-spacing: 1.5px; font-weight: 800; padding: 0.2rem 0.75rem; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                ASAMBLEAS POR FECHA
+        <a class="nav-link" href="index.html#analytics" style="width: 100%; text-decoration: none;">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            <span class="nav-text">Analytics & Tendencias</span>
+        </a>
+
+        <a class="nav-link" href="index.html#operations" style="width: 100%; text-decoration: none;">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            <span class="nav-text">Operaciones & Gastos</span>
+        </a>
+
+        <a class="nav-link" href="index.html#diagnostics" style="width: 100%; text-decoration: none;">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+            <span class="nav-text">Diagnóstico & Pericia</span>
+        </a>
+
+        <a class="nav-link" href="index.html#events" style="width: 100%; text-decoration: none;">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span class="nav-text">Asambleas & Actas</span>
+        </a>
+
+        <a class="nav-link" href="index.html#config" style="width: 100%; text-decoration: none;">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+            <span class="nav-text">Normativa & Ley 14701</span>
+        </a>
+
+        <!-- CATEGORÍA: AUDITORÍA POR UNIDAD -->
+        <div style="margin-top: 1.25rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+            <div class="nav-section-title" style="font-size: 0.62rem; text-transform: uppercase; color: var(--text-3); letter-spacing: 1.5px; font-weight: 800; padding: 0.2rem 1rem; margin-bottom: 0.35rem;">
+                VISTAS ESPECIALIZADAS
             </div>
-            <a class="nav-link" href="index.html#asamblea-2026-11-02" style="font-size: 0.78rem; padding: 0.4rem 0.75rem; gap: 6px;">
-                <span style="font-size:0.62rem; font-weight:800; color:#c084fc; background:rgba(167,139,250,0.15); padding:1px 5px; border-radius:4px;">2026</span>
-                02/11/2026 (Extraord.)
+            <a class="nav-link active" href="unidades.html" style="text-decoration: none;">
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/></svg>
+                <span class="nav-text">Expensas por U.F. (70)</span>
             </a>
-            <a class="nav-link" href="index.html#asamblea-2013-09-16" style="font-size: 0.78rem; padding: 0.4rem 0.75rem; gap: 6px;">
-                <span style="font-size:0.62rem; font-weight:800; color:#34d399; background:rgba(52,211,153,0.15); padding:1px 5px; border-radius:4px;">2013</span>
-                16/09/2013 (REC)
-            </a>
-            <a class="nav-link" href="index.html#asamblea-2012-09-05" style="font-size: 0.78rem; padding: 0.4rem 0.75rem; gap: 6px;">
-                <span style="font-size:0.62rem; font-weight:800; color:#38bdf8; background:rgba(56,189,248,0.15); padding:1px 5px; border-radius:4px;">2012</span>
-                05/09/2012 (RCP)
+            <a class="nav-link" href="auditoria-documentos.html" style="text-decoration: none;">
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span class="nav-text">Repositorio Documentos</span>
             </a>
         </div>
 
-        <div style="margin: 1.5rem 1rem 0 1rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
-            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-3); letter-spacing: 1.5px; margin-bottom: 0.25rem; font-weight: 700;">💧 Estado de Servicios</div>
-            <div style="font-size: 0.65rem; color: var(--text-3); margin-bottom: 0.6rem; line-height: 1.4;">Consulta directa a las prestadoras</div>
+        <!-- ESTADO DE SERVICIOS -->
+        <div style="margin: 1.25rem 1rem 0 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-3); letter-spacing: 1.5px; margin-bottom: 0.25rem; font-weight: 700;">Estado de Servicios</div>
+            <div style="font-size: 0.65rem; color: var(--text-3); margin-bottom: 0.5rem; line-height: 1.4;">Prestadoras públicas en tiempo real</div>
             <div id="servicesStatusWidget" style="display: flex; flex-direction: column; gap: 0.5rem;">
                 Cargando estado...
             </div>
@@ -878,7 +895,7 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
             <span>Evacuar Duda / Contacto</span>
         </button>
-        <div class="brand-sub" style="margin-bottom:6px;">Fuente de datos</div>
+        <div class="brand-sub" style="margin-bottom:4px; font-size:0.65rem;">Base de Liquidaciones</div>
         <span class="sidebar-badge" id="sidebarPeriods">Cargando...</span>
     </div>
 </aside>

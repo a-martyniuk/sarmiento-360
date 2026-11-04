@@ -2770,3 +2770,141 @@ window.printReclamoLetter = () => {
         }
     }, { passive: true });
 })();
+
+
+// =========================================================================
+// SISTEMA DE NAVEGACIÓN MODULAR Y PROGRESSIVE DISCLOSURE
+// =========================================================================
+const MODULE_HASH_MAP = {
+    'overview': 'view-overview',
+    'resumen': 'view-overview',
+    'analytics': 'view-analytics',
+    'graficos': 'view-analytics',
+    'tendencias': 'view-analytics',
+    'operaciones': 'view-operations',
+    'gastos': 'view-operations',
+    'tabla': 'view-operations',
+    'comprobantes': 'view-operations',
+    'diagnostico': 'view-diagnostics',
+    'diagnostics': 'view-diagnostics',
+    'auditoria': 'view-diagnostics',
+    'pericia': 'view-diagnostics',
+    'reclamo': 'view-diagnostics',
+    'morosidad': 'view-diagnostics',
+    'asambleas': 'view-events',
+    'eventos': 'view-events',
+    'actas': 'view-events',
+    'novedades': 'view-events',
+    'normativa': 'view-config',
+    'config': 'view-config',
+    'legal': 'view-config',
+    'reglamentos': 'view-config'
+};
+
+window.navigateToModule = function(targetViewId, targetAnchorId) {
+    const views = document.querySelectorAll('.module-view');
+    let found = false;
+
+    views.forEach(v => {
+        if (v.id === targetViewId) {
+            v.classList.add('active');
+            found = true;
+        } else {
+            v.classList.remove('active');
+        }
+    });
+
+    if (!found) {
+        const def = document.getElementById('view-overview');
+        if (def) def.classList.add('active');
+        targetViewId = 'view-overview';
+    }
+
+    // Actualizar sidebar nav items
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(btn => {
+        const btnTarget = btn.getAttribute('data-target-view');
+        if (btnTarget) {
+            btn.classList.toggle('active', btnTarget === targetViewId);
+        }
+    });
+
+    // Actualizar URL hash sin salto de página brusco
+    const cleanHash = targetViewId.replace('view-', '');
+    if (window.location.hash !== '#' + cleanHash) {
+        history.replaceState(null, '', '#' + cleanHash);
+    }
+
+    // Scroll contextual
+    if (targetAnchorId) {
+        setTimeout(() => {
+            const el = document.getElementById(targetAnchorId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 120);
+    } else {
+        const mainEl = document.querySelector('.main');
+        if (mainEl) mainEl.scrollTop = 0;
+    }
+
+    // Disparar evento de resize para recalcular anchos de ApexCharts
+    window.dispatchEvent(new Event('resize'));
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 300);
+};
+
+function initModularNavigation() {
+    // 1. Manejo de Sidebar Toggle (Colapso / Expansión 240px <-> 72px)
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('appSidebar');
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            try {
+                localStorage.setItem('sarmiento_sidebar_collapsed', isCollapsed ? '1' : '0');
+            } catch(e) {}
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 150);
+        });
+
+        // Restaurar preferencia guardada
+        try {
+            if (localStorage.getItem('sarmiento_sidebar_collapsed') === '1') {
+                sidebar.classList.add('collapsed');
+            }
+        } catch(e) {}
+    }
+
+    // 2. Resolver Hash inicial
+    function handleHashRouting() {
+        const rawHash = (window.location.hash || '').replace('#', '').toLowerCase();
+        let targetView = MODULE_HASH_MAP[rawHash];
+        let targetAnchor = null;
+
+        if (!targetView) {
+            if (rawHash.startsWith('asamblea')) {
+                targetView = 'view-events';
+                targetAnchor = rawHash;
+            } else if (rawHash === 'empleados' || rawHash === 'extraordinarios') {
+                targetView = 'view-operations';
+                targetAnchor = rawHash;
+            } else if (rawHash === 'secauditoriadocumental' || rawHash === 'secley14701' || rawHash === 'reglamentos') {
+                targetView = 'view-config';
+                targetAnchor = rawHash;
+            } else {
+                targetView = 'view-overview';
+            }
+        }
+        window.navigateToModule(targetView, targetAnchor);
+    }
+
+    window.addEventListener('hashchange', handleHashRouting);
+    handleHashRouting();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initModularNavigation);
+} else {
+    initModularNavigation();
+}
