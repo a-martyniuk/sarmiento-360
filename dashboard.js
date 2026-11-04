@@ -2766,3 +2766,51 @@ window.navigateToAssembly = function(assemblyId) {
         }
     }, 150);
 };
+
+
+// -------------------------------------------------------------
+// CARTELERA OFICIAL DE COMUNICADOS (CONSORCIOABIERTO)
+// -------------------------------------------------------------
+let currentCommsCat = 'all';
+let currentCommsSearch = '';
+
+window.filterCommsByCategory = function(category) {
+    currentCommsCat = category;
+    applyCommsFilter();
+
+    const buttons = document.querySelectorAll('.btn-comms-filter');
+    buttons.forEach(btn => {
+        const cat = btn.getAttribute('data-cat');
+        if (cat === category) {
+            btn.style.background = 'var(--accent)';
+            btn.style.color = '#fff';
+            btn.style.borderColor = 'transparent';
+        } else {
+            btn.style.background = 'rgba(255,255,255,0.05)';
+            btn.style.color = 'var(--text-2)';
+            btn.style.borderColor = 'var(--border)';
+        }
+    });
+};
+
+window.searchComms = function(query) {
+    currentCommsSearch = (query || '').toLowerCase().trim();
+    applyCommsFilter();
+};
+
+function applyCommsFilter() {
+    const items = document.querySelectorAll('.comunicado-item');
+    items.forEach(item => {
+        const itemCat = item.getAttribute('data-cat') || '';
+        const searchData = item.getAttribute('data-search') || '';
+
+        const matchesCat = (currentCommsCat === 'all' || itemCat === currentCommsCat);
+        const matchesSearch = (!currentCommsSearch || searchData.includes(currentCommsSearch));
+
+        if (matchesCat && matchesSearch) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
