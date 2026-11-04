@@ -31,3 +31,8 @@ DOCUMENTACION_LEGAL_PROPIEDADES_MARTYNIUK.md
 datos_escrituras_martyniuk.json
 MASTER_INDEX_SARMIENTO360.md
 ADMINISTRADORA_VIGENCIA_OFICIAL.md
+
+# Environment and Secrets
+.env
+.env.*
+*.env
