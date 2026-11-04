@@ -1528,8 +1528,8 @@ const renderTable = () => {
                         <span class="concepto-title" onclick="openModal('${conceptSafe}')" title="Clic para ver historial completo del concepto">${item.concepto}</span>
                         <div style="display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
                             ${showSubcat ? `<span style="font-size:0.73rem; color:var(--text-3); font-weight:500;">${subcat}</span>` : ''}
-                            ${item.estado === "Pendiente" ? `<span class="badge badge-pendiente" title="Devengado pendiente de pago">Pendiente</span>` : ''}
-                            ${item.seccion === "Pago Parcial" ? `<span class="badge badge-pendiente" title="Pago parcial — Saldo impago: ${fmtFull(item.saldo_pendiente || 0)}">Pago Parcial</span>` : ''}
+                            ${item.estado === "Pendiente" && item.seccion !== "Pago Parcial" ? `<span class="badge badge-pendiente" title="Devengado pendiente de pago">Pendiente</span>` : ''}
+                            ${item.seccion === "Pago Parcial" ? `<span class="badge badge-pendiente" title="Pago parcial — Saldo impago: ${fmtFull(item.saldo_pendiente || 0)}">Pago Parcial (${fmt(item.saldo_pendiente || 0)} pend.)</span>` : ''}
                             ${badges.join(' ')}
                         </div>
                     </div>
