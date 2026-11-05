@@ -1215,68 +1215,7 @@
             transform: scale(1);
         }
 
-        /* ── RESPONSIVIDAD MOBILE (PANTALLAS <= 768px) ── */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                min-width: 100%;
-                height: auto;
-                position: relative;
-                padding: 1.25rem 1rem;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-            .nav {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 6px;
-                margin-top: 0.75rem;
-            }
-            .nav-link {
-                width: auto;
-                flex: 1 1 auto;
-                justify-content: center;
-                padding: 0.5rem 0.6rem;
-                font-size: 0.8rem;
-            }
-            .sidebar-footer, #missingInvoicesSection {
-                display: none !important;
-            }
-            .main {
-                padding: 1.25rem 1rem;
-            }
-            .page-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-                width: 100%;
-                gap: 0.5rem;
-            }
-            .toolbar select, .toolbar input {
-                width: 100%;
-                margin-left: 0 !important;
-            }
-            .kpi-grid, .employee-grid {
-                grid-template-columns: 1fr !important;
-                gap: 0.75rem;
-            }
-            .charts-grid, .charts-row, .charts-row-3 {
-                grid-template-columns: 1fr !important;
-                gap: 1rem;
-            }
-            .table-container {
-                overflow-x: auto;
-            }
-            table {
-                min-width: 1000px;
-            }
-        }
+/* [REPOSICIONADO AL FINAL DE STYLE PARA MÁXIMA ESPECIFICIDAD] */
 
         /* ── IMPRESIÓN REPORTES (PDF) ── */
         @media print {
@@ -1455,6 +1394,182 @@
         .sidebar.collapsed + .main {
             max-width: calc(100vw - 72px) !important;
             width: calc(100vw - 72px) !important;
+        }
+
+        /* ── RESPONSIVIDAD MOBILE OPTIMIZADA (PANTALLAS <= 768px) ── */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column !important;
+                overflow-x: hidden !important;
+            }
+
+            /* 1. Header superior compacto y sticky en mobile */
+            .sidebar {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                max-height: 85vh !important;
+                overflow-y: auto !important;
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 1000 !important;
+                background: rgba(10, 14, 23, 0.98) !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
+                border-right: none !important;
+                border-bottom: 1px solid var(--border) !important;
+                padding: 0.65rem 1rem !important;
+                box-sizing: border-box !important;
+                transition: max-height 0.25s ease !important;
+            }
+
+            /* Estado colapsado: barra superior minimalista de 56px */
+            .sidebar.collapsed {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                max-height: 56px !important;
+                overflow: hidden !important;
+                padding: 0.6rem 1rem !important;
+            }
+
+            .sidebar.collapsed .brand {
+                display: block !important;
+            }
+
+            .sidebar.collapsed div[data-tooltip-down] {
+                display: flex !important;
+            }
+
+            /* Icono del botón toggle en mobile: indica desplegar / contraer */
+            .sidebar.collapsed .sidebar-toggle-btn svg {
+                transform: rotate(-90deg) !important;
+            }
+            .sidebar:not(.collapsed) .sidebar-toggle-btn svg {
+                transform: rotate(90deg) !important;
+            }
+
+            .sidebar.collapsed .sidebar-nav,
+            .sidebar.collapsed .sidebar-footer,
+            .sidebar.collapsed #missingInvoicesSection,
+            .sidebar.collapsed #servicesStatusWidget,
+            .sidebar.collapsed .sidebar-asambleas-subnav {
+                display: none !important;
+            }
+
+            /* Menú desplegado en mobile */
+            .sidebar:not(.collapsed) .sidebar-nav {
+                display: flex !important;
+                flex-direction: column !important;
+                margin-top: 0.75rem !important;
+            }
+
+            .sidebar:not(.collapsed) .nav-link {
+                justify-content: flex-start !important;
+                padding: 0.75rem 0.85rem !important;
+                font-size: 0.88rem !important;
+                width: 100% !important;
+            }
+
+            .sidebar:not(.collapsed) .nav-text {
+                display: inline !important;
+            }
+
+            .sidebar:not(.collapsed) .nav-section-title {
+                display: block !important;
+            }
+
+            .sidebar:not(.collapsed) .sidebar-footer {
+                display: block !important;
+                margin-top: 1rem !important;
+                padding-top: 1rem !important;
+            }
+
+            .sidebar:not(.collapsed) .btn-contact-sidebar span {
+                display: inline !important;
+            }
+
+            .sidebar:not(.collapsed) #missingInvoicesSection,
+            .sidebar:not(.collapsed) #servicesStatusWidget {
+                display: flex !important;
+            }
+
+            /* 2. Contenido Principal Full Width */
+            .main, .sidebar.collapsed + .main {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                padding: 1rem 0.85rem !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
+            }
+
+            .main > * {
+                max-width: 100% !important;
+            }
+
+            /* 3. Prevención de auto-zoom forzado en iOS (Safari / Chrome) */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+
+            /* 4. Estructura y cabecera de módulo adaptables */
+            .page-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.75rem !important;
+            }
+
+            .toolbar {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                width: 100% !important;
+                gap: 0.5rem !important;
+            }
+
+            .toolbar select, .toolbar input, .toolbar button {
+                width: 100% !important;
+                margin-left: 0 !important;
+                min-height: 40px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* 5. Grillas colapsables a 1 columna */
+            .kpi-grid, .employee-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+            }
+
+            .charts-grid, .charts-row, .charts-row-3 {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+
+            /* 6. Tablas financieras deslizables táctilmente */
+            .table-container {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                border-radius: 8px !important;
+                margin-bottom: 1rem !important;
+            }
+
+            table {
+                min-width: 800px !important;
+            }
+
+            /* 7. Asambleas y filtros */
+            .assembly-tab-btn {
+                white-space: normal !important;
+                text-align: center !important;
+                padding: 6px 10px !important;
+                font-size: 0.75rem !important;
+            }
+
+            #inputSearchComms {
+                max-width: 100% !important;
+            }
         }
 </style>
 </head>

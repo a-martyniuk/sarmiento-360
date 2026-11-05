@@ -2656,6 +2656,14 @@ window.navigateToModule = function(targetViewId, targetAnchorId) {
         if (mainEl) mainEl.scrollTop = 0;
     }
 
+    // Auto-colapsar sidebar en mobile al navegar
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('appSidebar');
+        if (sidebar && !sidebar.classList.contains('collapsed')) {
+            sidebar.classList.add('collapsed');
+        }
+    }
+
     // Disparar evento de resize para recalcular anchos de ApexCharts
     window.dispatchEvent(new Event('resize'));
     setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
@@ -2670,16 +2678,20 @@ function initModularNavigation() {
         toggleBtn.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
-            try {
-                localStorage.setItem('sarmiento_sidebar_collapsed', isCollapsed ? '1' : '0');
-            } catch(e) {}
+            if (window.innerWidth > 768) {
+                try {
+                    localStorage.setItem('sarmiento_sidebar_collapsed', isCollapsed ? '1' : '0');
+                } catch(e) {}
+            }
             window.dispatchEvent(new Event('resize'));
             setTimeout(() => window.dispatchEvent(new Event('resize')), 150);
         });
 
-        // Restaurar preferencia guardada
+        // Restaurar preferencia guardada (en mobile siempre inicia colapsado)
         try {
-            if (localStorage.getItem('sarmiento_sidebar_collapsed') === '1') {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+            } else if (localStorage.getItem('sarmiento_sidebar_collapsed') === '1') {
                 sidebar.classList.add('collapsed');
             }
         } catch(e) {}
