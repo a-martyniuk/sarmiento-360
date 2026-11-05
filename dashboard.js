@@ -351,6 +351,18 @@ const detectMissingInvoices = () => {
             if (rec.name === "Seguro Consorcio" && (month === "04" || month === "05")) {
                 return;
             }
+            // Ascensores Guillemi: Contrato rescindido a partir de agosto 2026 por cambio de prestador y licitación (Punto 5 Asamblea 02/11/2026)
+            if (rec.name === "Abono Ascensores (Guillemi)" && p >= "2026-08") {
+                return;
+            }
+            // Fumigación FB Saneamiento: Servicio bimestral bajo gestión D&F (meses pares 02, 04, 06); no renovado tras junio 2026
+            if (rec.name === "Abono Fumigación (FB Saneamiento)" && (month !== "02" && month !== "04" && month !== "06" || p >= "2026-07")) {
+                return;
+            }
+            // Seguridad MM / Bastida: En agosto 2026 (traspaso de administración) la facturación fue diferida e imputada en septiembre 2026
+            if (rec.name === "Seguridad 24hs (MM / Bastida)" && p === "2026-08") {
+                return;
+            }
             const hasGasto = rawExpenses.some(e => e.periodo === p && rec.test(e));
             if (!hasGasto) {
                 missing.push({ periodo: p, service: rec.name });
