@@ -588,7 +588,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-left: 3px solid var(--red); border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--red); font-size:0.85rem;"> Auditoría Pericial de Seguridad (Piso 14°A · Torre 356 · Celina Velayos)</strong>
+                        <strong style="color:var(--red); font-size:0.85rem;"> Auditoría Pericial de Seguridad (Piso 14°A · Torre 356 · Coef. 4,139%)</strong>
                         <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--red); border:1px solid rgba(244,63,94,0.3); font-size:0.7rem;">SUBSIDIO RECIBIDO</span>
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">
@@ -603,7 +603,7 @@ const openModal = (ufNum) => {
             secHtml = `
                 <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-left: 3px solid var(--red); border-radius: 8px; padding: 0.85rem 1rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="color:var(--red); font-size:0.85rem;"> Auditoría Pericial de Seguridad (Piso 14°A · Torre 360 · Ex Consejero Putz)</strong>
+                        <strong style="color:var(--red); font-size:0.85rem;"> Auditoría Pericial de Seguridad (Piso 14°A · Torre 360 · Coef. 4,139%)</strong>
                         <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--red); border:1px solid rgba(244,63,94,0.3); font-size:0.7rem;">SUBSIDIO RECIBIDO</span>
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-1); margin:4px 0;">

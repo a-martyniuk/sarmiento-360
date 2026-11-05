@@ -281,13 +281,13 @@
       "piso_14_unidades_grandes": {
         "uf_69": {
           "dpto": "14°A (Torre 356)",
-          "titular": "Celina Velayos",
+          "titular": "Propietario U.F. 69",
           "porcentual_escritura": 4.139,
           "saldo_deudor": -1370433.94
         },
         "uf_70": {
           "dpto": "14°A (Torre 360)",
-          "titular": "Steven / Gerardo Putz (Ex Consejero)",
+          "titular": "Propietario U.F. 70",
           "porcentual_escritura": 4.139,
           "saldo_deudor": -1370433.94
         }
@@ -1385,7 +1385,7 @@
       {
         "uf": 69,
         "dpto": "14°A (Torre 356)",
-        "titular": "Celina Velayos (14°A - Torre 356)",
+        "titular": "Propietario U.F. 69 (14°A - Torre 356)",
         "dni": "",
         "porcentual_legal": 4.139,
         "porcentual_liquidado_ca": 4.139,
@@ -1401,7 +1401,7 @@
       {
         "uf": 70,
         "dpto": "14°A (Torre 360)",
-        "titular": "Steven / Gerardo Putz (Ex Consejero · 14°A - Torre 360)",
+        "titular": "Propietario U.F. 70 (14°A - Torre 360)",
         "dni": "",
         "porcentual_legal": 4.139,
         "porcentual_liquidado_ca": 4.139,
@@ -1540,8 +1540,8 @@
       "descuento_comercial_10pct": 46180.12,
       "monto": 415621.11,
       "concepto": "Materiales de impermeabilización y pintura por filtraciones de azotea",
-      "origen": "Requerido por Celina Velayos (propietaria de UF 69, 14°A - Torre 356, último piso) debido a filtraciones estructurales originadas en la terraza común del edificio.",
-      "estado_asamblea": "VERIFICADO Y ACLARADO en Asamblea del 02/11/2026 como gasto común de reparación por filtración de terraza en UF 69 (Celina Velayos), descartándose que fuera pintura privada de UF 70."
+      "origen": "Requerido por copropietario de UF 69 (14°A - Torre 356, último piso) debido a filtraciones estructurales originadas en la terraza común del edificio.",
+      "estado_asamblea": "VERIFICADO Y ACLARADO en Asamblea del 02/11/2026 como gasto común de reparación por filtración de terraza en UF 69 (14°A Torre 356), descartándose que fuera pintura privada de UF 70."
     }
   },
   "auditoria_proveedores_vs_ipc": {
