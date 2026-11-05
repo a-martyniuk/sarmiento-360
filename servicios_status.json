@@ -1,15 +1,15 @@
 {
-    "actualizado": "05/11/2026 01:04",
+    "actualizado": "05/11/2026 09:31",
     "edesur": {
         "status": "Normal",
-        "message": "Servicio eléctrico operando normalmente."
+        "message": "Servicio electrico operando normalmente."
     },
     "aysa": {
-        "status": "Desconocido",
-        "message": "No se pudo verificar el estado del suministro de agua. Revisar manualmente."
+        "status": "Normal",
+        "message": "Suministro de agua operando normalmente."
     },
     "metrogas": {
-        "status": "Desconocido",
-        "message": "No se pudo verificar el estado del suministro de gas. Revisar manualmente."
+        "status": "Normal",
+        "message": "Suministro de gas de Metrogas operando normalmente."
     }
 }
