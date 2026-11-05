@@ -66,14 +66,14 @@ def main():
         print(f"Período de expensas esperado para evaluar/descargar: {expected_period}")
 
         is_valid = is_period_valid(expected_period)
-        is_first_five_days = now.day <= 5
+        is_in_window = now.day <= 12
 
-        # Si el período actual es válido Y NO estamos en los primeros 5 días del mes, omitir re-descargas
-        if is_valid and not is_first_five_days:
+        # Si el período actual es válido Y NO estamos en la ventana de publicación (días 1 al 12), omitir re-descargas
+        if is_valid and not is_in_window:
             print(f"El período {expected_period} se encuentra disponible con datos completos (válido). Se omite la descarga repetida.")
         else:
-            if is_first_five_days:
-                print(f"Período en ventana de publicación (Día 1-5 del mes). Buscando versiones nuevas o definitivas...")
+            if is_in_window:
+                print(f"Período en ventana de publicación (Días 1-12 del mes). Buscando versiones nuevas o definitivas...")
             elif not is_valid:
                 print(f"El período {expected_period} no está cargado o contiene información incompleta/inválida. Buscando actualización...")
 

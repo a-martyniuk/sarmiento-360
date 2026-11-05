@@ -39,7 +39,7 @@ def sync_from_consorcioabierto_api(ca_bundle):
     session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
     try:
         r_login_page = session.get("https://app.consorcioabierto.com/login", timeout=15)
-        m_csrf = re.search(r'name="_csrf_token"\s+value="([^"]+)"', r_login_page.text)
+        m_csrf = re.search(r'csrf_token:\s*"([^"]+)"', r_login_page.text) or re.search(r'name="_csrf_token"\s+value="([^"]+)"', r_login_page.text)
         csrf_token = m_csrf.group(1) if m_csrf else ""
         session.post(
             "https://app.consorcioabierto.com/login_check",
@@ -51,6 +51,23 @@ def sync_from_consorcioabierto_api(ca_bundle):
         for p_key, p_val in ca_bundle.get("periodos", {}).items():
             if p_val.get("liquidacion_id"):
                 liq_map[p_key] = p_val["liquidacion_id"]
+
+        # Sincronizar circulares y comunicados oficiales si el endpoint responde
+        try:
+            r_comms = session.get(
+                f"https://app.consorcioabierto.com/consorcios/{CONSORCIO_ID}/comunicados",
+                headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
+                timeout=15,
+            )
+            if r_comms.status_code == 200 and "application/json" in r_comms.headers.get("content-type", ""):
+                comms_data = r_comms.json()
+                comms_file = os.path.join(CACHE_DIR, "comunicados.json")
+                if isinstance(comms_data, list) and len(comms_data) > 0:
+                    with open(comms_file, "w", encoding="utf-8") as cf:
+                        json.dump(comms_data, cf, indent=2, ensure_ascii=False)
+                    print(f"   [API ConsorcioAbierto] Sincronizados {len(comms_data)} comunicados oficiales.")
+        except Exception as e_comms:
+            print(f"   [Aviso Comunicados CA] {e_comms}")
 
         # Auto-descubrir nuevas liquidaciones publicadas en el portal ConsorcioAbierto
         try:

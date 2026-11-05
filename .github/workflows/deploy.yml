@@ -6,12 +6,12 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    # Verificación de Servicios (Luz, Agua, Gas): Diariamente a las 06:00, 12:00, 18:00 y 21:00 Arg (UTC-3).
-    # Cron en UTC: 0 0,9,15,21 * * *
-    - cron: '0 0,9,15,21 * * *'
-    # Verificación de Expensas: Primeros 5 días del mes a las 18:00 Arg (21:00 UTC).
-    # Cron en UTC: 0 21 1-5 * *
-    - cron: '0 21 1-5 * *'
+    # 1. Monitoreo Liviano de Servicios Publicos (06:00, 12:00 y 22:00 Arg · UTC-3)
+    # Cron en UTC (09:00, 15:00 y 01:00 UTC):
+    - cron: '0 1,9,15 * * *'
+    # 2. Sincronizacion Principal Diaria (Comunicados, Expensas Dias 1-12 y Servicios): 17:00 Arg (20:00 UTC)
+    # Cron en UTC:
+    - cron: '0 20 * * *'
 
 permissions:
   contents: write
@@ -38,13 +38,18 @@ jobs:
       - name: Determine Update Mode
         id: mode-selector
         run: |
-          # Si se activa por push, dispatch o por cualquier cron durante los primeros 5 días del mes (días 1-5)
-          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] || { [ "${{ github.event_name }}" = "schedule" ] && [ "$(date +%d)" -le 5 ]; }; then
+          CURRENT_HOUR_UTC=$(date -u +%H)
+          CURRENT_DAY=$(date +%d)
+          # Modo completo si:
+          # - Es activado por push o workflow_dispatch manual
+          # - Es la corrida principal diaria de las 17:00 Arg (20:00 UTC)
+          # - Estamos en la ventana activa de publicacion de expensas (dias 1 al 12 del mes)
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$CURRENT_HOUR_UTC" = "20" ] || [ "$CURRENT_DAY" -le 12 ]; then
             echo "MODE=--all" >> $GITHUB_ENV
-            echo "Determined Update Mode: --all (Full update + PDF search)"
+            echo "Determined Update Mode: --all (Full sync: Comunicados + Expensas + Servicios)"
           else
             echo "MODE=--services-only" >> $GITHUB_ENV
-            echo "Determined Update Mode: --services-only (Utility monitoring only)"
+            echo "Determined Update Mode: --services-only (Lightweight utility check)"
           fi
 
       - name: Run Update Script
