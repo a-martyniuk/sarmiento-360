@@ -1531,17 +1531,6 @@
           "categoria": "Gastos Extraordinarios"
         }
       ]
-    },
-    "rex": {
-      "proveedor": "Pinturerías Rex S.A.",
-      "factura": "FC B 7001-00005828",
-      "fecha": "28/07/2025",
-      "subtotal_bruto": 461801.23,
-      "descuento_comercial_10pct": 46180.12,
-      "monto": 415621.11,
-      "concepto": "Materiales de impermeabilización y pintura por filtraciones de azotea",
-      "origen": "Requerido por Celina Velayos (propietaria de UF 69, 14°A - Torre 356, último piso) debido a filtraciones estructurales originadas en la terraza común del edificio.",
-      "estado_asamblea": "VERIFICADO Y ACLARADO en Asamblea del 02/11/2026 como gasto común de reparación por filtración de terraza en UF 69 (Celina Velayos), descartándose que fuera pintura privada de UF 70."
     }
   },
   "auditoria_proveedores_vs_ipc": {

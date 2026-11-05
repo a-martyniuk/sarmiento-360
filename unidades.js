@@ -595,7 +595,7 @@ const openModal = (ufNum) => {
                         Monto Pagado de Menos en 26 Meses: <strong style="color:var(--red); font-size:1.05rem;">-$ 1.370.433,94</strong>
                     </div>
                     <div style="font-size:0.75rem; color:var(--text-2); line-height:1.4;">
-                        Alícuota reglamentaria por dominio: <strong>4,139%</strong> vs. Alícuota plana abonada en Seguridad: <strong>1,4286% (1/70)</strong>. Nota de asamblea 02/11/2026: la compra en Pinturerías Rex (FC B 7001-00005828 por $ 415.621,11) correspondió a filtración estructural de azotea sobre esta unidad del último piso.
+                        Alícuota reglamentaria por dominio: <strong>4,139%</strong> vs. Alícuota plana abonada en Seguridad: <strong>1,4286% (1/70)</strong>.
                     </div>
                 </div>
             `;
