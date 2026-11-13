@@ -3,7 +3,7 @@
   "serie_id": "148.3_INIVELNAL_DICI_M_26",
   "nombre": "Índice de Precios al Consumidor (IPC) Cobertura Nacional",
   "periodo_base_auditoria": "2025-07",
-  "ultima_actualizacion": "2026-11-12",
+  "ultima_actualizacion": "2026-11-13",
   "ipc": [
     {
       "periodo": "2024-01",
@@ -36,7 +36,7 @@
     {
       "periodo": "2024-05",
       "fecha": "2024-05-01",
-      "indice": 6073.7,
+      "indice": 6073.72,
       "variacion_mensual_pct": 4.18,
       "inflacion_acumulada_desde_2025_07_pct": -32.69
     },
@@ -232,10 +232,16 @@
     {
       "periodo": "2026-09",
       "fecha": "2026-09-01",
-      "indice": 12497.75,
-      "variacion_mensual_pct": 1.8,
-      "estimado": true,
-      "inflacion_acumulada_desde_2025_07_pct": 38.5
+      "indice": 12514.15,
+      "variacion_mensual_pct": 1.93,
+      "inflacion_acumulada_desde_2025_07_pct": 38.68
+    },
+    {
+      "periodo": "2026-10",
+      "fecha": "2026-10-01",
+      "indice": 12785.93,
+      "variacion_mensual_pct": 2.17,
+      "inflacion_acumulada_desde_2025_07_pct": 41.69
     }
   ]
 }
