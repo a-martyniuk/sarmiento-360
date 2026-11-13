@@ -43,8 +43,8 @@ jobs:
           # Modo completo si:
           # - Es activado por push o workflow_dispatch manual
           # - Es la corrida principal diaria de las 17:00 Arg (20:00 UTC)
-          # - Estamos en la ventana activa de publicacion de expensas (dias 1 al 12 del mes)
-          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$CURRENT_HOUR_UTC" = "20" ] || [ "$CURRENT_DAY" -le 12 ]; then
+          # - Estamos en la ventana activa de publicacion de expensas (dias 1 al 16 del mes)
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$CURRENT_HOUR_UTC" = "20" ] || [ "$CURRENT_DAY" -le 16 ]; then
             echo "MODE=--all" >> $GITHUB_ENV
             echo "Determined Update Mode: --all (Full sync: Comunicados + Expensas + Servicios)"
           else

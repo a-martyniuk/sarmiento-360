@@ -19,6 +19,7 @@ CONSORCIO_ID = 27151
 LIQUIDACIONES_CA = {
     "2026-08": 633528,
     "2026-09": 645048,
+    "2026-10": 667261,
 }
 
 
@@ -307,7 +308,7 @@ def transform_ca_expense(item):
     attrs = item.get("attributes", {})
     particular = attrs.get("particular", False)
     importe = float(attrs.get("importe") or 0.0)
-    if particular or importe <= 0:
+    if particular or importe == 0:
         return None
 
     periodo = attrs.get("periodo")
@@ -780,6 +781,27 @@ def main():
             "saldo_disponibilidades": -37628.18,
             "fondo_reserva_cierre": 4055290.74,
             "cuenta_operativa_cierre": -4092918.92,
+            "administracion": "Fernández - Villasenin",
+        },
+        "2026-10": {
+            "periodo": "2026-10",
+            "ingresos": 19904204.82,
+            "ingresos_operativos": 18404204.82,
+            "ingresos_fondo_reserva": 1500000.00,
+            "egresos": 15219581.58,
+            "egresos_deuda_anterior": 716000.00,
+            "egresos_caja_total": 13104071.18,
+            "saldo_banco": 6762505.45,
+            "recaudado_termino": 17135760.24,
+            "recaudado_adeudado": 2304700.29,
+            "recaudado_intereses": 463744.29,
+            "recaudado_no_identificado": 0.00,
+            "deuda_acumulada": 1191012.97,
+            "pasivos_pendientes": 2831510.40,
+            "patrimonio_neto": 7953518.42,
+            "saldo_disponibilidades": 6762505.45,
+            "fondo_reserva_cierre": 5555290.74,
+            "cuenta_operativa_cierre": 1207214.71,
             "administracion": "Fernández - Villasenin",
         },
     }

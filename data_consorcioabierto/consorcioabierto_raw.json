@@ -5863,6 +5863,2932 @@
           "pay_pago_fondeo_habilitado": false
         }
       }
+    },
+    "2026-10": {
+      "liquidacion_id": 667261,
+      "gastos": {
+        "meta": {
+          "totales": {
+            "gastos": {
+              "cant": 23,
+              "monto": 14694808.58
+            },
+            "gastos_multiples": {
+              "cant": 0,
+              "monto": 0
+            },
+            "sueldos": {
+              "cant": 2,
+              "monto": 2124773
+            },
+            "iva": 0,
+            "monto_total": 15219581.58,
+            "notas_credito": {
+              "cant": 1,
+              "monto": -1600000
+            }
+          },
+          "filtros": [],
+          "meses": {
+            "desde": "2026-10",
+            "hasta": "2026-10"
+          }
+        },
+        "data": [
+          {
+            "type": "gasto",
+            "id": 11959204,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11972633,
+                  "cuenta": {
+                    "id": 14,
+                    "cod": 14,
+                    "nombre": "Sueldos: Sueldo neto/líquido"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 1139130
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": true,
+              "periodo": "2026-10",
+              "importe": 1139130,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Recibo",
+              "comprobante_nro": "269057",
+              "comprobante_adjunto": {
+                "tipo": "recibo_sueldo",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-10 Mensual - ENCARGADO TITULAR.pdf",
+                "fecha_upload": "2026-11-03 12:21:07",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/consorcios/27151/recibos_sueldo/SUELDO-261103122107905-b22afce41af4e9b3.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Liquidación de sueldo Oct 2026 - Mensual",
+              "sueldo_bruto": 1352082.96,
+              "imputaciones_porcentajes": true,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-03",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 938853,
+                  "attributes": {
+                    "primer_nombre": "Empleado: ENCARGADO TITULAR",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: ENCARGADO TITULAR"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11959205,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11972634,
+                  "cuenta": {
+                    "id": 14,
+                    "cod": 14,
+                    "nombre": "Sueldos: Sueldo neto/líquido"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 985643
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": true,
+              "periodo": "2026-10",
+              "importe": 985643,
+              "iva_discriminado": false,
+              "saldo": 10309,
+              "comprobante_tipo": "Recibo",
+              "comprobante_nro": "269058",
+              "comprobante_adjunto": {
+                "tipo": "recibo_sueldo",
+                "nombre_original": "SARMIENTO 356, 358 Y - Sueldo 2026-10 Mensual - 2° ENCARGADO.pdf",
+                "fecha_upload": "2026-11-03 12:21:08",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/consorcios/27151/recibos_sueldo/SUELDO-261103122108399-63b61ff8b53635a8.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Liquidación de sueldo Oct 2026 - Mensual",
+              "sueldo_bruto": 1259607.67,
+              "imputaciones_porcentajes": true,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-03",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 938854,
+                  "attributes": {
+                    "primer_nombre": "Empleado: 2° ENCARGADO",
+                    "identificacion": "CUIL Protegido",
+                    "nombre": "Empleado: 2° ENCARGADO"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11771287,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11784374,
+                  "cuenta": {
+                    "id": 7,
+                    "cod": 7,
+                    "nombre": "Gastos de Administración"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 900032
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 900032,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Sin comprobante",
+              "comprobante_nro": "-",
+              "detalle": "HONORARIOS ADM LIQUIDACIÓN",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-15",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 89952,
+                  "attributes": {
+                    "primer_nombre": "ADMINISTRACIÓN DE CONSORCIOS FERNÁNDEZ - VILLASENIN",
+                    "identificacion": "CUIL 27-29946737-1",
+                    "nombre": "ADMINISTRACIÓN DE CONSORCIOS FERNÁNDEZ - VILLASENIN"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11814496,
+            "attributes": {
+              "particular": false,
+              "es_seguro": true,
+              "imputaciones": [
+                {
+                  "id": 11827524,
+                  "cuenta": {
+                    "id": 8,
+                    "cod": 8,
+                    "nombre": "Seguros Ordinarios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 15533
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 15533,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Sin comprobante",
+              "comprobante_nro": "-",
+              "detalle": "AP",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-22",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 123192,
+                  "attributes": {
+                    "primer_nombre": "ALLIANZ ARGENTINA Compañia de Seguros S.A.",
+                    "identificacion": "CUIT 30-50003721-7",
+                    "nombre": "ALLIANZ ARGENTINA Compañia de Seguros S.A."
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12044222,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12058352,
+                  "cuenta": {
+                    "id": 15,
+                    "cod": 15,
+                    "nombre": "Sueldos: Cargas sociales"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": -1600000
+                }
+              ],
+              "tiene_pagos": false,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": -1600000,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Nota Crédito A",
+              "comprobante_nro": "0000-00000001",
+              "detalle": "REAJUSTE ESTIMADO ARCA",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": true,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 83616,
+                  "attributes": {
+                    "primer_nombre": "ARCA",
+                    "identificacion": "CUIT 33-69345023-9",
+                    "nombre": "ARCA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12044076,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12058206,
+                  "cuenta": {
+                    "id": 15,
+                    "cod": 15,
+                    "nombre": "Sueldos: Cargas sociales"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 1650682.45
+                }
+              ],
+              "tiene_pagos": false,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 1650682.45,
+              "iva_discriminado": false,
+              "saldo": 1650682.45,
+              "comprobante_tipo": "Ticket",
+              "comprobante_nro": "1706932892",
+              "cuota_nro": 8,
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto",
+                "nombre_original": "afip_vep_cuit_30714120626_nrovep_1706932892.pdf",
+                "fecha_upload": "2026-11-12 18:43:56",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/consorcios/27151/comprobantes_gastos/GASTO-261112184356980-95e514c5a3c0ca6a.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "CARGAS SOCIALES",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 83616,
+                  "attributes": {
+                    "primer_nombre": "ARCA",
+                    "identificacion": "CUIT 33-69345023-9",
+                    "nombre": "ARCA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12044075,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12058205,
+                  "cuenta": {
+                    "id": 15,
+                    "cod": 15,
+                    "nombre": "Sueldos: Cargas sociales"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 1520893.49
+                }
+              ],
+              "tiene_pagos": false,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 1520893.49,
+              "iva_discriminado": false,
+              "saldo": 1520893.49,
+              "comprobante_tipo": "Ticket",
+              "comprobante_nro": "1706948644",
+              "cuota_nro": 9,
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto",
+                "nombre_original": "afip_vep_cuit_30714120626_nrovep_1706948644.pdf",
+                "fecha_upload": "2026-11-12 19:24:59",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/consorcios/27151/comprobantes_gastos/GASTO-261112192459678-1442ed3629501ded.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "CARGAS SOCIALES",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 83616,
+                  "attributes": {
+                    "primer_nombre": "ARCA",
+                    "identificacion": "CUIT 33-69345023-9",
+                    "nombre": "ARCA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11855319,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11868347,
+                  "cuenta": {
+                    "id": 1,
+                    "cod": 1,
+                    "nombre": "Servicios Públicos"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 2032732.75
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-19",
+              "fecha_emision": "2026-09-19",
+              "importe": 2032732.75,
+              "iva_discriminado": false,
+              "iva": 347645.47,
+              "saldo": 0,
+              "comprobante_tipo": "Liq.Serv.Púb. B",
+              "comprobante_nro": "0111-29366745",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "FacturaAySA0111B29366745A.pdf",
+                "fecha_upload": "2026-10-27 10:23:22",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261027102322692-9463a12e2adc225a.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Servicio de Agua - Cliente Nº 192500 - Medidor Nº 260110627 - Período 09/09/2026 al 08/11/2026 - Consumo 1.385 m3",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-27",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 87297,
+                  "attributes": {
+                    "primer_nombre": "AYSA",
+                    "identificacion": "CUIT 30-70956507-5",
+                    "nombre": "AYSA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11855318,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11868346,
+                  "cuenta": {
+                    "id": 1,
+                    "cod": 1,
+                    "nombre": "Servicios Públicos"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 24608.42
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-19",
+              "fecha_emision": "2026-09-19",
+              "importe": 24608.42,
+              "iva_discriminado": false,
+              "iva": 4208.62,
+              "saldo": 0,
+              "comprobante_tipo": "Liq.Serv.Púb.",
+              "comprobante_nro": "0111-29366743",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "FacturaAySA0111B29366743A.pdf",
+                "fecha_upload": "2026-10-27 10:23:22",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261027102322687-bd83851737cedc45.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Servicio de Agua - Cliente Nº 192498 - Medidor Nº 23060013 - Período 09/09/2026 al 08/11/2026 - Consumo 0 m3",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-27",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 87297,
+                  "attributes": {
+                    "primer_nombre": "AYSA",
+                    "identificacion": "CUIT 30-70956507-5",
+                    "nombre": "AYSA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11855316,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11868344,
+                  "cuenta": {
+                    "id": 1,
+                    "cod": 1,
+                    "nombre": "Servicios Públicos"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 24288.27
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-19",
+              "fecha_emision": "2026-09-19",
+              "importe": 24288.27,
+              "iva_discriminado": false,
+              "iva": 4153.87,
+              "saldo": 0,
+              "comprobante_tipo": "Liq.Serv.Púb. B",
+              "comprobante_nro": "0111-02936674",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "FacturaAySA0111B29366744A.pdf",
+                "fecha_upload": "2026-10-27 10:23:22",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261027102322684-ca3b10107960a7b2.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Servicio de Agua - Cliente Nº 192499 - Medidor Nº 23037359 - Período 09/09/2026 al 08/11/2026 - Consumo 0 m3",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-27",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 87297,
+                  "attributes": {
+                    "primer_nombre": "AYSA",
+                    "identificacion": "CUIT 30-70956507-5",
+                    "nombre": "AYSA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12041336,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12055440,
+                  "cuenta": {
+                    "id": 5,
+                    "cod": 5,
+                    "nombre": "Gastos Bancarios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 323985.94
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 323985.94,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Sin comprobante",
+              "comprobante_nro": "-",
+              "detalle": "MANTENIMIENTO DE CUENTA + IMP LEY",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 125559,
+                  "attributes": {
+                    "primer_nombre": "BANCO GALICIA",
+                    "nombre": "BANCO GALICIA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11675659,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11688452,
+                  "cuenta": {
+                    "id": 2,
+                    "cod": 2,
+                    "nombre": "Abono de Servicios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 4960876.06
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-02",
+              "fecha_emision": "2026-10-02",
+              "importe": 4960876.06,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Factura B",
+              "comprobante_nro": "0004-00000986",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "986_Consorcio de copropoetarios Sarmiento_Factura Septiembre 2026.pdf",
+                "fecha_upload": "2026-10-05 11:02:59",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261005110259632-432bfd972cb11396.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Servicio de vigilancia física horas diurnas / nocturnas.",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-05",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 939471,
+                  "attributes": {
+                    "primer_nombre": "BASTIDA SA SEGURIDAD PRIVADA INTEGRAL",
+                    "identificacion": "CUIT 30-70840520-1",
+                    "nombre": "BASTIDA SA SEGURIDAD PRIVADA INTEGRAL"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11707585,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11720499,
+                  "cuenta": {
+                    "id": 2,
+                    "cod": 2,
+                    "nombre": "Abono de Servicios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 151723.11
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-12",
+              "fecha_emision": "2026-10-05",
+              "importe": 151723.11,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Factura B",
+              "comprobante_nro": "0006-00107064",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "FA-B 00006-00107064.pdf",
+                "fecha_upload": "2026-10-07 13:08:35",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261007130835498-cbd165e125b99d40.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "[PRODV101] Abono mensual licencia Edificios - UFs principales | [PRODV111] Abono mensual Módulo Sueldos",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-07",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 83617,
+                  "attributes": {
+                    "primer_nombre": "CONSORCIO ABIERTO SRL",
+                    "identificacion": "CUIT 30-71527826-6",
+                    "nombre": "CONSORCIO ABIERTO SRL"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11852832,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11865888,
+                  "cuenta": {
+                    "id": 6,
+                    "cod": 6,
+                    "nombre": "Gastos de Limpieza"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 145912.57
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_emision": "2026-10-05",
+              "importe": 145912.57,
+              "iva_discriminado": false,
+              "iva": 25323.67,
+              "saldo": 0,
+              "comprobante_tipo": "Factura A",
+              "comprobante_nro": "0005-00002779",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "Factura Electrónica A (PV 0005) A00005-00002779 - CONSORCIO DE PROPIERTARIOS EDIFICIO SARMIENTO.pdf",
+                "fecha_upload": "2026-10-27 08:36:20",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261027083620468-cc372958ed6e0dc7.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "RESIDUO 80 X 1.00 X 10 REFORZADAS | AROMATIZACION SYSTEM AERO | LIMPIADOR DESODORANTE CONCENTRADO P/ 70 LITROS | TOALLA INTERCALADA BEIGE 20 X 24 | GUANTE DE GOMA ECO TXL | SECADOR SAMANTHA X 40 | PAPEL HIGIENICO ELEGANTE 4 x 30 M SIMPLE HOJA X 48 UD",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-27",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 939386,
+                  "attributes": {
+                    "primer_nombre": "DE ARRIBA, JAIME CARLOS (CLEANAR HIGIENE INSTITUCIONAL)",
+                    "identificacion": "CUIT 20-29922868-2",
+                    "nombre": "DE ARRIBA, JAIME CARLOS (CLEANAR HIGIENE INSTITUCIONAL)"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12041493,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12055597,
+                  "cuenta": {
+                    "id": 1,
+                    "cod": 1,
+                    "nombre": "Servicios Públicos"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 1203905.41
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-08",
+              "fecha_emision": "2026-09-30",
+              "importe": 1203905.41,
+              "iva_discriminado": false,
+              "iva": 212049.53,
+              "saldo": 0,
+              "comprobante_tipo": "Liq.Serv.Púb. B",
+              "comprobante_nro": "0501-91358670",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "05637256-9004913446781.pdf",
+                "fecha_upload": "2026-11-12 14:39:36",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261112143936604-703accc02403ab2c.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Servicio de Energía Eléctrica - Cliente Nº 05637256 - Medidor Nº 015034846 - Período 9 - Consumo 3558 kWh",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 841056,
+                  "attributes": {
+                    "primer_nombre": "EDESUR - EMPRESA DISTRIBUIDORA SUR S.A.",
+                    "identificacion": "CUIT 30-65511651-2",
+                    "nombre": "EDESUR - EMPRESA DISTRIBUIDORA SUR S.A."
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12040755,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12054861,
+                  "cuenta": {
+                    "id": 52,
+                    "cod": 52,
+                    "nombre": "Combustible y Lubricantes"
+                  },
+                  "coeficiente": {
+                    "nro": "2",
+                    "nombre": "DEL MES"
+                  },
+                  "monto": 47015.97
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-30",
+              "importe": 47015.97,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Ticket",
+              "comprobante_nro": "00003-00086276",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto",
+                "nombre_original": "combustible retira javier.pdf",
+                "fecha_upload": "2026-11-12 13:45:03",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/consorcios/27151/comprobantes_gastos/GASTO-261112134503191-7005f9475d92a657.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "EVOLUX D.500 NO 00003-00086276 Hora: 11:59:59 (IVA) [B.1.1 Importe 19.5 7LS A $ 2079.732",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 945254,
+                  "attributes": {
+                    "primer_nombre": "ESTACION LIDO LOMAS S.A.",
+                    "identificacion": "CUIT 33-71745794-9",
+                    "nombre": "ESTACION LIDO LOMAS S.A."
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11909308,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11922347,
+                  "cuenta": {
+                    "id": 52,
+                    "cod": 52,
+                    "nombre": "Combustible y Lubricantes"
+                  },
+                  "coeficiente": {
+                    "nro": "2",
+                    "nombre": "DEL MES"
+                  },
+                  "monto": 48215.9
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-30",
+              "fecha_emision": "2026-10-30",
+              "importe": 48215.9,
+              "iva_discriminado": false,
+              "iva": 7224.28,
+              "saldo": 0,
+              "comprobante_tipo": "Ticket",
+              "comprobante_nro": "0003-00086274",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "combustible retira javier.pdf",
+                "fecha_upload": "2026-10-30 12:27:15",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261030122715777-28509f5f2cc2d71a.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "EVOLUX D.500 20.015LS A $ 2079.732",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-30",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 945254,
+                  "attributes": {
+                    "primer_nombre": "ESTACION LIDO LOMAS S.A.",
+                    "identificacion": "CUIT 33-71745794-9",
+                    "nombre": "ESTACION LIDO LOMAS S.A."
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11814488,
+            "attributes": {
+              "particular": false,
+              "es_seguro": true,
+              "imputaciones": [
+                {
+                  "id": 11827516,
+                  "cuenta": {
+                    "id": 8,
+                    "cod": 8,
+                    "nombre": "Seguros Ordinarios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 341929.35
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 341929.35,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Sin comprobante",
+              "comprobante_nro": "-",
+              "detalle": "INTEGRAL DE CONSORCIO",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-22",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 125691,
+                  "attributes": {
+                    "primer_nombre": "LA HOLANDO SUDAMERICANA COMPAÑIA DE SEGUROS S A",
+                    "identificacion": "CUIT 33-50003806-9",
+                    "nombre": "LA HOLANDO SUDAMERICANA COMPAÑIA DE SEGUROS S A"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11785685,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11798697,
+                  "cuenta": {
+                    "id": 3,
+                    "cod": 3,
+                    "nombre": "Mantenimiento de Partes Comunes"
+                  },
+                  "coeficiente": {
+                    "nro": "2",
+                    "nombre": "DEL MES"
+                  },
+                  "monto": 201000
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-16",
+              "fecha_emision": "2026-10-16",
+              "importe": 201000,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Factura C",
+              "comprobante_nro": "0004-00000429",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "20220010350_011_00004_00000429.pdf",
+                "fecha_upload": "2026-10-19 13:42:11",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261019134211490-d6cffb8a11af9cee.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "CAMBIO LAMPARAS Y LIMPIEZA APLIQUE TECHO ENTRADA EDIFICIO, /// EN APLIQUE ENTRADA COCHERA 356 /// EN APLIQUES COCHERAS 5/ 22/ 23 /25/ 29 PB | COMPRA 14 LAMPARAS A.E27/ Y 5 G9",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-19",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 939485,
+                  "attributes": {
+                    "primer_nombre": "LECOS SERVICIOS de LINAJE ESTEBAN JESUS",
+                    "identificacion": "CUIT 20-22001035-0",
+                    "nombre": "LECOS SERVICIOS de LINAJE ESTEBAN JESUS"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11637319,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11649862,
+                  "cuenta": {
+                    "id": 3,
+                    "cod": 3,
+                    "nombre": "Mantenimiento de Partes Comunes"
+                  },
+                  "coeficiente": {
+                    "nro": "2",
+                    "nombre": "DEL MES"
+                  },
+                  "monto": 43000
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-11",
+              "fecha_emision": "2026-10-01",
+              "importe": 43000,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Factura B",
+              "comprobante_nro": "0003-00006841",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "FA_B_6841.PDF",
+                "fecha_upload": "2026-10-01 14:33:47",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261001143347861-ab40290ed5433000.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "REMERA M-C - ALGODÓN 100% T. S / M / L/ XL | Pantalon De Trabajo OMBU ALG100% C/CIERRE - T 36 a",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-01",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 124184,
+                  "attributes": {
+                    "primer_nombre": "MATAFUEGOS MEGASEG SRL",
+                    "identificacion": "CUIT 30-70986733-0",
+                    "nombre": "MATAFUEGOS MEGASEG SRL"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11814435,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11827464,
+                  "cuenta": {
+                    "id": 2,
+                    "cod": 2,
+                    "nombre": "Abono de Servicios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 44761
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 44761,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Sin comprobante",
+              "comprobante_nro": "-",
+              "detalle": "ABONO INTERNET",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-22",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 124933,
+                  "attributes": {
+                    "primer_nombre": "PERSONAL / FLOW",
+                    "nombre": "PERSONAL / FLOW"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 11894695,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 11907718,
+                  "cuenta": {
+                    "id": 2,
+                    "cod": 2,
+                    "nombre": "Abono de Servicios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 130000
+                }
+              ],
+              "tiene_pagos": false,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-28",
+              "fecha_emision": "2026-10-28",
+              "importe": 130000,
+              "iva_discriminado": false,
+              "saldo": 130000,
+              "comprobante_tipo": "Factura C",
+              "comprobante_nro": "0001-00000185",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "27235068465_011_00001_00000185.pdf",
+                "fecha_upload": "2026-10-29 14:04:22",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261029140422905-48b87d5603ab3498.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Servicio de jardinería",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-10-29",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 446337,
+                  "attributes": {
+                    "primer_nombre": "SERRATORE SILVINA ADRIANA",
+                    "identificacion": "CUIT 27-23506846-5",
+                    "nombre": "SERRATORE SILVINA ADRIANA"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12038433,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12052511,
+                  "cuenta": {
+                    "id": 16,
+                    "cod": 16,
+                    "nombre": "Sueldos: Aportes sindicales"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 234355.5
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 234355.5,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Recibo",
+              "comprobante_nro": "26-00473911",
+              "cuota_nro": 9,
+              "detalle": "CPF aporte y contribución",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 195779,
+                  "attributes": {
+                    "primer_nombre": "SUTERH / FATERYH",
+                    "nombre": "SUTERH / FATERYH"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12038432,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12052510,
+                  "cuenta": {
+                    "id": 16,
+                    "cod": 16,
+                    "nombre": "Sueldos: Aportes sindicales"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 26039.5
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 26039.5,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Recibo",
+              "comprobante_nro": "26-00561359",
+              "cuota_nro": 9,
+              "detalle": "SERACARH Contribución",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 195779,
+                  "attributes": {
+                    "primer_nombre": "SUTERH / FATERYH",
+                    "nombre": "SUTERH / FATERYH"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12038431,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12052509,
+                  "cuenta": {
+                    "id": 16,
+                    "cod": 16,
+                    "nombre": "Sueldos: Aportes sindicales"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 473317.89
+                }
+              ],
+              "tiene_pagos": true,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "importe": 473317.89,
+              "iva_discriminado": false,
+              "saldo": 0,
+              "comprobante_tipo": "Recibo",
+              "comprobante_nro": "26-00584562",
+              "cuota_nro": 9,
+              "detalle": "FMVDD aporte y contribución. Contrib. Solidaria OS CCT 589/10. ART 27 bis CCT Aporte y Contribución",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 195779,
+                  "attributes": {
+                    "primer_nombre": "SUTERH / FATERYH",
+                    "nombre": "SUTERH / FATERYH"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "gasto",
+            "id": 12041267,
+            "attributes": {
+              "particular": false,
+              "es_seguro": false,
+              "imputaciones": [
+                {
+                  "id": 12055371,
+                  "cuenta": {
+                    "id": 2,
+                    "cod": 2,
+                    "nombre": "Abono de Servicios"
+                  },
+                  "coeficiente": {
+                    "nro": "1",
+                    "nombre": "G FIJOS"
+                  },
+                  "monto": 150000
+                }
+              ],
+              "tiene_pagos": false,
+              "tipo": "Ordinario",
+              "sueldo": false,
+              "periodo": "2026-10",
+              "fecha_vencimiento": "2026-10-26",
+              "fecha_emision": "2026-10-26",
+              "importe": 150000,
+              "iva_discriminado": false,
+              "saldo": 150000,
+              "comprobante_tipo": "Factura C",
+              "comprobante_nro": "0001-00002031",
+              "comprobante_adjunto": {
+                "tipo": "comprobante_gasto_flash",
+                "nombre_original": "20048018689_011_00001_00002031.pdf",
+                "fecha_upload": "2026-11-12 14:24:35",
+                "links": {
+                  "descarga": {
+                    "href": "https://files.consorcioabierto.com/administraciones/1086/comprobantes_gastos_flash/GASTO_FLASH-261112142435436-802848a66fbffdb7.pdf",
+                    "method": "public"
+                  }
+                }
+              },
+              "detalle": "Desinsectacion (octubre)",
+              "imputaciones_porcentajes": false,
+              "anterior_ca": false,
+              "fecha_creacion": "2026-11-12",
+              "nc": false,
+              "tiene_nc": false
+            },
+            "relationships": {
+              "proveedor": {
+                "data": {
+                  "type": "proveedor",
+                  "id": 918769,
+                  "attributes": {
+                    "primer_nombre": "TARTARELLI ULDERICO",
+                    "identificacion": "CUIT 20-04801868-9",
+                    "nombre": "TARTARELLI ULDERICO"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "prorrateo": {
+        "cant_coef": 4,
+        "periodo_cierre": "2026-10",
+        "periodo_pagos": "2026-11",
+        "vencimientos": {
+          "cant": 1,
+          "venc_1": {
+            "fecha": "2026-11-16"
+          }
+        },
+        "tasa_interes": 8.91,
+        "columnas": {
+          "uf_nro": "texto",
+          "uf": "texto",
+          "consorcista": "texto",
+          "anterior_saldo": "monto",
+          "anterior_pagos": "monto",
+          "anterior_descuentos": "monto",
+          "saldo_deudor_favor": "monto",
+          "intereses": "monto",
+          "coef_1": "porcentaje",
+          "ordinarias_1": "monto",
+          "coef_2": "porcentaje",
+          "ordinarias_2": "monto",
+          "coef_3": "porcentaje",
+          "ordinarias_3": "monto",
+          "redondeo": "monto",
+          "total_vto1": "monto"
+        },
+        "cant_col_montos": 9,
+        "headers": {
+          "uf_nro": "#",
+          "uf": "Unidad func.",
+          "consorcista": "Consorcista",
+          "anterior_saldo": "Saldo anterior",
+          "anterior_pagos": "Pagos Oct26",
+          "anterior_descuentos": "Descuentos Oct26",
+          "saldo_deudor_favor": "Saldo deudor / a favor",
+          "intereses": "Intereses",
+          "coef_1": "% G FIJOS",
+          "ordinarias_1": "Ordinarias G FIJOS",
+          "coef_2": "% DEL MES",
+          "ordinarias_2": "Ordinarias DEL MES",
+          "coef_3": "% FONDO",
+          "ordinarias_3": "Ordinarias FONDO",
+          "redondeo": "Redond.",
+          "total_vto1": "Total"
+        },
+        "filas_ufs": [
+          {
+            "uf_nro": "001",
+            "uf": "1A 356",
+            "consorcista": "✓ PASADENA S.A.",
+            "anterior_saldo": 272156.01,
+            "anterior_pagos": -272156.01,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.55,
+            "ordinarias_1": 230645.42,
+            "coef_2": 1.55,
+            "ordinarias_2": 5258.09,
+            "coef_3": 1.55,
+            "ordinarias_3": 23250,
+            "redondeo": 0.5,
+            "total_vto1": 259154.01
+          },
+          {
+            "uf_nro": "002",
+            "uf": "1C 356",
+            "consorcista": "✓ FERNÁNDEZ SANTIAGO JAVIER",
+            "anterior_saldo": 206790.02,
+            "anterior_pagos": -206790.02,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.07,
+            "ordinarias_1": 159219.74,
+            "coef_2": 1.07,
+            "ordinarias_2": 3629.78,
+            "coef_3": 1.07,
+            "ordinarias_3": 16050,
+            "redondeo": 0.5,
+            "total_vto1": 178900.02
+          },
+          {
+            "uf_nro": "003",
+            "uf": "1B 356",
+            "consorcista": "✓ ALVAREZ MARIA INES",
+            "anterior_saldo": 201465.03,
+            "anterior_pagos": -201465.03,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.03,
+            "ordinarias_1": 153267.6,
+            "coef_2": 1.03,
+            "ordinarias_2": 3494.09,
+            "coef_3": 1.03,
+            "ordinarias_3": 15450,
+            "redondeo": 0.34,
+            "total_vto1": 172212.03
+          },
+          {
+            "uf_nro": "004",
+            "uf": "1A 360",
+            "consorcista": "✓ PERRI ARIEL MATIAS",
+            "anterior_saldo": 201465.04,
+            "anterior_pagos": -201465.04,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.03,
+            "ordinarias_1": 153267.6,
+            "coef_2": 1.03,
+            "ordinarias_2": 3494.09,
+            "coef_3": 1.03,
+            "ordinarias_3": 15450,
+            "redondeo": 0.35,
+            "total_vto1": 172212.04
+          },
+          {
+            "uf_nro": "005",
+            "uf": "1C 360",
+            "consorcista": "✓ BONFANTI SANDRA",
+            "anterior_saldo": 216109.05,
+            "anterior_pagos": -216109.05,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.13,
+            "ordinarias_1": 168147.95,
+            "coef_2": 1.13,
+            "ordinarias_2": 3833.32,
+            "coef_3": 1.13,
+            "ordinarias_3": 16950,
+            "redondeo": -0.22,
+            "total_vto1": 188931.05
+          },
+          {
+            "uf_nro": "006",
+            "uf": "1B 360",
+            "consorcista": "✓ MAGLIOLO SILVIA / DÍAZ BARBOZA R. CÉSAR",
+            "anterior_saldo": 293590.06,
+            "anterior_pagos": -293590.06,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.71,
+            "ordinarias_1": 254453.98,
+            "coef_2": 1.71,
+            "ordinarias_2": 5800.86,
+            "coef_3": 1.71,
+            "ordinarias_3": 25650,
+            "redondeo": 0.22,
+            "total_vto1": 285905.06
+          },
+          {
+            "uf_nro": "007",
+            "uf": "2A 356",
+            "consorcista": "MALDAJAN",
+            "anterior_saldo": 2222124.07,
+            "anterior_pagos": -2222125,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": -0.93,
+            "intereses": 0,
+            "coef_1": 1.7075,
+            "ordinarias_1": 254081.97,
+            "coef_2": 1.7075,
+            "ordinarias_2": 5792.38,
+            "coef_3": 1.7075,
+            "ordinarias_3": 25612.5,
+            "redondeo": 0.15,
+            "total_vto1": 285486.07
+          },
+          {
+            "uf_nro": "008",
+            "uf": "2C 356",
+            "consorcista": "✓ CARROSO GRACIELA",
+            "anterior_saldo": 209453.08,
+            "anterior_pagos": -209453.08,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.08,
+            "ordinarias_1": 160707.78,
+            "coef_2": 1.08,
+            "ordinarias_2": 3663.7,
+            "coef_3": 1.08,
+            "ordinarias_3": 16200,
+            "redondeo": -0.4,
+            "total_vto1": 180571.08
+          },
+          {
+            "uf_nro": "009",
+            "uf": "2B 356",
+            "consorcista": "✓ GUALLINI R / BLAUSTEIN",
+            "anterior_saldo": 201465.09,
+            "anterior_pagos": -201465.09,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.03,
+            "ordinarias_1": 153267.6,
+            "coef_2": 1.03,
+            "ordinarias_2": 3494.09,
+            "coef_3": 1.03,
+            "ordinarias_3": 15450,
+            "redondeo": 0.4,
+            "total_vto1": 172212.09
+          },
+          {
+            "uf_nro": "010",
+            "uf": "2A 360",
+            "consorcista": "✓ LANNES RODRIGO DAMIAN",
+            "anterior_saldo": 200134.1,
+            "anterior_pagos": -200134.1,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": 0.36,
+            "total_vto1": 170540.1
+          },
+          {
+            "uf_nro": "011",
+            "uf": "2C 360",
+            "consorcista": "✓ MENA GABRIELA FERNANDA",
+            "anterior_saldo": 206790.11,
+            "anterior_pagos": -206790.11,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.07,
+            "ordinarias_1": 159219.74,
+            "coef_2": 1.07,
+            "ordinarias_2": 3629.78,
+            "coef_3": 1.07,
+            "ordinarias_3": 16050,
+            "redondeo": 0.59,
+            "total_vto1": 178900.11
+          },
+          {
+            "uf_nro": "012",
+            "uf": "2B 360",
+            "consorcista": "✓ DOMINGUEZ  SANDRA CAROLINA",
+            "anterior_saldo": 270824.12,
+            "anterior_pagos": -270824.12,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.71,
+            "ordinarias_1": 254453.98,
+            "coef_2": 1.71,
+            "ordinarias_2": 5800.86,
+            "coef_3": 1.71,
+            "ordinarias_3": 25650,
+            "redondeo": 0.28,
+            "total_vto1": 285905.12
+          },
+          {
+            "uf_nro": "013",
+            "uf": "3A 356",
+            "consorcista": "✓ GRIMM ANDRES / HEGERT CATALINA",
+            "anterior_saldo": 276150.13,
+            "anterior_pagos": -276150.13,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.6,
+            "ordinarias_1": 238085.6,
+            "coef_2": 1.6,
+            "ordinarias_2": 5427.71,
+            "coef_3": 1.6,
+            "ordinarias_3": 24000,
+            "redondeo": -0.18,
+            "total_vto1": 267513.13
+          },
+          {
+            "uf_nro": "014",
+            "uf": "3C 356",
+            "consorcista": "✓ GRIMM ANDRES / HEGERT CATALINA",
+            "anterior_saldo": 206790.14,
+            "anterior_pagos": -206790.14,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.03,
+            "ordinarias_1": 153267.6,
+            "coef_2": 1.03,
+            "ordinarias_2": 3494.09,
+            "coef_3": 1.03,
+            "ordinarias_3": 15450,
+            "redondeo": 0.45,
+            "total_vto1": 172212.14
+          },
+          {
+            "uf_nro": "015",
+            "uf": "3B 356",
+            "consorcista": "✓ FERRANDEZ ADRIAN IBERO",
+            "anterior_saldo": 200134.15,
+            "anterior_pagos": -200134.15,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": 0.41,
+            "total_vto1": 170540.15
+          },
+          {
+            "uf_nro": "016",
+            "uf": "3A 360",
+            "consorcista": "✓ IANELLO BEATRIZ A.",
+            "anterior_saldo": 201465.16,
+            "anterior_pagos": -201465,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0.16,
+            "intereses": 0.01,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": 0.25,
+            "total_vto1": 170540.16
+          },
+          {
+            "uf_nro": "017",
+            "uf": "3C 360",
+            "consorcista": "✓ MUSACCHIO DIEGO",
+            "anterior_saldo": 230886.17,
+            "anterior_pagos": -230886.17,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.24,
+            "ordinarias_1": 184516.34,
+            "coef_2": 1.24,
+            "ordinarias_2": 4206.48,
+            "coef_3": 1.24,
+            "ordinarias_3": 18600,
+            "redondeo": 0.35,
+            "total_vto1": 207323.17
+          },
+          {
+            "uf_nro": "018",
+            "uf": "3B 360",
+            "consorcista": "✓ ROMBOUTS DIETER",
+            "anterior_saldo": 555093.18,
+            "anterior_pagos": -271000,
+            "anterior_descuentos": -251668,
+            "saldo_deudor_favor": 32425.18,
+            "intereses": 2889.08,
+            "coef_1": 1.55,
+            "ordinarias_1": 230645.42,
+            "coef_2": 1.55,
+            "ordinarias_2": 5258.09,
+            "coef_3": 1.55,
+            "ordinarias_3": 23250,
+            "redondeo": 0.41,
+            "total_vto1": 294468.18
+          },
+          {
+            "uf_nro": "019",
+            "uf": "4A 356",
+            "consorcista": "RIONEGRO CARLOS ALBERTO",
+            "anterior_saldo": 291541.19,
+            "anterior_pagos": -291541.19,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.7075,
+            "ordinarias_1": 254081.97,
+            "coef_2": 1.7075,
+            "ordinarias_2": 5792.38,
+            "coef_3": 1.7075,
+            "ordinarias_3": 25612.5,
+            "redondeo": 0.34,
+            "total_vto1": 285487.19
+          },
+          {
+            "uf_nro": "020",
+            "uf": "4C 356",
+            "consorcista": "GIANOLA",
+            "anterior_saldo": 206790.2,
+            "anterior_pagos": -206790.2,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.2275,
+            "ordinarias_1": 182656.29,
+            "coef_2": 1.2275,
+            "ordinarias_2": 4164.07,
+            "coef_3": 1.2275,
+            "ordinarias_3": 18412.5,
+            "redondeo": 0.34,
+            "total_vto1": 205233.2
+          },
+          {
+            "uf_nro": "021",
+            "uf": "4B 356",
+            "consorcista": "✓ COSTA ROBERTO / FRANCO M. GABRIELA",
+            "anterior_saldo": 431752.21,
+            "anterior_pagos": -414700,
+            "anterior_descuentos": -17086.42,
+            "saldo_deudor_favor": -34.21,
+            "intereses": 0,
+            "coef_1": 1.18,
+            "ordinarias_1": 175588.13,
+            "coef_2": 1.18,
+            "ordinarias_2": 4002.94,
+            "coef_3": 1.18,
+            "ordinarias_3": 17700,
+            "redondeo": 0.35,
+            "total_vto1": 197257.21
+          },
+          {
+            "uf_nro": "022",
+            "uf": "4A 360",
+            "consorcista": "✓ DOMÍNGUEZ OSVALDO ARIEL",
+            "anterior_saldo": 222899.22,
+            "anterior_pagos": -222899.22,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.18,
+            "ordinarias_1": 175588.13,
+            "coef_2": 1.18,
+            "ordinarias_2": 4002.94,
+            "coef_3": 1.18,
+            "ordinarias_3": 17700,
+            "redondeo": 0.15,
+            "total_vto1": 197291.22
+          },
+          {
+            "uf_nro": "023",
+            "uf": "4C 360",
+            "consorcista": "CALANDRA",
+            "anterior_saldo": 229555.23,
+            "anterior_pagos": -229555.23,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.2275,
+            "ordinarias_1": 182656.29,
+            "coef_2": 1.2275,
+            "ordinarias_2": 4164.07,
+            "coef_3": 1.2275,
+            "ordinarias_3": 18412.5,
+            "redondeo": 0.37,
+            "total_vto1": 205233.23
+          },
+          {
+            "uf_nro": "024",
+            "uf": "4B 360",
+            "consorcista": "✓ TAKEDA LAURA NANCY",
+            "anterior_saldo": 272156.24,
+            "anterior_pagos": -272156.24,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.56,
+            "ordinarias_1": 232133.46,
+            "coef_2": 1.56,
+            "ordinarias_2": 5292.02,
+            "coef_3": 1.56,
+            "ordinarias_3": 23400,
+            "redondeo": -0.24,
+            "total_vto1": 260825.24
+          },
+          {
+            "uf_nro": "025",
+            "uf": "5A 356",
+            "consorcista": "✓ CACIOPPO ANGELA / SUAREZ MARCOS",
+            "anterior_saldo": 272155.25,
+            "anterior_pagos": -272156,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": -0.75,
+            "intereses": 0,
+            "coef_1": 1.56,
+            "ordinarias_1": 232133.46,
+            "coef_2": 1.56,
+            "ordinarias_2": 5292.02,
+            "coef_3": 1.56,
+            "ordinarias_3": 23400,
+            "redondeo": 0.52,
+            "total_vto1": 260825.25
+          },
+          {
+            "uf_nro": "026",
+            "uf": "5C 356",
+            "consorcista": "✓ PUNTOTRES S.A.",
+            "anterior_saldo": 867279.26,
+            "anterior_pagos": -433639.63,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 417653.43,
+            "intereses": 53199.12,
+            "coef_1": 1.08,
+            "ordinarias_1": 160707.78,
+            "coef_2": 1.08,
+            "ordinarias_2": 3663.7,
+            "coef_3": 1.08,
+            "ordinarias_3": 16200,
+            "redondeo": 0.23,
+            "total_vto1": 651424.26
+          },
+          {
+            "uf_nro": "027",
+            "uf": "5B 356",
+            "consorcista": "✓ NIBALI DANIEL / MAKOVITZ MARIA ARACELI",
+            "anterior_saldo": 200134.27,
+            "anterior_pagos": -200134.27,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": 0.53,
+            "total_vto1": 170540.27
+          },
+          {
+            "uf_nro": "028",
+            "uf": "5A 360",
+            "consorcista": "✓ FLOLASCO SILVINA",
+            "anterior_saldo": 200134.28,
+            "anterior_pagos": -200134.28,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": 0.54,
+            "total_vto1": 170540.28
+          },
+          {
+            "uf_nro": "029",
+            "uf": "5C 360",
+            "consorcista": "✓ PUMAR RICARDO / CASAS NORMA",
+            "anterior_saldo": 213447.29,
+            "anterior_pagos": -213447.29,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.11,
+            "ordinarias_1": 165171.88,
+            "coef_2": 1.11,
+            "ordinarias_2": 3765.47,
+            "coef_3": 1.11,
+            "ordinarias_3": 16650,
+            "redondeo": -0.06,
+            "total_vto1": 185587.29
+          },
+          {
+            "uf_nro": "030",
+            "uf": "5B 360",
+            "consorcista": "✓ JAIMES MARISA",
+            "anterior_saldo": 297583.3,
+            "anterior_pagos": -297583.3,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.9,
+            "ordinarias_1": 282726.64,
+            "coef_2": 1.9,
+            "ordinarias_2": 6445.41,
+            "coef_3": 1.9,
+            "ordinarias_3": 28500,
+            "redondeo": 0.25,
+            "total_vto1": 317672.3
+          },
+          {
+            "uf_nro": "031",
+            "uf": "6A 356",
+            "consorcista": "✓ FIORENZA DANIEL ROSARIO / DISCIOSCIA LIDIA",
+            "anterior_saldo": 366943.31,
+            "anterior_pagos": -366943.31,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 2.18,
+            "ordinarias_1": 324391.62,
+            "coef_2": 2.18,
+            "ordinarias_2": 7395.25,
+            "coef_3": 2.18,
+            "ordinarias_3": 32700,
+            "redondeo": 0.44,
+            "total_vto1": 364487.31
+          },
+          {
+            "uf_nro": "032",
+            "uf": "6C 360",
+            "consorcista": "VIAND CAMILA BELEN",
+            "anterior_saldo": 228224.32,
+            "anterior_pagos": -228224.32,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.2275,
+            "ordinarias_1": 182656.29,
+            "coef_2": 1.2275,
+            "ordinarias_2": 4164.07,
+            "coef_3": 1.2275,
+            "ordinarias_3": 18412.5,
+            "redondeo": 0.46,
+            "total_vto1": 205233.32
+          },
+          {
+            "uf_nro": "033",
+            "uf": "6B 356",
+            "consorcista": "DELGADO",
+            "anterior_saldo": 221434.33,
+            "anterior_pagos": -221434.33,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.1775,
+            "ordinarias_1": 175216.12,
+            "coef_2": 1.1775,
+            "ordinarias_2": 3994.46,
+            "coef_3": 1.1775,
+            "ordinarias_3": 17662.5,
+            "redondeo": 0.25,
+            "total_vto1": 196873.33
+          },
+          {
+            "uf_nro": "034",
+            "uf": "6A 360",
+            "consorcista": "IGLESIAS",
+            "anterior_saldo": 249524.34,
+            "anterior_pagos": 0,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 249524.34,
+            "intereses": 22232.62,
+            "coef_1": 1.1775,
+            "ordinarias_1": 175216.12,
+            "coef_2": 1.1775,
+            "ordinarias_2": 3994.46,
+            "coef_3": 1.1775,
+            "ordinarias_3": 17662.5,
+            "redondeo": 0.3,
+            "total_vto1": 468630.34
+          },
+          {
+            "uf_nro": "035",
+            "uf": "6C 356",
+            "consorcista": "✓ **FAPSA S.A.C.A.I.F.",
+            "anterior_saldo": 228224.35,
+            "anterior_pagos": -228224.35,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.23,
+            "ordinarias_1": 183028.3,
+            "coef_2": 1.23,
+            "ordinarias_2": 4172.55,
+            "coef_3": 1.23,
+            "ordinarias_3": 18450,
+            "redondeo": 0.5,
+            "total_vto1": 205651.35
+          },
+          {
+            "uf_nro": "036",
+            "uf": "6B 360",
+            "consorcista": "GIANCASPRO",
+            "anterior_saldo": 273487.36,
+            "anterior_pagos": -273487.36,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.7075,
+            "ordinarias_1": 254081.97,
+            "coef_2": 1.7075,
+            "ordinarias_2": 5792.38,
+            "coef_3": 1.7075,
+            "ordinarias_3": 25612.5,
+            "redondeo": 0.51,
+            "total_vto1": 285487.36
+          },
+          {
+            "uf_nro": "037",
+            "uf": "7A 356",
+            "consorcista": "✓ FIORENZA MARÍA LAURA",
+            "anterior_saldo": 270824.37,
+            "anterior_pagos": -270824.37,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.71,
+            "ordinarias_1": 254453.98,
+            "coef_2": 1.71,
+            "ordinarias_2": 5800.86,
+            "coef_3": 1.71,
+            "ordinarias_3": 25650,
+            "redondeo": 0.53,
+            "total_vto1": 285905.37
+          },
+          {
+            "uf_nro": "038",
+            "uf": "7C 356",
+            "consorcista": "✓ ANTON RICARDO ENRIQUE",
+            "anterior_saldo": 216109.38,
+            "anterior_pagos": -216109.38,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.07,
+            "ordinarias_1": 159219.74,
+            "coef_2": 1.07,
+            "ordinarias_2": 3629.78,
+            "coef_3": 1.07,
+            "ordinarias_3": 16050,
+            "redondeo": 0.86,
+            "total_vto1": 178900.38
+          },
+          {
+            "uf_nro": "039",
+            "uf": "7B 356",
+            "consorcista": "✓ GARCÍA FRANQUEIRA  SILVINA L.",
+            "anterior_saldo": 220910.39,
+            "anterior_pagos": -220910.39,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.03,
+            "ordinarias_1": 153267.6,
+            "coef_2": 1.03,
+            "ordinarias_2": 3494.09,
+            "coef_3": 1.03,
+            "ordinarias_3": 15450,
+            "redondeo": 0.7,
+            "total_vto1": 172212.39
+          },
+          {
+            "uf_nro": "040",
+            "uf": "7A 360",
+            "consorcista": "✓ VALL MARICEL R",
+            "anterior_saldo": 204652.4,
+            "anterior_pagos": -204652.4,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.06,
+            "ordinarias_1": 157731.71,
+            "coef_2": 1.06,
+            "ordinarias_2": 3595.86,
+            "coef_3": 1.06,
+            "ordinarias_3": 15900,
+            "redondeo": 0.83,
+            "total_vto1": 177228.4
+          },
+          {
+            "uf_nro": "041",
+            "uf": "7C 360",
+            "consorcista": "✓ CASTRO HERNÁN RODRIGO",
+            "anterior_saldo": 207540.41,
+            "anterior_pagos": -207541,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": -0.59,
+            "intereses": 0,
+            "coef_1": 1.15,
+            "ordinarias_1": 171124.02,
+            "coef_2": 1.15,
+            "ordinarias_2": 3901.17,
+            "coef_3": 1.15,
+            "ordinarias_3": 17250,
+            "redondeo": 0.81,
+            "total_vto1": 192275.41
+          },
+          {
+            "uf_nro": "042",
+            "uf": "7B 360",
+            "consorcista": "✓ GLOBAL BAYRES S.A.",
+            "anterior_saldo": 278812.42,
+            "anterior_pagos": -278812.42,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.6,
+            "ordinarias_1": 238085.6,
+            "coef_2": 1.6,
+            "ordinarias_2": 5427.71,
+            "coef_3": 1.6,
+            "ordinarias_3": 24000,
+            "redondeo": 0.11,
+            "total_vto1": 267513.42
+          },
+          {
+            "uf_nro": "043",
+            "uf": "8A 356",
+            "consorcista": "SIMON PABLO",
+            "anterior_saldo": 320115.43,
+            "anterior_pagos": -321000,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": -884.57,
+            "intereses": 0,
+            "coef_1": 1.7075,
+            "ordinarias_1": 254081.97,
+            "coef_2": 1.7075,
+            "ordinarias_2": 5792.38,
+            "coef_3": 1.7075,
+            "ordinarias_3": 25612.5,
+            "redondeo": 0.15,
+            "total_vto1": 284602.43
+          },
+          {
+            "uf_nro": "044",
+            "uf": "8C 356",
+            "consorcista": "RAAD J. F.",
+            "anterior_saldo": 228224.44,
+            "anterior_pagos": -228224.44,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.2275,
+            "ordinarias_1": 182656.29,
+            "coef_2": 1.2275,
+            "ordinarias_2": 4164.07,
+            "coef_3": 1.2275,
+            "ordinarias_3": 18412.5,
+            "redondeo": 0.58,
+            "total_vto1": 205233.44
+          },
+          {
+            "uf_nro": "045",
+            "uf": "8B 356",
+            "consorcista": "PONZIO FACUNDO TOMAS",
+            "anterior_saldo": 208121.45,
+            "anterior_pagos": -208121.45,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.1775,
+            "ordinarias_1": 175216.12,
+            "coef_2": 1.1775,
+            "ordinarias_2": 3994.46,
+            "coef_3": 1.1775,
+            "ordinarias_3": 17662.5,
+            "redondeo": 0.37,
+            "total_vto1": 196873.45
+          },
+          {
+            "uf_nro": "046",
+            "uf": "8A 360",
+            "consorcista": "DURRUTY - VAZQUEZ",
+            "anterior_saldo": 222899.46,
+            "anterior_pagos": -222899.46,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.1775,
+            "ordinarias_1": 175216.12,
+            "coef_2": 1.1775,
+            "ordinarias_2": 3994.46,
+            "coef_3": 1.1775,
+            "ordinarias_3": 17662.5,
+            "redondeo": 0.38,
+            "total_vto1": 196873.46
+          },
+          {
+            "uf_nro": "047",
+            "uf": "8C 360",
+            "consorcista": "✓ CICCONE ENRIQUE / ROSSI GRACIELA",
+            "anterior_saldo": 248193.47,
+            "anterior_pagos": -248193.47,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.38,
+            "ordinarias_1": 205348.83,
+            "coef_2": 1.38,
+            "ordinarias_2": 4681.4,
+            "coef_3": 1.38,
+            "ordinarias_3": 20700,
+            "redondeo": 0.24,
+            "total_vto1": 230730.47
+          },
+          {
+            "uf_nro": "048",
+            "uf": "8B 360",
+            "consorcista": "✓ MALLAMACE MARTA",
+            "anterior_saldo": 486714.48,
+            "anterior_pagos": -469053,
+            "anterior_descuentos": -17662.07,
+            "saldo_deudor_favor": -0.59,
+            "intereses": 0,
+            "coef_1": 1.55,
+            "ordinarias_1": 230645.42,
+            "coef_2": 1.55,
+            "ordinarias_2": 5258.09,
+            "coef_3": 1.55,
+            "ordinarias_3": 23250,
+            "redondeo": 0.56,
+            "total_vto1": 259153.48
+          },
+          {
+            "uf_nro": "049",
+            "uf": "9A 356",
+            "consorcista": "✓ CALONGE RICARDO / CHAS MIRTA",
+            "anterior_saldo": 318884.49,
+            "anterior_pagos": -318884.49,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.91,
+            "ordinarias_1": 284214.68,
+            "coef_2": 1.91,
+            "ordinarias_2": 6479.33,
+            "coef_3": 1.91,
+            "ordinarias_3": 28650,
+            "redondeo": 0.48,
+            "total_vto1": 319344.49
+          },
+          {
+            "uf_nro": "050",
+            "uf": "9B 356",
+            "consorcista": "✓ TOSAR ALEJANDRA CECILIA",
+            "anterior_saldo": 220103.5,
+            "anterior_pagos": -220103.5,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.17,
+            "ordinarias_1": 174100.09,
+            "coef_2": 1.17,
+            "ordinarias_2": 3969.01,
+            "coef_3": 1.17,
+            "ordinarias_3": 17550,
+            "redondeo": 0.4,
+            "total_vto1": 195619.5
+          },
+          {
+            "uf_nro": "051",
+            "uf": "9A 360",
+            "consorcista": "✓ FAPSA S.A.C.A.I.F.",
+            "anterior_saldo": 709209.51,
+            "anterior_pagos": -200000,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 492331.14,
+            "intereses": 60745.08,
+            "coef_1": 1.17,
+            "ordinarias_1": 174100.09,
+            "coef_2": 1.17,
+            "ordinarias_2": 3969.01,
+            "coef_3": 1.17,
+            "ordinarias_3": 17550,
+            "redondeo": -0.81,
+            "total_vto1": 748694.51
+          },
+          {
+            "uf_nro": "052",
+            "uf": "9B 360",
+            "consorcista": "✓ *FAPSA S.A.C.A.I.F.",
+            "anterior_saldo": 326870.52,
+            "anterior_pagos": -326870.22,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0.3,
+            "intereses": 0.03,
+            "coef_1": 1.96,
+            "ordinarias_1": 291654.85,
+            "coef_2": 1.96,
+            "ordinarias_2": 6648.94,
+            "coef_3": 1.96,
+            "ordinarias_3": 29400,
+            "redondeo": -0.6,
+            "total_vto1": 327703.52
+          },
+          {
+            "uf_nro": "053",
+            "uf": "10A 356",
+            "consorcista": "✓ ROLDAN HECTOR / RICCI ADRIANA",
+            "anterior_saldo": 312226.53,
+            "anterior_pagos": -312226.53,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.85,
+            "ordinarias_1": 275286.47,
+            "coef_2": 1.85,
+            "ordinarias_2": 6275.79,
+            "coef_3": 1.85,
+            "ordinarias_3": 27750,
+            "redondeo": -0.73,
+            "total_vto1": 309311.53
+          },
+          {
+            "uf_nro": "054",
+            "uf": "10B 356",
+            "consorcista": "✓ PRIMAVERA CRISTIAN  / BUBBA SILVIA",
+            "anterior_saldo": 388266.54,
+            "anterior_pagos": -388266.54,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.01,
+            "ordinarias_1": 150291.53,
+            "coef_2": 1.01,
+            "ordinarias_2": 3426.24,
+            "coef_3": 1.01,
+            "ordinarias_3": 15150,
+            "redondeo": -0.23,
+            "total_vto1": 168867.54
+          },
+          {
+            "uf_nro": "055",
+            "uf": "10A 360",
+            "consorcista": "✓ MARTYNIUK ALEXIS",
+            "anterior_saldo": 200110.55,
+            "anterior_pagos": -200110.55,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.01,
+            "ordinarias_1": 150291.53,
+            "coef_2": 1.01,
+            "ordinarias_2": 3426.24,
+            "coef_3": 1.01,
+            "ordinarias_3": 15150,
+            "redondeo": -0.22,
+            "total_vto1": 168867.55
+          },
+          {
+            "uf_nro": "056",
+            "uf": "10B 360",
+            "consorcista": "✓ GINES DEBORA Y MARIANA",
+            "anterior_saldo": 293588.56,
+            "anterior_pagos": -293589,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": -0.44,
+            "intereses": 0,
+            "coef_1": 1.71,
+            "ordinarias_1": 254453.98,
+            "coef_2": 1.71,
+            "ordinarias_2": 5800.86,
+            "coef_3": 1.71,
+            "ordinarias_3": 25650,
+            "redondeo": -0.84,
+            "total_vto1": 285903.56
+          },
+          {
+            "uf_nro": "057",
+            "uf": "11A 356",
+            "consorcista": "✓ ASSETTA ANA MARIA",
+            "anterior_saldo": 321545.57,
+            "anterior_pagos": -321545.57,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.92,
+            "ordinarias_1": 285702.71,
+            "coef_2": 1.92,
+            "ordinarias_2": 6513.25,
+            "coef_3": 1.92,
+            "ordinarias_3": 28800,
+            "redondeo": -0.39,
+            "total_vto1": 321015.57
+          },
+          {
+            "uf_nro": "058",
+            "uf": "11B 356",
+            "consorcista": "✓ PRIMAVERA DOMENICO Y CRISTIAN",
+            "anterior_saldo": 204127.58,
+            "anterior_pagos": -204127.58,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.04,
+            "ordinarias_1": 154755.64,
+            "coef_2": 1.04,
+            "ordinarias_2": 3528.01,
+            "coef_3": 1.04,
+            "ordinarias_3": 15600,
+            "redondeo": -0.07,
+            "total_vto1": 173883.58
+          },
+          {
+            "uf_nro": "059",
+            "uf": "11A 360",
+            "consorcista": "✓ MARTYNIUK ANDRES",
+            "anterior_saldo": 201464.59,
+            "anterior_pagos": -201464.59,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": -0.15,
+            "total_vto1": 170539.59
+          },
+          {
+            "uf_nro": "060",
+            "uf": "11B 360",
+            "consorcista": "✓ DIAZ NORA Y ALBA ADRIAN",
+            "anterior_saldo": 312226.6,
+            "anterior_pagos": -312226.6,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.85,
+            "ordinarias_1": 275286.47,
+            "coef_2": 1.85,
+            "ordinarias_2": 6275.79,
+            "coef_3": 1.85,
+            "ordinarias_3": 27750,
+            "redondeo": -0.66,
+            "total_vto1": 309311.6
+          },
+          {
+            "uf_nro": "061",
+            "uf": "12A 356",
+            "consorcista": "✓ FERNANDEZ CLAUDIO DANIEL",
+            "anterior_saldo": 298913.61,
+            "anterior_pagos": -298913.61,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.75,
+            "ordinarias_1": 260406.12,
+            "coef_2": 1.75,
+            "ordinarias_2": 5936.56,
+            "coef_3": 1.75,
+            "ordinarias_3": 26250,
+            "redondeo": -0.07,
+            "total_vto1": 292592.61
+          },
+          {
+            "uf_nro": "062",
+            "uf": "12B 356",
+            "consorcista": "✓ LAGANÁ OSCAR",
+            "anterior_saldo": 201464.62,
+            "anterior_pagos": -201464.62,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": -0.12,
+            "total_vto1": 170539.62
+          },
+          {
+            "uf_nro": "063",
+            "uf": "12A 360",
+            "consorcista": "✓ MUZZIO ALEJO NICOLÁS",
+            "anterior_saldo": 200133.63,
+            "anterior_pagos": -200133.63,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": -0.11,
+            "total_vto1": 170539.63
+          },
+          {
+            "uf_nro": "064",
+            "uf": "12B 360",
+            "consorcista": "✓ MARTINIELLO DIEGO  EZEQUIEL",
+            "anterior_saldo": 321545.64,
+            "anterior_pagos": -321545.64,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.9,
+            "ordinarias_1": 282726.64,
+            "coef_2": 1.9,
+            "ordinarias_2": 6445.41,
+            "coef_3": 1.9,
+            "ordinarias_3": 28500,
+            "redondeo": -0.41,
+            "total_vto1": 317671.64
+          },
+          {
+            "uf_nro": "065",
+            "uf": "13A 356",
+            "consorcista": "✓ BERNARD MARIA CRISTINA",
+            "anterior_saldo": 294920.65,
+            "anterior_pagos": -294920.65,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.73,
+            "ordinarias_1": 257430.05,
+            "coef_2": 1.73,
+            "ordinarias_2": 5868.71,
+            "coef_3": 1.73,
+            "ordinarias_3": 25950,
+            "redondeo": -0.11,
+            "total_vto1": 289248.65
+          },
+          {
+            "uf_nro": "066",
+            "uf": "13B 356",
+            "consorcista": "✓ SEOANE  DANIEL / CORTAZZO LAURA",
+            "anterior_saldo": 200133.66,
+            "anterior_pagos": -200133.66,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.02,
+            "ordinarias_1": 151779.57,
+            "coef_2": 1.02,
+            "ordinarias_2": 3460.17,
+            "coef_3": 1.02,
+            "ordinarias_3": 15300,
+            "redondeo": -0.08,
+            "total_vto1": 170539.66
+          },
+          {
+            "uf_nro": "067",
+            "uf": "13A 360",
+            "consorcista": "✓ BRUNO SANDRA",
+            "anterior_saldo": 200133.67,
+            "anterior_pagos": -200133.67,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.01,
+            "ordinarias_1": 150291.53,
+            "coef_2": 1.01,
+            "ordinarias_2": 3426.24,
+            "coef_3": 1.01,
+            "ordinarias_3": 15150,
+            "redondeo": -0.1,
+            "total_vto1": 168867.67
+          },
+          {
+            "uf_nro": "068",
+            "uf": "13B 360",
+            "consorcista": "✓ PASADENA S.A.",
+            "anterior_saldo": 289594.68,
+            "anterior_pagos": -289594.68,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 1.69,
+            "ordinarias_1": 251477.91,
+            "coef_2": 1.69,
+            "ordinarias_2": 5733.02,
+            "coef_3": 1.69,
+            "ordinarias_3": 25350,
+            "redondeo": -0.25,
+            "total_vto1": 282560.68
+          },
+          {
+            "uf_nro": "069",
+            "uf": "14A 356",
+            "consorcista": "✓ VELAYOS CELINA",
+            "anterior_saldo": 615091.69,
+            "anterior_pagos": -615091.19,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0.5,
+            "intereses": 0.04,
+            "coef_1": 4.13,
+            "ordinarias_1": 614558.44,
+            "coef_2": 4.13,
+            "ordinarias_2": 14010.28,
+            "coef_3": 4.13,
+            "ordinarias_3": 61950,
+            "redondeo": -0.57,
+            "total_vto1": 690518.69
+          },
+          {
+            "uf_nro": "070",
+            "uf": "14A 360",
+            "consorcista": "✓ PUTZ GERARDO / STEVEN LILIANA",
+            "anterior_saldo": 616673.7,
+            "anterior_pagos": -616673.7,
+            "anterior_descuentos": 0,
+            "saldo_deudor_favor": 0,
+            "intereses": 0,
+            "coef_1": 4.2,
+            "ordinarias_1": 624974.69,
+            "coef_2": 4.2,
+            "ordinarias_2": 14247.74,
+            "coef_3": 4.2,
+            "ordinarias_3": 63000,
+            "redondeo": -0.73,
+            "total_vto1": 702221.7
+          }
+        ],
+        "totales": {
+          "uf_nro": "Total: 70",
+          "uf": "",
+          "consorcista": "",
+          "anterior_saldo": 21806498.85,
+          "anterior_pagos": -20296204.82,
+          "anterior_descuentos": -286416.49,
+          "saldo_deudor_favor": 1191012.97,
+          "intereses": 139065.98,
+          "coef_1": 100,
+          "ordinarias_1": 14880349.72,
+          "coef_2": 100,
+          "ordinarias_2": 339231.89,
+          "coef_3": 100,
+          "ordinarias_3": 1500000,
+          "redondeo": 10.29,
+          "total_vto1": 18049670.85
+        },
+        "identificaciones_cobranzas_anteriores": {
+          "total_importe_original": 392000,
+          "total_intereses_descontados": 34748.49
+        },
+        "coeficientes_editados": true,
+        "medios_pago": {
+          "transferencia": [
+            {
+              "banco": "Banco Galicia",
+              "cuenta": "0009108-8 044-9",
+              "cbu": "0070044320000009108891",
+              "alias": "SARMIENTO356.58.60",
+              "titular": "CONSORCIO DE COPROPIETARIOS EDIFICIO SARMIENTO 356 358 Y 360"
+            }
+          ],
+          "pay_habilitado": false,
+          "pay_pago_fondeo_habilitado": false
+        }
+      }
     }
   }
 }
